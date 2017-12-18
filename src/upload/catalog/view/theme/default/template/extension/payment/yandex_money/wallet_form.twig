@@ -1,0 +1,76 @@
+{% if fullView is defined and fullView %}
+{{ header }}{{ column_left }}{{ column_right }}
+<div class="container">
+    {{ content_top }}
+    {% endif %}
+
+    <style>
+
+    input[name="paymentType"] {
+        margin:0px !important;
+        position:relative !important;
+    }
+    input[name="payment-type"] {
+        margin:0px !important;
+        position:relative !important;
+    }
+
+    </style>
+    <form action="{{ action }}" id="paymentForm" method="POST">
+        <h3>{{ wallet.getDisplayName() }}</h3>
+        <table class="radio">
+            <tbody>
+            <tr class="highlight">
+                <td><input type="radio" name="payment-type" value="PC" checked id="ym1"></td>
+                <td><label for="ym1">{{ language.get('text_method_yandex_money') }}</label></td>
+            </tr>
+            <tr class="highlight">
+                <td><input type="radio" name="payment-type" value="AC" id="ym2"></td>
+                <td><label for="ym2">{{ language.get('text_method_bank_card') }}</label></td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="receiver" value="{{ wallet.getAccountId() }}">
+        <input type="hidden" name="formcomment" value="">
+        <input type="hidden" name="short-dest" value="">
+        <input type="hidden" name="writable-targets" value="false">
+        <input type="hidden" name="comment-needed" value="true">
+        <input type="hidden" name="label" value="{{ orderId }}">
+        <input type="hidden" name="successURL" value="{{ successUrl }}" >
+        <input type="hidden" name="quickpay-form" value="shop">
+        <input type="hidden" name="targets" value="{{ orderText }} {{ orderId }}">
+        <input type="hidden" name="sum" value="{{ amount }}" data-type="number" >
+        <input type="hidden" name="comment" value="{{ comment }}" >
+        <input type="hidden" name="need-fio" value="true">
+        <input type="hidden" name="need-email" value="true" >
+        <input type="hidden" name="need-phone" value="false">
+        <input type="hidden" name="need-address" value="false">
+    </form>
+    <div class="buttons">
+        <div class="pull-right">
+            <input type="button" id="button-confirm" value="{{ language.get('text_continue') }}" class="btn btn-primary" />
+        </div>
+    </div>
+    <script type="text/javascript"><!--
+    jQuery('#button-confirm').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $.ajax({
+            type: 'get',
+            url: '{{ validate_url }}',
+            data: {
+                payment_type: jQuery('#paymentForm')[0]['payment-type'].value
+            },
+            cache: false,
+            success: function() {
+                $('#paymentForm').submit();
+            }
+        });
+    });
+    //--></script>
+
+    {% if fullView is defined and fullView %}
+    {{ content_bottom }}
+</div>
+{{ footer }}
+{%  endif %}

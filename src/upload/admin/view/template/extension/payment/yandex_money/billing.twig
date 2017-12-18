@@ -1,0 +1,95 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ language.get('billing_page_title') }}</h3>
+    </div>
+    <div class="panel-body">
+        <div>
+            <p>{{ language.get('billing_header_description') }}</p>
+            <p>{{ language.get('billing_version_string') }} {{ module_version }}</p>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="billing-enabled" name="yandex_money_billing_enabled" value="on"{{ billing.isEnabled() ? ' checked' : '' }} class="enable-button" />
+                    {{ language.get('billing_enable_label') }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-sm-2 control-label" for="billing-form-id">{{ language.get('billing_form_id_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yandex_money_billing_form_id" value="{{ billing.getFormId() }}" placeholder="{{ language.get('billing_form_id_label') }}" id="billing-form-id" class="form-control" />
+                {% if error_billing_form_id is defined and error_billing_form_id %}
+                <div class="text-danger">{{ error_billing_form_id }}</div>
+                {% else %}
+                <p class="help-block">{{ language.get('billing_form_id_description') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="billing-purpose">{{ language.get('billing_purpose_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yandex_money_billing_purpose" value="{{ billing.getPurpose() }}" placeholder="{{ language.get('billing_purpose_label') }}" id="billing-purpose" class="form-control" />
+                <p class="help-block">{{ language.get('billing_purpose_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="billing-display-name">{{ language.get('billing_display_name_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yandex_money_billing_display_name" value="{{ billing.getDisplayName() }}" placeholder="{{ language.get('billing_display_name_label') }}" id="billing-display-name" class="form-control" />
+                <p class="help-block">{{ language.get('billing_display_name_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="billing-success-order-status">
+                {{ language.get('billing_success_order_status_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="billing-success-order-status" name="yandex_money_billing_success_order_status" class="form-control">
+                    {%  for id, name in orderStatuses %}
+                    <option value="{{ id }}"{{ billing.getSuccessOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('billing_success_order_status_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="billing-min-payment-amount">
+                {{ language.get('billing_minimum_payment_amount_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="billing-min-payment-amount" name="yandex_money_billing_minimum_payment_amount" value="{{ billing.getMinPaymentAmount() }}" class="form-control" />
+                <p class="help-block">{{ language.get('billing_minimum_payment_amount_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-geo-zone">
+                {{ language.get('billing_geo_zone_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="kassa-geo-zone" name="yandex_money_billing_geo_zone" class="form-control">
+                    <option value="0"{{ billing.getGeoZoneId() == 0 ? ' selected' : '' }}>{{ language.get('billing_any_geo_zone') }}</option>
+                    {% for id, name in geoZones %}
+                    <option value="{{ id }}"{{ billing.getGeoZoneId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('billing_geo_zone_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="billing-sort-order">
+                {{ language.get('billing_sort_order_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="billing-sort-order" name="yandex_money_billing_sort_order" value="{{ yandex_money_billing_sort_order }}" class="form-control" />
+                <p class="help-block">{{ language.get('billing_sort_order_description') }}</p>
+            </div>
+        </div>
+    </div>
+</div>

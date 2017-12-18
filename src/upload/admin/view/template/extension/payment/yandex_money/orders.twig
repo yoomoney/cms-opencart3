@@ -1,0 +1,104 @@
+{% for po in pokupki_status %}
+    {{ po }}
+{% endfor %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div>
+            <p>{{ language.get('kassa_header_description') }}</p>
+            <p>{{ language.get('kassa_version_string') }} {{ module_version }}</p>
+        </div>
+        <input type="hidden" name="yandex_money_pokupki_yapi" value="https://api.partner.market.yandex.ru/v2/" id="yandex_money_pokupki_yapi"/>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_stoken">{{ pokupki_stoken }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_stoken" value="{{ yandex_money_pokupki_stoken }}" id="yandex_money_pokupki_stoken" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_number">{{ pokupki_number }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_number" value="{{ yandex_money_pokupki_number }}" id="yandex_money_pokupki_number" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_idapp">{{ pokupki_idapp }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_idapp" value="{{ yandex_money_pokupki_idapp }}" id="yandex_money_pokupki_idapp" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_pw">{{ pokupki_pw }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_pw" value="{{ yandex_money_pokupki_pw }}" id="yandex_money_pokupki_pw" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_callback">{{ pokupki_callback }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_callback" disabled="disabled" value="{{ yandex_money_pokupki_callback }}" id="yandex_money_pokupki_callback" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_idpickup">{{ pokupki_idpickup }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_idpickup" value="{{ yandex_money_pokupki_idpickup }}" id="yandex_money_pokupki_idpickup" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_sapi">{{ pokupki_sapi }}</label>
+            <div class="col-sm-8">
+                <input type="text" disabled="disabled" name="yandex_money_pokupki_sapi" value="{{ yandex_money_pokupki_sapi }}" id="yandex_money_pokupki_sapi" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-4">{{ pokupki_method }}</label>
+            <div class="col-sm-8">
+                <div class="checkbox">
+                    <label for="yandex_money_pokupki_yandex"><input type="checkbox" {{ (yandex_money_pokupki_yandex ? ' checked="checked"' : '') }} name="yandex_money_pokupki_yandex" id="yandex_money_pokupki_yandex" class="" value="1"/> {{ pokupki_set_1 }}</label>
+                </div>
+                <!--<div class="checkbox">
+                    <label for="yandex_money_pokupki_sprepaid"><input type="checkbox" {{ (yandex_money_pokupki_sprepaid ? ' checked="checked"' : '') }} name="yandex_money_pokupki_sprepaid" id="yandex_money_pokupki_sprepaid" class="" value="1"/> {{ pokupki_set_2 }}</label>
+                </div>-->
+                <div class="checkbox">
+                    <label for="yandex_money_pokupki_cash"><input type="checkbox" {{ (yandex_money_pokupki_cash ? ' checked="checked"' : '') }} name="yandex_money_pokupki_cash" id="yandex_money_pokupki_cash" class="" value="1"/> {{ pokupki_set_3 }}</label>
+                </div>
+                <div class="checkbox">
+                    <label for="yandex_money_pokupki_bank"><input type="checkbox" {{ (yandex_money_pokupki_bank ? ' checked="checked"' : '') }} name="yandex_money_pokupki_bank" id="yandex_money_pokupki_bank" class="" value="1"/> {{ pokupki_set_4 }}</label>
+                </div>
+            </div>
+        </div>
+        <!-- -->
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{ pokupki_text_status }}</label>
+                <div class="col-sm-8">
+                    {% for val, text_status in pokupki_text_status_value %}
+                    <div class="">
+                        <label class="control-label col-sm-5">{{ text_status }}</label>
+                        <div class="col-sm-7">
+                            <select name="yandex_money_pokupki_status_{{ val }}" id="yandex_money_pokupki_status_{{ val }}" class="form-control">
+                            {% for id, order_status in orderStatuses %}
+                                {% if id == yandex_money_pokupki_status[val] %}
+                                    <option value="{{ id }}" selected="selected">{{ order_status }}</option>
+                                {% else %}
+                                    <option value="{{ id }}">{{ order_status }}</option>
+                                {% endif %}
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!-- -->
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="yandex_money_pokupki_token">{{ pokupki_token }}</label>
+            <div class="col-sm-8">
+                <input type="text" name="yandex_money_pokupki_token" value="{{ yandex_money_pokupki_gtoken }}" id="yandex_money_pokupki_token" disabled="disabled" class="form-control"/>
+                <p class="help-block">
+                    <a href="{{ yandex_money_pokupki_callback_url }}">{{ pokupki_gtoken }}</a>
+                </p>
+            </div>
+        </div>
+{{ data_carrier }}

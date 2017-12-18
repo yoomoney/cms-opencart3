@@ -1,0 +1,57 @@
+{% if fullView is defined and fullView %}
+{{ header }}{{ column_left }}{{ column_right }}
+<div class="container">
+    {{ content_top }}
+    {% endif %}
+    
+    <form action="{{ action }}" id="paymentForm" method="POST">
+        <input type="hidden" name="formId" value="{{ billing.getFormId() }}" />
+        <input type="hidden" name="narrative" value="{{ purpose }}" />
+        <input type="hidden" name="quickPayVersion" value="2">
+        <div class="form-group required" id="fast-pay-fio-wrapper">
+            <label class="control-label" for="fio">{{ language.get('fast_pay_fio_label') }}</label>
+            <input type="text" name="fio" id='fast-pay-fio' value="{{ customerName }}" />
+            <div class="text-danger"></div>
+        </div>
+        <input type="hidden" name="sum" value="{{ amount }}" />
+    </form>
+    <div class="buttons">
+        <div class="pull-right">
+            <input type="button" id="button-confirm" value="{{ language.get('text_continue') }}" class="btn btn-primary" />
+        </div>
+    </div>
+
+    <script type="text/javascript"><!--
+    jQuery('#button-confirm').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var fioValue = jQuery('#fast-pay-fio').val(),
+        wrapper = jQuery('#fast-pay-fio-wrapper');
+
+        if (fioValue.match(/^[A-Яа-яA-Za-z]+\s[A-Яа-яA-Za-z]+\s[A-Яа-яA-Za-z]+$/) == null) {
+            wrapper.addClass('has-error');
+            wrapper.find('.text-danger').html('Введите верное Ф.И.О.').show();
+        } else {
+            wrapper.removeClass('has-error');
+            wrapper.find('.text-danger').html('').hide();
+            $.ajax({
+                type: 'get',
+                url: '{{ validate_url }}',
+                data: {
+                    payMethod: 'fast_pay'
+                },
+                cache: false,
+                success: function() {
+                    $('#paymentForm').submit();
+                }
+            });
+        }
+    });
+    //--></script>
+
+    {% if fullView is defined and fullView %}
+    {{ content_bottom }}
+</div>
+{{ footer }}
+{%  endif %}
