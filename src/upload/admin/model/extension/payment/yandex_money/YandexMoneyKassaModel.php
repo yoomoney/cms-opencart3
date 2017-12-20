@@ -166,4 +166,20 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     {
         $this->invoiceLogo = $value;
     }
+
+    /**
+     * @param bool $value
+     */
+    public function setCreateOrderBeforeRedirect($value)
+    {
+        $this->createOrderBeforeRedirect = (bool)$value;
+    }
+
+    /**
+     * @param bool $value
+     */
+    public function setClearCartBeforeRedirect($value)
+    {
+        $this->clearCartAfterOrderCreation = (bool)$value;
+    }
 }

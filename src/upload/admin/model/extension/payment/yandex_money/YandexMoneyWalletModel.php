@@ -46,4 +46,20 @@ class YandexMoneyWalletModel extends \YandexMoneyModule\Model\WalletModel
     {
         $this->displayName = $value;
     }
+
+    /**
+     * @param bool $value
+     */
+    public function setCreateOrderBeforeRedirect($value)
+    {
+        $this->createOrderBeforeRedirect = (bool)$value;
+    }
+
+    /**
+     * @param bool $value
+     */
+    public function setClearCartBeforeRedirect($value)
+    {
+        $this->clearCartAfterOrderCreation = (bool)$value;
+    }
 }

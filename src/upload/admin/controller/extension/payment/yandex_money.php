@@ -130,7 +130,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.0';
+        $data['module_version'] = '1.0.1';
         $data['breadcrumbs'] = $this->getBreadCrumbs();
         $data['kassaTaxRates'] = $this->getKassaTaxRates();
         $data['shopTaxRates'] = $this->getShopTaxRates();
@@ -523,6 +523,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $value = isset($request->post['yandex_money_kassa_invoice_logo']) ? $request->post['yandex_money_kassa_invoice_logo'] === 'on' : false;
         $kassa->setSendInvoiceLogo($value);
         $request->post['yandex_money_kassa_invoice_logo'] = $kassa->getSendInvoiceLogo();
+
+        $value = false;
+        if (isset($request->post['yandex_money_kassa_create_order_before_redirect']) && $request->post['yandex_money_kassa_create_order_before_redirect'] === 'on') {
+            $value = true;
+        }
+        $request->post['yandex_money_kassa_create_order_before_redirect'] = $value;
+        $kassa->setCreateOrderBeforeRedirect($value);
+
+        $value = false;
+        if (isset($request->post['yandex_money_kassa_clear_cart_before_redirect']) && $request->post['yandex_money_kassa_clear_cart_before_redirect'] === 'on') {
+            $value = true;
+        }
+        $request->post['yandex_money_kassa_clear_cart_before_redirect'] = $value;
+        $kassa->setClearCartBeforeRedirect($value);
     }
 
     private function validateWallet(Request $request)
@@ -574,6 +588,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $value = isset($request->post['yandex_money_wallet_geo_zone']) ? $request->post['yandex_money_wallet_geo_zone'] : array();
         $wallet->setGeoZoneId($value);
         $request->post['yandex_money_wallet_geo_zone'] = $wallet->getGeoZoneId();
+
+        $value = false;
+        if (isset($request->post['yandex_money_wallet_create_order_before_redirect']) && $request->post['yandex_money_wallet_create_order_before_redirect'] === 'on') {
+            $value = true;
+        }
+        $request->post['yandex_money_wallet_create_order_before_redirect'] = $value;
+        $wallet->setCreateOrderBeforeRedirect($value);
+
+        $value = false;
+        if (isset($request->post['yandex_money_wallet_clear_cart_before_redirect']) && $request->post['yandex_money_wallet_clear_cart_before_redirect'] === 'on') {
+            $value = true;
+        }
+        $request->post['yandex_money_wallet_clear_cart_before_redirect'] = $value;
+        $wallet->setClearCartBeforeRedirect($value);
     }
 
     private function validateBilling(Request $request)

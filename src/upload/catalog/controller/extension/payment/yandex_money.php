@@ -184,6 +184,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     public function create()
     {
+        ob_start();
         $kassa = $this->getModel()->getKassaModel();
         if (!$kassa->isEnabled()) {
             $this->jsonError('Yandex.Kassa module disabled');
@@ -229,6 +230,21 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
             $result['redirect'] = $confirmation->getConfirmationUrl();
         }
+
+        if ($kassa->getCreateOrderBeforeRedirect()) {
+            $this->getModel()->log('debug', 'Confirm order#' . $orderId . ' after payment creation');
+            $this->getModel()->confirmOrder($orderId, $payment);
+        }
+        if ($kassa->getClearCartBeforeRedirect()) {
+            $this->getModel()->log('debug', 'Clear order#' . $orderId . ' cart after payment creation');
+            $this->cart->clear();
+        }
+
+        $output = ob_get_clean();
+        if (!empty($output)) {
+            $this->getModel()->log('warning', 'Non empty buffer: ' . $output);
+        }
+
         echo json_encode($result);
         exit();
     }
@@ -288,10 +304,23 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->jsonError('Invalid payment type');
         }
 
-        $this->load->model('checkout/order');
-        $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
-        $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
-        $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+        $paymentModel = $this->getModel()->getPaymentModel();
+        if ($paymentModel instanceof \YandexMoneyModule\Model\WalletModel) {
+            if ($paymentModel->getCreateOrderBeforeRedirect()) {
+                $this->load->model('checkout/order');
+                $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
+                $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+            }
+            if ($paymentModel->getClearCartBeforeRedirect()) {
+                $this->cart->clear();
+            }
+        } else {
+            $this->load->model('checkout/order');
+            $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
+            $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
+            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+        }
     }
 
     /**

@@ -18,6 +18,9 @@ class WalletModel extends AbstractPaymentModel
         $this->applicationId = $this->getConfigValue('application_id');
         $this->password = $this->getConfigValue('password');
         $this->testMode = $this->getConfigValue('test_mode') == '1';
+
+        $this->createOrderBeforeRedirect = $this->getConfigValue('create_order_before_redirect');
+        $this->clearCartAfterOrderCreation = $this->getConfigValue('clear_cart_before_redirect');
     }
 
     public function getAccountId()

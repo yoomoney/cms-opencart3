@@ -59,6 +59,9 @@ class KassaModel extends AbstractPaymentModel
                 }
             }
         }
+
+        $this->createOrderBeforeRedirect = $this->getConfigValue('create_order_before_redirect');
+        $this->clearCartAfterOrderCreation = $this->getConfigValue('clear_cart_before_redirect');
     }
 
     public function isTestMode()

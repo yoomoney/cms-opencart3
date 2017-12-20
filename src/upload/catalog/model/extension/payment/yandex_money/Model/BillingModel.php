@@ -14,6 +14,9 @@ class BillingModel extends AbstractPaymentModel
         parent::__construct($config, 'billing');
         $this->formId = $this->getConfigValue('form_id');
         $this->purpose = $this->getConfigValue('purpose');
+
+        $this->createOrderBeforeRedirect = true;
+        $this->clearCartAfterOrderCreation = true;
     }
 
     public function getFormId()
