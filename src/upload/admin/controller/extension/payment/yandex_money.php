@@ -130,7 +130,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.1';
+        $data['module_version'] = '1.0.2';
         $data['breadcrumbs'] = $this->getBreadCrumbs();
         $data['kassaTaxRates'] = $this->getKassaTaxRates();
         $data['shopTaxRates'] = $this->getShopTaxRates();
@@ -232,7 +232,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         foreach ($arLang as $lang_name) {
             $data[$lang_name] = $this->language->get($lang_name);
         }
-        $data['mod_off'] = sprintf($this->language->get('mod_off'), $this->url->link('extension/payment/install', 'user_token=' . $this->session->data['user_token'] . '&extension=yandex_money', true));
 
         foreach (array('pickup','cancelled','delivery','processing','unpaid','delivered') as $val) {
             $data['pokupki_text_status_value'][$val] = $this->language->get('pokupki_text_status_' . $val);
@@ -447,6 +446,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->error['kassa_password'] = $this->language->get('kassa_password_error_required');
         }
 
+        if (empty($this->error)) {
+            if (!$kassa->checkConnection()) {
+                $this->error['kassa_invalid_credentials'] = $this->language->get('kassa_error_invalid_credentials');
+            }
+        }
+
         $value = isset($request->post['yandex_money_kassa_payment_mode']) ? $request->post['yandex_money_kassa_payment_mode'] : '';
         $epl = true;
         if ($value === 'shop') {
@@ -537,6 +542,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         $request->post['yandex_money_kassa_clear_cart_before_redirect'] = $value;
         $kassa->setClearCartBeforeRedirect($value);
+
+        $value = isset($request->post['yandex_money_kassa_show_in_footer']) ? $request->post['yandex_money_kassa_show_in_footer'] : 'off';
+        $kassa->setShowLinkInFooter($value === 'on');
+        $request->post['yandex_money_kassa_show_in_footer'] = $kassa->getShowLinkInFooter();
     }
 
     private function validateWallet(Request $request)
@@ -727,7 +736,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['yandex_money_pokupki_gtoken'] = $this->config->get('yandex_money_pokupki_gtoken');
         $data['yandex_money_metrika_o2auth'] = $this->config->get('yandex_money_metrika_o2auth');
         $data['token_url'] = 'https://oauth.yandex.ru/token?';
-        $data['mod_status'] = $this->config->get('yandex_module_status');
 
         return $data;
     }
@@ -1091,14 +1099,14 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function treeCat($id_cat = 0, $checked = array())
     {
+        if (empty($checked)) {
+            $checked = array();
+        }
         $html = '';
         $categories = $this->getCategories($id_cat);
         foreach ($categories as $category) {
             if (is_array($checked)) {
                 $flag = in_array($category['category_id'], $checked);
-            } else {
-                var_dump($checked);
-                exit();
             }
             $children = $this->getCategories($category['category_id']);
             if (count($children)) {

@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 2.0.x - 2.3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -191,6 +191,7 @@
             <search><![CDATA[$data['newsletter'] = $this->url->link('account/newsletter']]></search>
             <add position="after"><![CDATA[$data['yandex_metrika'] = $this->config->get('yandex_money_metrika_code') ? html_entity_decode($this->config->get('yandex_money_metrika_code'), ENT_QUOTES, 'UTF-8') : '';
             $data['yandex_money_metrika_active'] = $this->config->get('yandex_money_metrika_active') ? true : false;
+            $data['yandex_money_kassa_show_in_footer'] = $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_show_in_footer');
             ]]></add>
         </operation>
     </file>
@@ -249,6 +250,14 @@
             }
             </script>
         {% endif %}]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[<p>{{ powered }}</p>]]></search>
+            <add position="after"><![CDATA[
+            {% if yandex_money_kassa_show_in_footer is defined and yandex_money_kassa_show_in_footer %}
+            <p><a href="https://kassa.yandex.ru/?_openstat=promo;merchants;opencart2">Работает Яндекс.Касса</a></p>
+            {% endif %}
+            ]]></add>
         </operation>
     </file>
 </modification>

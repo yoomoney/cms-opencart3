@@ -12,7 +12,7 @@ $_['kassa_breadcrumbs_logs'] = 'Журнал сообщений';
 $_['kassa_text_success'] = 'Success';
 $_['kassa_page_title'] = 'Настройки Яндекс.Кассы';
 $_['kassa_breadcrumbs_heading_title'] = 'Журнал сообщений платежного модуля Яндекс.Деньги';
-$_['kassa_test_mode_description'] = 'Вы включили тестовый режим приема платежей. Проверьте, как проходит оплата, и напишите менеджеру Кассы. Он выдаст рабочие shopId и Секретный ключ.  Инструкция: как проводить тестовые платежи';
+$_['kassa_test_mode_description'] = 'Вы включили тестовый режим приема платежей. Проверьте, как проходит оплата, и напишите менеджеру Кассы. Он выдаст рабочие shopId и Секретный ключ. <a href="https://yandex.ru/support/checkout/payments/api.html#api__04" target="_blank">Инструкция</a>';
 
 $_['kassa_enable_label'] = 'Включить приём платежей через Яндекс.Кассу';
 
@@ -23,6 +23,7 @@ $_['kassa_shop_id_error_required'] = 'Необходимо указать shopId
 $_['kassa_password_label'] = 'Секретный ключ';
 $_['kassa_password_description'] = 'Выпустите и активируйте секретный ключ в <a href="https://kassa.yandex.ru/my" target="_blank">личном кабинете Яндекс.Кассы</a>. Потом скопируйте его сюда.';
 $_['kassa_password_error_required'] = 'Необходимо указать секретный ключ из личного кабинета Яндекс.Кассы';
+$_['kassa_error_invalid_credentials'] = 'Проверьте shopId и Секретный ключ — где-то есть ошибка. А лучше скопируйте их прямо из <a href="https://kassa.yandex.ru/my" target="_blank">личного кабинета Яндекс.Кассы</a>';
 
 $_['kassa_payment_mode_label'] = 'Выбор способа оплаты';
 $_['kassa_payment_mode_kassa_label'] = 'На стороне Кассы';
@@ -274,4 +275,3 @@ $_['error_permission']   = 'You do not have the right to manage the module!';
 $_['active_on']          = 'Activated';
 $_['active_off']          = 'Disabled';
 $_['active']          = 'Activity';
-$_['mod_off']          = 'Install the Yandex.Money extension from the payment modules folder.';

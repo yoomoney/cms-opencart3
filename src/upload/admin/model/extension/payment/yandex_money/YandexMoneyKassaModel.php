@@ -182,4 +182,33 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     {
         $this->clearCartAfterOrderCreation = (bool)$value;
     }
+
+    /**
+     * @param null|\Psr\Log\LoggerInterface $logger
+     * @return bool
+     */
+    public function checkConnection($logger = null)
+    {
+        $client = new \YandexCheckout\Client();
+        $client->setAuth($this->getShopId(), $this->getPassword());
+        if ($logger !== null) {
+            $client->setLogger($this);
+        }
+        try {
+            $payment = $client->getPaymentInfo('00000000-0000-0000-0000-000000000001');
+        } catch (\YandexCheckout\Common\Exceptions\NotFoundException $e) {
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param bool $value
+     */
+    public function setShowLinkInFooter($value)
+    {
+        $this->showInFooter = $value ? true : false;
+    }
 }
