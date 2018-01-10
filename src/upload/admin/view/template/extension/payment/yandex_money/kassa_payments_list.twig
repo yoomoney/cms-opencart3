@@ -1,0 +1,62 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <a href="{{ update_link }}" data-toggle="tooltip" title="{{ language.get('kassa_payments_update_button') }}" class="btn btn-default"><i class="fa fa-refresh"></i></a>
+                <a href="{{ capture_link }}" data-toggle="tooltip" title="{{ language.get('kassa_payments_capture_button') }}" class="btn btn-default"><i class="fa fa-check-square-o"></i></a>
+            </div>
+            <h1>{{ language.get('module_title') }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrums %}
+                <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-list"></i> {{ language.get('kassa_payments_page_title') }}</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <td class="text-center">ID заказа</td>
+                        <td class="text-center">ID платежа</td>
+                        <td class="text-center">Сумма</td>
+                        <td class="text-center">Оплачен</td>
+                        <td class="text-center">Статус</td>
+                        <td class="text-center">Дата создания</td>
+                        <td class="text-center">Дата подтверждения</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td class="text-center">{{ payment.order_id }}</td>
+                        <td class="text-left">{{ payment.payment_id }}</td>
+                        <td class="text-right">{{ payment.amount }} {{ payment.currency }}</td>
+                        <td class="text-center">{% if payment.paid == 'Y' %}да{% else %}нет{% endif %}</td>
+                        <td class="text-center">{{ payment.status }}</td>
+                        <td class="text-center">{{ payment.created_at }}</td>
+                        <td class="text-center">
+                            {% if payment.captured_at == '0000-00-00 00:00:00' %}
+                            не подтверждён
+                            {% else %}
+                            {{ payment.captured_at }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-sm-6 text-left">{{ pagination }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ footer }}

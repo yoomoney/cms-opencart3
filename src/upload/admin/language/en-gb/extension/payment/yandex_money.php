@@ -105,6 +105,13 @@ $_['kassa_refund_status_pending_label'] = 'В ожидании';
 $_['kassa_refund_status_succeeded_label'] = 'Проведён';
 $_['kassa_refund_status_canceled_label'] = 'Отменён';
 
+$_['kassa_breadcrumbs_payments'] = 'Список платежей через модуль Кассы';
+$_['kassa_payments_page_title'] = 'Список платежей через модуль Кассы';
+$_['kassa_payments_update_button'] = 'Обновить список';
+$_['kassa_payments_capture_button'] = 'Провести все платежи';
+$_['kassa_payment_list_label'] = 'Список платежей через модуль Кассы';
+$_['kassa_payment_list_link'] = 'Открыть список';
+
 $_['kassa_tab_header'] = 'Яндекс.Касса';
 $_['wallet_tab_header'] = 'Яндекс.Деньги';
 $_['billing_tab_header'] = 'Яндекс.Платёжка';

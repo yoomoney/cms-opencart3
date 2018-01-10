@@ -130,7 +130,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.2';
+        $data['module_version'] = '1.0.3';
         $data['breadcrumbs'] = $this->getBreadCrumbs();
         $data['kassaTaxRates'] = $this->getKassaTaxRates();
         $data['shopTaxRates'] = $this->getShopTaxRates();
@@ -144,7 +144,16 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $data['action'] = $this->url->link('extension/payment/' . self::MODULE_NAME, 'user_token=' . $this->session->data['user_token'], true);
         $data['cancel'] = $this->url->link('extension/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true);
-        $data['kassa_logs_link'] = $this->url->link('extension/payment/' . self::MODULE_NAME . '/logs', 'user_token=' . $this->session->data['user_token'], true);
+        $data['kassa_logs_link'] = $this->url->link(
+            'extension/payment/' . self::MODULE_NAME . '/logs',
+            'user_token=' . $this->session->data['user_token'],
+            true
+        );
+        $data['kassa_payments_link'] = $this->url->link(
+            'extension/payment/' . self::MODULE_NAME . '/payments',
+            'user_token=' . $this->session->data['user_token'],
+            true
+        );
 
         $data['language'] = $this->language;
 
@@ -340,6 +349,103 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['footer'] = $this->load->controller('common/footer');
 
         $this->response->setOutput($this->load->view('extension/payment/yandex_money/logs', $data));
+    }
+
+    public function payments()
+    {
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
+        $this->load->model('setting/setting');
+
+        if (!$this->getModel()->getKassaModel()->isEnabled()) {
+            $url = $this->url->link('extension/payment/yandex_money', 'user_token=' . $this->session->data['user_token'], true);
+            $this->response->redirect($url);
+        }
+
+        if (isset($this->request->get['page'])) {
+            $page = $this->request->get['page'];
+        } else {
+            $page = 1;
+        }
+        $limit = $this->config->get('config_limit_admin');
+        $payments = $this->getModel()->findPayments(($page - 1) * $limit, $limit);
+
+        if (isset($this->request->get['update_statuses'])) {
+
+            $orderIds = array();
+            foreach ($payments as $row) {
+                $orderIds[$row['payment_id']] = $row['order_id'];
+            }
+
+            /** @var ModelSaleOrder $orderModel */
+            $this->load->model('sale/order');
+            $orderModel = $this->model_sale_order;
+
+            $paymentObjects = $this->getModel()->updatePaymentsStatuses($payments);
+            if ($this->request->get['update_statuses'] == 2) {
+                foreach ($paymentObjects as $payment) {
+                    $this->getModel()->log('info', 'Check payment#' . $payment->getId());
+                    if ($payment['status'] === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+                        $this->getModel()->log('info', 'Capture payment#' . $payment->getId());
+                        if ($this->getModel()->capturePayment($payment, false)) {
+                            $orderId = $orderIds[$payment->getId()];
+                            $orderInfo = $orderModel->getOrder($orderId);
+                            if (empty($orderInfo)) {
+                                $this->getModel()->log('warning', 'Empty order#' . $orderId . ' in notification');
+                                continue;
+                            } elseif ($orderInfo['order_status_id'] <= 0) {
+                                $link = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $orderId, true);
+                                $anchor = '<a href="' . $link . '" class="button">Оплатить</a>';
+                                $orderInfo['order_status_id'] = 1;
+                                $this->getModel()->updateOrderStatus($orderId, $orderInfo, $anchor);
+                            }
+                            $this->getModel()->confirmOrderPayment(
+                                $orderId,
+                                $orderInfo,
+                                $payment,
+                                $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
+                            );
+                            $this->getModel()->log('info', 'Платёж для заказа №' . $orderId . ' подтверждён');
+                        }
+                    }
+                }
+            }
+            $link = $this->url->link('extension/payment/yandex_money/payments', 'user_token=' . $this->session->data['user_token'], true);
+            $this->response->redirect($link);
+        }
+
+        $this->document->setTitle($this->language->get('kassa_payments_page_title'));
+
+        $data['header']      = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer']      = $this->load->controller('common/footer');
+
+        $pagination = new Pagination();
+        $pagination->total = $this->getModel()->countPayments();
+        $pagination->page = $page;
+        $pagination->limit = $limit;
+        $pagination->url = $this->url->link(
+            'extension/payment/yandex_money/payments',
+            'user_token=' . $this->session->data['user_token'] . '&page={page}',
+            true
+        );
+
+        $data['language'] = $this->language;
+        $data['payments'] = $payments;
+        $data['breadcrumbs'] = $this->getBreadCrumbs(array(
+            'text' => 'kassa_breadcrumbs_payments',
+            'href' => 'payments',
+        ));
+        $data['update_link'] = $this->url->link(
+            'extension/payment/yandex_money/payments',
+            'user_token=' . $this->session->data['user_token'] . '&update_statuses=1',
+            true
+        );
+        $data['capture_link'] = $this->url->link(
+            'extension/payment/yandex_money/payments',
+            'user_token=' . $this->session->data['user_token'] . '&update_statuses=2',
+            true
+        );
+        $this->response->setOutput($this->load->view('extension/payment/yandex_money/kassa_payments_list', $data));
     }
 
     public function install()
