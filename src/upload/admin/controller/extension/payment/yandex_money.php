@@ -44,7 +44,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         'yandex_money_market_pickup',
         'yandex_money_market_color_options',
         'yandex_money_market_size_options',
-        'yandex_money_market_categories'
+        'yandex_money_market_categories',
     );
 
     public $fields_orders = array(
@@ -64,7 +64,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         'yandex_money_pokupki_status_delivery',
         'yandex_money_pokupki_status_delivered',
         'yandex_money_pokupki_status_processing',
-        'yandex_money_pokupki_status_unpaid'
+        'yandex_money_pokupki_status_unpaid',
     );
 
     private $error = array();
@@ -76,7 +76,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function index()
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('heading_title'));
         $this->load->model('setting/setting');
 
@@ -101,25 +101,28 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         );
         if (($this->request->server['REQUEST_METHOD'] == 'POST')) {
             if ($this->validate($this->request)) {
-                if (isset($this->request->post['yandex_money_market_categories'])) {
+                if (isset($this->request->post['yandex_money_market_categories']) && $this->request->post['yandex_money_market_categories']) {
                     $this->request->post['yandex_money_market_categories'] = implode(',', $this->request->post['yandex_money_market_categories']);
                 }
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $this->request->post);
                 if (isset($this->request->post['yandex_money_market_categories'])) {
-                    $this->request->post['yandex_money_market_categories'] = explode(',', $this->request->post['yandex_money_market_categories']);
+                    $this->request->post['yandex_money_market_categories'] = explode(',',
+                        $this->request->post['yandex_money_market_categories']);
                 }
-                $this->model_setting_setting->editSetting('payment_' . self::MODULE_NAME, $this->request->post);
-                $this->session->data['success'] = $this->language->get('kassa_text_success');
+                $this->model_setting_setting->editSetting('payment_'.self::MODULE_NAME, $this->request->post);
+                $this->session->data['success']         = $this->language->get('kassa_text_success');
                 $this->session->data['last-active-tab'] = $data['lastActiveTab'];
                 if (isset($this->request->post['language_reload'])) {
                     $this->session->data['success-message'] = 'Настройки были сохранены';
                     $this->response->redirect(
-                        $this->url->link('extension/payment/' . self::MODULE_NAME, 'user_token=' . $this->session->data['user_token'], true)
+                        $this->url->link('extension/payment/'.self::MODULE_NAME,
+                            'user_token='.$this->session->data['user_token'], true)
                     );
                 } else {
                     $this->response->redirect(
                         $this->url->link(
-                            'extension/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true
+                            'extension/extension', 'user_token='.$this->session->data['user_token'].'&type=payment',
+                            true
                         )
                     );
                 }
@@ -130,60 +133,62 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.3';
-        $data['breadcrumbs'] = $this->getBreadCrumbs();
-        $data['kassaTaxRates'] = $this->getKassaTaxRates();
-        $data['shopTaxRates'] = $this->getShopTaxRates();
-        $data['orderStatuses'] = $this->getAvailableOrderStatuses();
-        $data['geoZones'] = $this->getAvailableGeoZones();
+        $data['module_version'] = '1.0.4';
+        $data['breadcrumbs']    = $this->getBreadCrumbs();
+        $data['kassaTaxRates']  = $this->getKassaTaxRates();
+        $data['shopTaxRates']   = $this->getShopTaxRates();
+        $data['orderStatuses']  = $this->getAvailableOrderStatuses();
+        $data['geoZones']       = $this->getAvailableGeoZones();
 
         if (isset($this->session->data['success-message'])) {
             $data['successMessage'] = $this->session->data['success-message'];
             unset($this->session->data['success-message']);
         }
 
-        $data['action'] = $this->url->link('extension/payment/' . self::MODULE_NAME, 'user_token=' . $this->session->data['user_token'], true);
-        $data['cancel'] = $this->url->link('extension/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true);
-        $data['kassa_logs_link'] = $this->url->link(
-            'extension/payment/' . self::MODULE_NAME . '/logs',
-            'user_token=' . $this->session->data['user_token'],
+        $data['action']              = $this->url->link('extension/payment/'.self::MODULE_NAME,
+            'user_token='.$this->session->data['user_token'], true);
+        $data['cancel']              = $this->url->link('extension/extension',
+            'user_token='.$this->session->data['user_token'].'&type=payment', true);
+        $data['kassa_logs_link']     = $this->url->link(
+            'extension/payment/'.self::MODULE_NAME.'/logs',
+            'user_token='.$this->session->data['user_token'],
             true
         );
         $data['kassa_payments_link'] = $this->url->link(
-            'extension/payment/' . self::MODULE_NAME . '/payments',
-            'user_token=' . $this->session->data['user_token'],
+            'extension/payment/'.self::MODULE_NAME.'/payments',
+            'user_token='.$this->session->data['user_token'],
             true
         );
 
         $data['language'] = $this->language;
 
-        $data['header'] = $this->load->controller('common/header');
+        $data['header']      = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
-        $data['footer'] = $this->load->controller('common/footer');
+        $data['footer']      = $this->load->controller('common/footer');
 
         $data['kassa'] = $this->getModel()->getKassaModel();
-        $name = $data['kassa']->getDisplayName();
+        $name          = $data['kassa']->getDisplayName();
         if (empty($name)) {
             $data['kassa']->setDisplayName($this->language->get('kassa_default_display_name'));
         }
         $data['wallet'] = $this->getModel()->getWalletModel();
-        $name = $data['wallet']->getDisplayName();
+        $name           = $data['wallet']->getDisplayName();
         if (empty($name)) {
             $data['wallet']->setDisplayName($this->language->get('wallet_default_display_name'));
         }
         $data['billing'] = $this->getModel()->getBillingModel();
-        $name = $data['billing']->getDisplayName();
+        $name            = $data['billing']->getDisplayName();
         if (empty($name)) {
             $data['billing']->setDisplayName($this->language->get('billing_default_display_name'));
         }
 
-        $url = new Url(HTTP_CATALOG);
+        $url                     = new Url(HTTP_CATALOG);
         $data['notificationUrl'] = str_replace(
             'http://',
             'https://',
-            $url->link('extension/payment/' . self::MODULE_NAME . '/capture', '', true)
+            $url->link('extension/payment/'.self::MODULE_NAME.'/capture', '', true)
         );
-        $data['callbackUrl'] = $url->link('extension/payment/' . self::MODULE_NAME . '/callback', '', true);
+        $data['callbackUrl']     = $url->link('extension/payment/'.self::MODULE_NAME.'/callback', '', true);
 
         if (isset($this->request->post['yandex_money_kassa_sort_order'])) {
             $data['yandex_money_kassa_sort_order'] = $this->request->post['yandex_money_kassa_sort_order'];
@@ -213,13 +218,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('setting/setting');
         $this->load->model('catalog/option');
         $this->load->model('localisation/order_status');
-        $data['data_carrier'] = $this->getModel()->carrierList();
+        $data['data_carrier']   = $this->getModel()->carrierList();
         $data['metrika_status'] = '';
-        $data['market_status'] = '';
+        $data['market_status']  = '';
         $data['pokupki_status'] = '';
-        $array_init = array_merge($this->fields_metrika, $this->fields_market, $this->fields_orders);
+        $array_init             = array_merge($this->fields_metrika, $this->fields_market, $this->fields_orders);
 
-        if(isset($this->request->get['err'])) {
+        if (isset($this->request->get['err'])) {
             $data['err_token'] = $this->request->get['err'];
         } else {
             $data['err_token'] = '';
@@ -227,24 +232,104 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         // kassa
         $arLang = array(
-            'metrika_gtoken','metrika_number','metrika_idapp','metrika_o2auth','metrika_pw','metrika_uname','metrika_upw','metrika_set','metrika_celi','metrika_callback',
-            'metrika_sv','metrika_set_1','metrika_set_2','metrika_set_3','metrika_set_4','metrika_set_5','celi_cart','celi_order',
-            'pokupki_gtoken','pokupki_stoken','pokupki_yapi','pokupki_number','pokupki_login','pokupki_pw','pokupki_idapp','pokupki_token',
-            'pokupki_idpickup','pokupki_method','pokupki_sapi','pokupki_set_1','pokupki_set_2','pokupki_set_3','pokupki_set_4','pokupki_sv','pokupki_upw',
-            'pokupki_callback','market_color_option','market_size_option','market_size_unit','text_select_all','text_unselect_all','text_no','market_set',
-            'market_set_1','market_set_2','market_set_3','market_set_4','market_set_5','market_set_6','market_set_7','market_set_8','market_set_9','market_lnk_yml',
-            'market_cat','market_out','market_out_sel','market_out_all','market_dostup','market_dostup_1','market_dostup_2','market_dostup_3','market_dostup_4',
-            'market_s_name','market_d_cost','market_d_days','market_sv_all','market_rv_all','market_ch_all','market_unch_all','market_prostoy','market_sv','market_gen','p2p_os',
-            'tab_row_sign','tab_row_cause','tab_row_primary','ya_version','text_license','market','metrika','pokupki','active','active_on',
-            'active_off','log','button_cancel','text_installed','button_save','button_cancel','pokupki_text_status'
+            'metrika_gtoken',
+            'metrika_number',
+            'metrika_idapp',
+            'metrika_o2auth',
+            'metrika_pw',
+            'metrika_uname',
+            'metrika_upw',
+            'metrika_set',
+            'metrika_celi',
+            'metrika_callback',
+            'metrika_sv',
+            'metrika_set_1',
+            'metrika_set_2',
+            'metrika_set_3',
+            'metrika_set_4',
+            'metrika_set_5',
+            'celi_cart',
+            'celi_order',
+            'pokupki_gtoken',
+            'pokupki_stoken',
+            'pokupki_yapi',
+            'pokupki_number',
+            'pokupki_login',
+            'pokupki_pw',
+            'pokupki_idapp',
+            'pokupki_token',
+            'pokupki_idpickup',
+            'pokupki_method',
+            'pokupki_sapi',
+            'pokupki_set_1',
+            'pokupki_set_2',
+            'pokupki_set_3',
+            'pokupki_set_4',
+            'pokupki_sv',
+            'pokupki_upw',
+            'pokupki_callback',
+            'market_color_option',
+            'market_size_option',
+            'market_size_unit',
+            'text_select_all',
+            'text_unselect_all',
+            'text_no',
+            'market_set',
+            'market_set_1',
+            'market_set_2',
+            'market_set_3',
+            'market_set_4',
+            'market_set_5',
+            'market_set_6',
+            'market_set_7',
+            'market_set_8',
+            'market_set_9',
+            'market_lnk_yml',
+            'market_cat',
+            'market_out',
+            'market_out_sel',
+            'market_out_all',
+            'market_dostup',
+            'market_dostup_1',
+            'market_dostup_2',
+            'market_dostup_3',
+            'market_dostup_4',
+            'market_s_name',
+            'market_d_cost',
+            'market_d_days',
+            'market_sv_all',
+            'market_rv_all',
+            'market_ch_all',
+            'market_unch_all',
+            'market_prostoy',
+            'market_sv',
+            'market_gen',
+            'p2p_os',
+            'tab_row_sign',
+            'tab_row_cause',
+            'tab_row_primary',
+            'ya_version',
+            'text_license',
+            'market',
+            'metrika',
+            'pokupki',
+            'active',
+            'active_on',
+            'active_off',
+            'log',
+            'button_cancel',
+            'text_installed',
+            'button_save',
+            'button_cancel',
+            'pokupki_text_status',
         );
         foreach ($arLang as $lang_name) {
             $data[$lang_name] = $this->language->get($lang_name);
         }
 
-        foreach (array('pickup','cancelled','delivery','processing','unpaid','delivered') as $val) {
-            $data['pokupki_text_status_value'][$val] = $this->language->get('pokupki_text_status_' . $val);
-            $data['yandex_money_pokupki_status'][$val] = $this->config->get('yandex_money_pokupki_status_' . $val);
+        foreach (array('pickup', 'cancelled', 'delivery', 'processing', 'unpaid', 'delivered') as $val) {
+            $data['pokupki_text_status_value'][$val]   = $this->language->get('pokupki_text_status_'.$val);
+            $data['yandex_money_pokupki_status'][$val] = $this->config->get('yandex_money_pokupki_status_'.$val);
         }
         $data['yandex_money_market_stock_days'] = $this->config->get('yandex_money_market_stock_days');
         $data['yandex_money_market_stock_cost'] = $this->config->get('yandex_money_market_stock_cost');
@@ -253,17 +338,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $stock_results = $this->model_localisation_stock_status->getStockStatuses();
         foreach ($stock_results as $result) {
             $data['stockstatuses'][] = array(
-                'id' => $result['stock_status_id'],
-                'name' => $result['name']
+                'id'   => $result['stock_status_id'],
+                'name' => $result['name'],
             );
         }
         //
         $data['user_token'] = $this->session->data['user_token'];
 
-        $results = $this->model_catalog_option->getOptions(array('sort' => 'name'));
-        $data['options'] = $results;
-        $data['tab_general'] = $this->language->get('tab_general');
-        $data['yandex_money_market_size_options'] = array();
+        $results                                   = $this->model_catalog_option->getOptions(array('sort' => 'name'));
+        $data['options']                           = $results;
+        $data['tab_general']                       = $this->language->get('tab_general');
+        $data['yandex_money_market_size_options']  = array();
         $data['yandex_money_market_color_options'] = array();
 
         $this->load->model('localisation/stock_status');
@@ -280,12 +365,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         $this->load->model('localisation/currency');
-        $currencies = $this->model_localisation_currency->getCurrencies();
+        $currencies         = $this->model_localisation_currency->getCurrencies();
         $allowed_currencies = array_flip(array('RUR', 'RUB', 'BYN', 'KZT', 'UAH'));
         $data['currencies'] = array_intersect_key($currencies, $allowed_currencies);
 
-        $data = array_merge($data, $this->initForm($array_init));
-        $data = array_merge($data, $this->initErrors());
+        $data                    = array_merge($data, $this->initForm($array_init));
+        $data                    = array_merge($data, $this->initErrors());
         $data['market_cat_tree'] = $this->treeCat(0, $categories);
         if (!isset($data['yandex_money_market_size_options'])) {
             $data['yandex_money_market_size_options'] = array();
@@ -308,10 +393,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function logs()
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('kassa_breadcrumbs_heading_title'));
 
-        $fileName = DIR_LOGS . 'yandex-money.log';
+        $fileName = DIR_LOGS.'yandex-money.log';
 
         if (isset($_POST['clear-logs']) && $_POST['clear-logs'] === '1') {
             if (file_exists($fileName)) {
@@ -324,10 +409,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $this->response->addheader('Expires: 0');
                 $this->response->addheader('Content-Description: File Transfer');
                 $this->response->addheader('Content-Type: application/octet-stream');
-                $this->response->addheader('Content-Disposition: attachment; filename="yandex-money_' . date('Y-m-d_H-i-s') . '.log"');
+                $this->response->addheader('Content-Disposition: attachment; filename="yandex-money_'.date('Y-m-d_H-i-s').'.log"');
                 $this->response->addheader('Content-Transfer-Encoding: binary');
 
                 $this->response->setOutput(file_get_contents($fileName));
+
                 return;
             }
         }
@@ -336,17 +422,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if (file_exists($fileName)) {
             $content = file_get_contents($fileName);
         }
-        $data['logs'] = $content;
+        $data['logs']        = $content;
         $data['breadcrumbs'] = $this->getBreadCrumbs(array(
             'text' => 'kassa_breadcrumbs_logs',
-            'href' => 'logs'
+            'href' => 'logs',
         ));
 
         $data['language'] = $this->language;
 
-        $data['header'] = $this->load->controller('common/header');
+        $data['header']      = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
-        $data['footer'] = $this->load->controller('common/footer');
+        $data['footer']      = $this->load->controller('common/footer');
 
         $this->response->setOutput($this->load->view('extension/payment/yandex_money/logs', $data));
     }
@@ -357,7 +443,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('setting/setting');
 
         if (!$this->getModel()->getKassaModel()->isEnabled()) {
-            $url = $this->url->link('extension/payment/yandex_money', 'user_token=' . $this->session->data['user_token'], true);
+            $url = $this->url->link('extension/payment/yandex_money', 'user_token='.$this->session->data['user_token'],
+                true);
             $this->response->redirect($url);
         }
 
@@ -366,7 +453,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } else {
             $page = 1;
         }
-        $limit = $this->config->get('config_limit_admin');
+        $limit    = $this->config->get('config_limit_admin');
         $payments = $this->getModel()->findPayments(($page - 1) * $limit, $limit);
 
         if (isset($this->request->get['update_statuses'])) {
@@ -383,18 +470,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $paymentObjects = $this->getModel()->updatePaymentsStatuses($payments);
             if ($this->request->get['update_statuses'] == 2) {
                 foreach ($paymentObjects as $payment) {
-                    $this->getModel()->log('info', 'Check payment#' . $payment->getId());
+                    $this->getModel()->log('info', 'Check payment#'.$payment->getId());
                     if ($payment['status'] === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
-                        $this->getModel()->log('info', 'Capture payment#' . $payment->getId());
+                        $this->getModel()->log('info', 'Capture payment#'.$payment->getId());
                         if ($this->getModel()->capturePayment($payment, false)) {
-                            $orderId = $orderIds[$payment->getId()];
+                            $orderId   = $orderIds[$payment->getId()];
                             $orderInfo = $orderModel->getOrder($orderId);
                             if (empty($orderInfo)) {
-                                $this->getModel()->log('warning', 'Empty order#' . $orderId . ' in notification');
+                                $this->getModel()->log('warning', 'Empty order#'.$orderId.' in notification');
                                 continue;
                             } elseif ($orderInfo['order_status_id'] <= 0) {
-                                $link = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $orderId, true);
-                                $anchor = '<a href="' . $link . '" class="button">Оплатить</a>';
+                                $link                         = $this->url->link('extension/payment/yandex_money/repay',
+                                    'order_id='.$orderId, true);
+                                $anchor                       = '<a href="'.$link.'" class="button">Оплатить</a>';
                                 $orderInfo['order_status_id'] = 1;
                                 $this->getModel()->updateOrderStatus($orderId, $orderInfo, $anchor);
                             }
@@ -404,12 +492,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                                 $payment,
                                 $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
                             );
-                            $this->getModel()->log('info', 'Платёж для заказа №' . $orderId . ' подтверждён');
+                            $this->getModel()->log('info', 'Платёж для заказа №'.$orderId.' подтверждён');
                         }
                     }
                 }
             }
-            $link = $this->url->link('extension/payment/yandex_money/payments', 'user_token=' . $this->session->data['user_token'], true);
+            $link = $this->url->link('extension/payment/yandex_money/payments',
+                'user_token='.$this->session->data['user_token'], true);
             $this->response->redirect($link);
         }
 
@@ -419,30 +508,30 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer']      = $this->load->controller('common/footer');
 
-        $pagination = new Pagination();
+        $pagination        = new Pagination();
         $pagination->total = $this->getModel()->countPayments();
-        $pagination->page = $page;
+        $pagination->page  = $page;
         $pagination->limit = $limit;
-        $pagination->url = $this->url->link(
+        $pagination->url   = $this->url->link(
             'extension/payment/yandex_money/payments',
-            'user_token=' . $this->session->data['user_token'] . '&page={page}',
+            'user_token='.$this->session->data['user_token'].'&page={page}',
             true
         );
 
-        $data['language'] = $this->language;
-        $data['payments'] = $payments;
-        $data['breadcrumbs'] = $this->getBreadCrumbs(array(
+        $data['language']     = $this->language;
+        $data['payments']     = $payments;
+        $data['breadcrumbs']  = $this->getBreadCrumbs(array(
             'text' => 'kassa_breadcrumbs_payments',
             'href' => 'payments',
         ));
-        $data['update_link'] = $this->url->link(
+        $data['update_link']  = $this->url->link(
             'extension/payment/yandex_money/payments',
-            'user_token=' . $this->session->data['user_token'] . '&update_statuses=1',
+            'user_token='.$this->session->data['user_token'].'&update_statuses=1',
             true
         );
         $data['capture_link'] = $this->url->link(
             'extension/payment/yandex_money/payments',
-            'user_token=' . $this->session->data['user_token'] . '&update_statuses=2',
+            'user_token='.$this->session->data['user_token'].'&update_statuses=2',
             true
         );
         $this->response->setOutput($this->load->view('extension/payment/yandex_money/kassa_payments_list', $data));
@@ -461,36 +550,39 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     private function getModel()
     {
         if ($this->_model === null) {
-            $this->load->model('extension/payment/' . self::MODULE_NAME);
-            $property = 'model_extension_payment_' . self::MODULE_NAME;
+            $this->load->model('extension/payment/'.self::MODULE_NAME);
+            $property     = 'model_extension_payment_'.self::MODULE_NAME;
             $this->_model = $this->__get($property);
         }
+
         return $this->_model;
     }
 
     private function getBreadCrumbs($add = null)
     {
-        $params = 'user_token=' . $this->session->data['user_token'];
+        $params = 'user_token='.$this->session->data['user_token'];
         $result = array(
             array(
                 'text' => $this->language->get('kassa_breadcrumbs_home'),
-                'href' => $this->url->link('common/dashboard', $params, true)
+                'href' => $this->url->link('common/dashboard', $params, true),
             ),
             array(
                 'text' => $this->language->get('kassa_breadcrumbs_extension'),
-                'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true)
+                'href' => $this->url->link('marketplace/extension',
+                    'user_token='.$this->session->data['user_token'].'&type=payment', true),
             ),
             array(
                 'text' => $this->language->get('module_title'),
-                'href' => $this->url->link('extension/payment/' . self::MODULE_NAME, $params, true)
-            )
+                'href' => $this->url->link('extension/payment/'.self::MODULE_NAME, $params, true),
+            ),
         );
         if (!empty($add)) {
             $result[] = array(
                 'text' => $this->language->get($add['text']),
-                'href' => $this->url->link('extension/payment/' . self::MODULE_NAME . '/' . $add['href'], $params, true),
+                'href' => $this->url->link('extension/payment/'.self::MODULE_NAME.'/'.$add['href'], $params, true),
             );
         }
+
         return $result;
     }
 
@@ -501,19 +593,22 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        $this->validateKassa($request);
+        if (isset($request->post['yandex_money_kassa_enabled']) && $request->post['yandex_money_kassa_enabled'] === 'on') {
+            $this->validateKassa($request);
+        }
+
         $this->validateWallet($request);
         $this->validateBilling($request);
 
         $enabled = false;
         if ($this->getModel()->getKassaModel()->isEnabled()) {
-            $enabled = true;
+            $enabled                                          = true;
             $request->post['payment_yandex_money_sort_order'] = $request->post['yandex_money_kassa_sort_order'];
         } elseif ($this->getModel()->getWalletModel()->isEnabled()) {
-            $enabled = true;
+            $enabled                                          = true;
             $request->post['payment_yandex_money_sort_order'] = $request->post['yandex_money_wallet_sort_order'];
         } elseif ($this->getModel()->getBillingModel()->isEnabled()) {
-            $enabled = true;
+            $enabled                                          = true;
             $request->post['payment_yandex_money_sort_order'] = $request->post['yandex_money_billing_sort_order'];
         }
         $request->post['payment_yandex_money_status'] = $enabled;
@@ -530,7 +625,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function validateKassa(Request $request)
     {
-        $kassa = $this->getModel()->getKassaModel();
+        $kassa   = $this->getModel()->getKassaModel();
         $enabled = false;
         if (isset($request->post['yandex_money_kassa_enabled']) && $request->post['yandex_money_kassa_enabled'] === 'on') {
             $enabled = true;
@@ -559,7 +654,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         $value = isset($request->post['yandex_money_kassa_payment_mode']) ? $request->post['yandex_money_kassa_payment_mode'] : '';
-        $epl = true;
+        $epl   = true;
         if ($value === 'shop') {
             $epl = false;
         }
@@ -571,8 +666,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $selected = false;
         foreach ($kassa->getPaymentMethods() as $id => $value) {
-            $property = 'yandex_money_kassa_payment_method_' . $id;
-            $value = isset($request->post[$property]) ? $request->post[$property] === 'on' : false;
+            $property = 'yandex_money_kassa_payment_method_'.$id;
+            $value    = isset($request->post[$property]) ? $request->post[$property] === 'on' : false;
             $kassa->setPaymentMethodFlag($id, $value);
             $request->post[$property] = $value;
             if ($value) {
@@ -656,7 +751,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function validateWallet(Request $request)
     {
-        $wallet = $this->getModel()->getWalletModel();
+        $wallet  = $this->getModel()->getWalletModel();
         $enabled = false;
         if (isset($request->post['yandex_money_wallet_enabled']) && $request->post['yandex_money_wallet_enabled'] === 'on') {
             $enabled = true;
@@ -767,7 +862,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         if (!empty($this->error)) {
             foreach ($this->error as $key => $error) {
-                $data['error_' . $key] = $error;
+                $data['error_'.$key] = $error;
             }
         }
     }
@@ -782,6 +877,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         foreach ($model->getTaxRates() as $taxRate) {
             $result[$taxRate['tax_rate_id']] = $taxRate['name'];
         }
+
         return $result;
     }
 
@@ -789,9 +885,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $result = array();
         foreach ($this->getModel()->getKassaModel()->getTaxRateList() as $taxRateId) {
-            $key = 'kassa_tax_rate_' . $taxRateId . '_label';
+            $key                = 'kassa_tax_rate_'.$taxRateId.'_label';
             $result[$taxRateId] = $this->language->get($key);
         }
+
         return $result;
     }
 
@@ -802,6 +899,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         foreach ($this->model_localisation_geo_zone->getGeoZones() as $row) {
             $result[$row['geo_zone_id']] = $row['name'];
         }
+
         return $result;
     }
 
@@ -812,6 +910,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         foreach ($this->model_localisation_order_status->getOrderStatuses() as $row) {
             $result[$row['order_status_id']] = $row['name'];
         }
+
         return $result;
     }
 
@@ -821,27 +920,29 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data[$a] = $this->config->get($a);
         }
 
-        $url = new Url(HTTPS_CATALOG);
+        $url                               = new Url(HTTPS_CATALOG);
         $data['yandex_money_pokupki_sapi'] = $url->link('extension/yandex_market', '', true);
         if ($this->config->get('config_secure')) {
-            $data['ya_kassa_fail'] = HTTPS_CATALOG.'index.php?route=checkout/failure';
-            $data['ya_kassa_success'] = HTTPS_CATALOG.'index.php?route=checkout/success';
-            $data['ya_p2p_linkapp'] = HTTPS_CATALOG.'index.php?route=extension/payment/yandex_money/inside';
+            $data['ya_kassa_fail']               = HTTPS_CATALOG.'index.php?route=checkout/failure';
+            $data['ya_kassa_success']            = HTTPS_CATALOG.'index.php?route=checkout/success';
+            $data['ya_p2p_linkapp']              = HTTPS_CATALOG.'index.php?route=extension/payment/yandex_money/inside';
             $data['yandex_money_market_lnk_yml'] = HTTPS_CATALOG.'index.php?route=extension/payment/yandex_money/market';
         } else {
-            $data['ya_kassa_fail'] = HTTP_CATALOG.'index.php?route=checkout/failure';
-            $data['ya_kassa_success'] = HTTP_CATALOG.'index.php?route=checkout/success';
-            $data['ya_p2p_linkapp'] = HTTP_CATALOG.'index.php?route=extension/payment/yandex_money/inside';
+            $data['ya_kassa_fail']               = HTTP_CATALOG.'index.php?route=checkout/failure';
+            $data['ya_kassa_success']            = HTTP_CATALOG.'index.php?route=checkout/success';
+            $data['ya_p2p_linkapp']              = HTTP_CATALOG.'index.php?route=extension/payment/yandex_money/inside';
             $data['yandex_money_market_lnk_yml'] = HTTP_CATALOG.'index.php?route=extension/payment/yandex_money/market';
         }
 
         $data['yandex_money_metrika_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='.$this->config->get('yandex_money_metrika_idapp').'&device_id='.md5('metrika'.$this->config->get('yandex_money_metrika_idapp')).'&client_secret='.$this->config->get('yandex_money_metrika_pw');
-        $data['yandex_money_metrika_callback'] = $this->url->link('extension/payment/yandex_money/prepare_m', 'user_token='.$this->session->data['user_token'], true);
+        $data['yandex_money_metrika_callback']     = $this->url->link('extension/payment/yandex_money/prepare_m',
+            'user_token='.$this->session->data['user_token'], true);
         $data['yandex_money_pokupki_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='.$this->config->get('yandex_money_pokupki_idapp').'&device_id='.md5('pokupki'.$this->config->get('yandex_money_pokupki_idapp')).'&client_secret='.$this->config->get('yandex_money_pokupki_pw');
-        $data['yandex_money_pokupki_callback'] = $this->url->link('extension/payment/yandex_money/prepare_p', 'user_token='.$this->session->data['user_token'], true);
-        $data['yandex_money_pokupki_gtoken'] = $this->config->get('yandex_money_pokupki_gtoken');
-        $data['yandex_money_metrika_o2auth'] = $this->config->get('yandex_money_metrika_o2auth');
-        $data['token_url'] = 'https://oauth.yandex.ru/token?';
+        $data['yandex_money_pokupki_callback']     = $this->url->link('extension/payment/yandex_money/prepare_p',
+            'user_token='.$this->session->data['user_token'], true);
+        $data['yandex_money_pokupki_gtoken']       = $this->config->get('yandex_money_pokupki_gtoken');
+        $data['yandex_money_metrika_o2auth']       = $this->config->get('yandex_money_metrika_o2auth');
+        $data['token_url']                         = 'https://oauth.yandex.ru/token?';
 
         return $data;
     }
@@ -851,8 +952,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this->goCurl(
             'm',
             'grant_type=authorization_code&code='.$this->request->get['code']
-                . '&client_id='.$this->config->get('yandex_money_metrika_idapp')
-                . '&client_secret='.$this->config->get('yandex_money_metrika_pw')
+            .'&client_id='.$this->config->get('yandex_money_metrika_idapp')
+            .'&client_secret='.$this->config->get('yandex_money_metrika_pw')
         );
     }
 
@@ -861,20 +962,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this->goCurl(
             'p',
             'grant_type=authorization_code&code='.$this->request->get['code']
-                . '&client_id='.$this->config->get('yandex_money__pokupki_idapp')
-                . '&client_secret='.$this->config->get('yandex_money__pokupki_pw')
+            .'&client_id='.$this->config->get('yandex_money__pokupki_idapp')
+            .'&client_secret='.$this->config->get('yandex_money__pokupki_pw')
         );
     }
 
     public function goCurl($type, $post)
     {
         $url = 'https://oauth.yandex.ru/token';
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,$url);
+        $ch  = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FAILONERROR, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 9);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
@@ -883,78 +984,96 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         curl_close($ch);
         $data = json_decode($result);
         if ($status == 200) {
-            if (!empty($data->access_token))
-            {
+            if (!empty($data->access_token)) {
                 $this->load->model('setting/setting');
-                if($type == 'm') {
+                if ($type == 'm') {
                     $this->model_setting_setting->editSetting('yandex_money_metrika_o2auth', array(
-                        'yandex_money_metrika_o2auth' => $data->access_token
+                        'yandex_money_metrika_o2auth' => $data->access_token,
                     ));
-                } elseif($type == 'p') {
+                } elseif ($type == 'p') {
                     $this->model_setting_setting->editSetting('yandex_money_pokupki_gtoken', array(
-                        'yandex_money_pokupki_gtoken' => $data->access_token
+                        'yandex_money_pokupki_gtoken' => $data->access_token,
                     ));
                 }
                 $this->response->redirect(
                     $this->url->link(
-                        'extension/payment/yandex_money', 'user_token=' . $this->session->data['user_token'], true
+                        'extension/payment/yandex_money', 'user_token='.$this->session->data['user_token'], true
                     )
                 );
             }
         }
 
-        $this->response->redirect($this->url->link('extension/payment/yandex_money', 'err='.$data->error_description.'&user_token=' . $this->session->data['user_token'], true));
+        $this->response->redirect($this->url->link('extension/payment/yandex_money',
+            'err='.$data->error_description.'&user_token='.$this->session->data['user_token'], true));
     }
 
     private function initErrors()
     {
-        $data = array();
+        $data   = array();
         $status = array();
-        foreach(array('pickup','cancelled','delivery','processing','unpaid','delivered') as $val){
+        foreach (array('pickup', 'cancelled', 'delivery', 'processing', 'unpaid', 'delivered') as $val) {
             $status[] = $this->config->get('yandex_money_pokupki_status_'.$val);
         }
         $status = array_unique($status);
 
-        if ($this->config->get('yandex_money_pokupki_stoken') == '')
+        if ($this->config->get('yandex_money_pokupki_stoken') == '') {
             $data['pokupki_status'][] = $this->errors_alert('Токен не заполнен!');
-        if ($this->config->get('yandex_money_pokupki_yapi') == '')
+        }
+        if ($this->config->get('yandex_money_pokupki_yapi') == '') {
             $data['pokupki_status'][] = $this->errors_alert('URL api не заполнен');
-        if ($this->config->get('yandex_money_pokupki_number') == '')
+        }
+        if ($this->config->get('yandex_money_pokupki_number') == '') {
             $data['pokupki_status'][] = $this->errors_alert('Номер кампании не заполнен');
-        if ($this->config->get('yandex_money_pokupki_idapp') == '')
+        }
+        if ($this->config->get('yandex_money_pokupki_idapp') == '') {
             $data['pokupki_status'][] = $this->errors_alert('ID приложения не заполнен');
-        if ($this->config->get('yandex_money_pokupki_pw') == '')
+        }
+        if ($this->config->get('yandex_money_pokupki_pw') == '') {
             $data['pokupki_status'][] = $this->errors_alert('Пароль приложения не заполнен');
-        if ($this->config->get('yandex_money_pokupki_gtoken') == '')
+        }
+        if ($this->config->get('yandex_money_pokupki_gtoken') == '') {
             $data['pokupki_status'][] = $this->errors_alert('Токен yandex не получен!');
-        if (count($status)!=6)
+        }
+        if (count($status) != 6) {
             $data['pokupki_status'][] = $this->errors_alert('Статусы для передачи в Яндекс.Маркет должны быть уникальными');
+        }
 
-        if ($this->config->get('yandex_money_market_shopname') == '')
+        if ($this->config->get('yandex_money_market_shopname') == '') {
             $data['market_status'][] = $this->errors_alert('Не введено название магазина');
-        if ($this->config->get('yandex_money_market_localcoast') == '')
+        }
+        if ($this->config->get('yandex_money_market_localcoast') == '') {
             $data['market_status'][] = $this->errors_alert('Введите стоимость доставки в домашнем регионе');
-        if ($this->config->get('yandex_money_market_localdays') == '')
+        }
+        if ($this->config->get('yandex_money_market_localdays') == '') {
             $data['market_status'][] = $this->errors_alert('Введите срок доставки в домашнем регионе');
+        }
 
-        if ($this->config->get('yandex_money_metrika_number') == '')
+        if ($this->config->get('yandex_money_metrika_number') == '') {
             $data['metrika_status'][] = $this->errors_alert('Не заполнен номер счётчика');
-        if ($this->config->get('yandex_money_metrika_idapp') == '')
+        }
+        if ($this->config->get('yandex_money_metrika_idapp') == '') {
             $data['metrika_status'][] = $this->errors_alert('ID Приложения не заполнено');
-        if ($this->config->get('yandex_money_metrika_pw') == '')
+        }
+        if ($this->config->get('yandex_money_metrika_pw') == '') {
             $data['metrika_status'][] = $this->errors_alert('Пароль приложения не заполнено');
-        if ($this->config->get('yandex_money_metrika_o2auth') == '')
+        }
+        if ($this->config->get('yandex_money_metrika_o2auth') == '') {
             $data['metrika_status'][] = $this->errors_alert('Получите токен OAuth');
+        }
 
 
-        if (empty($data['market_status']))
-            $data['market_status'][] = '';//$this->success_alert('Все необходимые настроки заполнены!');
-        if (empty($data['kassa_status']))
-            $data['kassa_status'][] = '';//$this->success_alert('Все необходимые настроки заполнены!');
-        if (empty($data['metrika_status']))
-            $data['metrika_status'][] = '';//$this->success_alert('Все необходимые настроки заполнены!');
-        if (empty($data['pokupki_status']))
-            $data['pokupki_status'][] = '';//$this->success_alert('Все необходимые настроки заполнены!');
+        if (empty($data['market_status'])) {
+            $data['market_status'][] = '';
+        }//$this->success_alert('Все необходимые настроки заполнены!');
+        if (empty($data['kassa_status'])) {
+            $data['kassa_status'][] = '';
+        }//$this->success_alert('Все необходимые настроки заполнены!');
+        if (empty($data['metrika_status'])) {
+            $data['metrika_status'][] = '';
+        }//$this->success_alert('Все необходимые настроки заполнены!');
+        if (empty($data['pokupki_status'])) {
+            $data['pokupki_status'][] = '';
+        }//$this->success_alert('Все необходимые настроки заполнены!');
         return $data;
     }
 
@@ -962,22 +1081,25 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $this->language->load('extension/payment/yandex_money');
 
-        $json = array();
+        $json     = array();
         $order_id = (isset($this->request->get['order_id'])) ? $this->request->get['order_id'] : 0;
         if ($order_id <= 0) {
             $json['error'] = $this->language->get('kassa_invoices_invalid_order_id');
             $this->sendResponseJson($json);
+
             return true;
         }
         $kassa = $this->getModel()->getKassaModel();
         if (!$kassa->isEnabled()) {
             $json['error'] = $this->language->get('kassa_invoices_kassa_disabled');
             $this->sendResponseJson($json);
+
             return true;
         }
         if (!$kassa->isInvoicesEnabled()) {
             $json['error'] = $this->language->get('kassa_invoices_disabled');
             $this->sendResponseJson($json);
+
             return true;
         }
         $this->load->model('sale/order');
@@ -985,11 +1107,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if (empty($order_info)) {
             $json['error'] = $this->language->get('kassa_invoices_order_not_exists');
             $this->sendResponseJson($json);
+
             return true;
         }
-        $email = $order_info['email'];
-        $products = $this->model_sale_order->getOrderProducts($order_id);
-        $amount = number_format(
+        $email     = $order_info['email'];
+        $products  = $this->model_sale_order->getOrderProducts($order_id);
+        $amount    = number_format(
             $this->currency->convert(
                 $this->currency->format(
                     $order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false
@@ -1000,8 +1123,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             2, '.', ''
         );
         $urlHelper = new Url(HTTPS_CATALOG);
-        $url = $urlHelper->link('extension/payment/yandex_money/simplepayment', 'order_id=' . $order_id, true);
-        $logo = (is_file(DIR_IMAGE . $this->config->get('config_logo'))) ? DIR_IMAGE . $this->config->get('config_logo') : '';
+        $url       = $urlHelper->link('extension/payment/yandex_money/simplepayment', 'order_id='.$order_id, true);
+        $logo      = (is_file(DIR_IMAGE.$this->config->get('config_logo'))) ? DIR_IMAGE.$this->config->get('config_logo') : '';
 
         $replaceMap = array(
             '%order_id%'  => $order_id,
@@ -1009,55 +1132,56 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         );
         foreach ($order_info as $key => $value) {
             if (is_scalar($value)) {
-                $replaceMap['%' . $key . '%'] = $value;
+                $replaceMap['%'.$key.'%'] = $value;
             } else {
-                $replaceMap['%' . $key . '%'] = json_encode($value);
+                $replaceMap['%'.$key.'%'] = json_encode($value);
             }
         }
         $text_instruction = strtr($kassa->getInvoiceMessage(), $replaceMap);
-        $subject = strtr($kassa->getInvoiceSubject(), $replaceMap);
+        $subject          = strtr($kassa->getInvoiceSubject(), $replaceMap);
 
         $link_img = ($this->request->server['HTTPS']) ? HTTPS_CATALOG : HTTP_CATALOG;
-        $data = array(
-            'shop_name' => $order_info['store_name'],
-            'shop_url' => $order_info['store_url'],
-            'shop_logo' => 'cid:'.basename($logo),
-            'b_logo' => $kassa->getSendInvoiceLogo(),
+        $data     = array(
+            'shop_name'     => $order_info['store_name'],
+            'shop_url'      => $order_info['store_url'],
+            'shop_logo'     => 'cid:'.basename($logo),
+            'b_logo'        => $kassa->getSendInvoiceLogo(),
             'customer_name' => $order_info['customer'],
-            'order_id' => $order_id,
-            'sum' => $amount,
-            'link' => $url,
+            'order_id'      => $order_id,
+            'sum'           => $amount,
+            'link'          => $url,
             'yandex_button' => $link_img.'image/cache/yandex_buttons.png',
-            'total' => $order_info['total'],
-            'shipping' => $order_info['shipping_method'],
-            'products' => $products,
-            'instruction' => $text_instruction
+            'total'         => $order_info['total'],
+            'shipping'      => $order_info['shipping_method'],
+            'products'      => $products,
+            'instruction'   => $text_instruction,
         );
-        $message = $this->load->view('extension/payment/yandex_money/invoice_message', $data);
+        $message  = $this->load->view('extension/payment/yandex_money/invoice_message', $data);
 
         try {
             $mail = new Mail();
 
-            $mail->protocol = $this->config->get('config_mail_protocol');
-            $mail->parameter = $this->config->get('config_mail_parameter');
+            $mail->protocol      = $this->config->get('config_mail_protocol');
+            $mail->parameter     = $this->config->get('config_mail_parameter');
             $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
             $mail->smtp_username = $this->config->get('config_mail_smtp_username');
-            $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-            $mail->smtp_port = $this->config->get('config_mail_smtp_port');
-            $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+            $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES,
+                'UTF-8');
+            $mail->smtp_port     = $this->config->get('config_mail_smtp_port');
+            $mail->smtp_timeout  = $this->config->get('config_mail_smtp_timeout');
 
             $mail->setTo($email);
             $mail->setFrom($this->config->get('config_email'));
             $mail->setSender($this->config->get('config_email'));
             $mail->setSubject($subject);
-            $mail->addAttachment(DIR_CATALOG . 'view/theme/default/image/yandex_buttons.png');
+            $mail->addAttachment(DIR_CATALOG.'view/theme/default/image/yandex_buttons.png');
             if ($logo != '') {
                 $mail->addAttachment($logo);
             }
             $mail->setHtml($message);
             $mail->send();
-        } catch(Exception $e) {
-            $json['error']= $e->getMessage();
+        } catch (Exception $e) {
+            $json['error'] = $e->getMessage();
             $this->sendResponseJson($json);
         }
         $json['success'] = sprintf("Счет на оплату заказа %s выставлен", $order_id);
@@ -1066,16 +1190,18 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function refund()
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->load->model('setting/setting');
         $error = array();
 
         $orderId = isset($this->request->get['order_id']) ? (int)$this->request->get['order_id'] : 0;
         if (empty($orderId)) {
-            $this->response->redirect($this->url->link('sale/order', 'user_token='.$this->session->data['user_token'], true));
+            $this->response->redirect($this->url->link('sale/order', 'user_token='.$this->session->data['user_token'],
+                true));
         }
         $this->load->model('sale/order');
-        $returnUrl = $this->url->link('sale/order', 'user_token='.$this->session->data['user_token'].'&order_id=' . $orderId, true);
+        $returnUrl = $this->url->link('sale/order',
+            'user_token='.$this->session->data['user_token'].'&order_id='.$orderId, true);
         $orderInfo = $this->model_sale_order->getOrder($orderId);
         if (empty($orderInfo)) {
             $this->response->redirect($returnUrl);
@@ -1089,7 +1215,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($payment === null) {
             $this->response->redirect($returnUrl);
         }
-        $amount = $payment->getAmount()->getValue();
+        $amount  = $payment->getAmount()->getValue();
         $comment = '';
 
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && isset($this->request->post['kassa_refund_amount'])) {
@@ -1108,27 +1234,28 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     $this->session->data['error'] = 'Не удалось провести возврат';
                 } else {
                     $this->response->redirect(
-                        $this->url->link('extension/payment/yandex_money/refund', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $orderId, true)
+                        $this->url->link('extension/payment/yandex_money/refund',
+                            'user_token='.$this->session->data['user_token'].'&order_id='.$orderId, true)
                     );
                 }
             }
         }
 
         $paymentMethod = 'не выбран';
-        $paymentData = $payment->getPaymentMethod();
+        $paymentData   = $payment->getPaymentMethod();
         if ($paymentData !== null) {
-            $paymentMethod = $this->language->get('kassa_payment_method_' . $paymentData->getType());
+            $paymentMethod = $this->language->get('kassa_payment_method_'.$paymentData->getType());
         }
 
-        $data['kassa'] = $this->getModel()->getKassaModel();
-        $data['payment'] = $payment;
-        $data['order'] = $orderInfo;
-        $data['paymentMethod'] = $paymentMethod;
-        $data['errors'] = $error;
-        $data['amount'] = $amount;
-        $data['comment'] = $comment;
-        $data['error'] = isset($this->session->data['error']) ? $this->session->data['error'] : '';
-        $data['refunds'] = $this->getModel()->getOrderRefunds($orderInfo['order_id']);
+        $data['kassa']             = $this->getModel()->getKassaModel();
+        $data['payment']           = $payment;
+        $data['order']             = $orderInfo;
+        $data['paymentMethod']     = $paymentMethod;
+        $data['errors']            = $error;
+        $data['amount']            = $amount;
+        $data['comment']           = $comment;
+        $data['error']             = isset($this->session->data['error']) ? $this->session->data['error'] : '';
+        $data['refunds']           = $this->getModel()->getOrderRefunds($orderInfo['order_id']);
         $data['refundable_amount'] = $amount;
         foreach ($data['refunds'] as $refund) {
             if ($refund['status'] !== \YandexCheckout\Model\RefundStatus::CANCELED) {
@@ -1141,26 +1268,27 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['refundable_amount'] = round($data['refundable_amount'], 2);
         unset($this->session->data['error']);
 
-        $data['header'] = $this->load->controller('common/header');
+        $data['header']      = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
-        $data['footer'] = $this->load->controller('common/footer');
-        $data['language'] = $this->language;
+        $data['footer']      = $this->load->controller('common/footer');
+        $data['language']    = $this->language;
 
         $data['breadcrumbs'] = array();
 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+            'href' => $this->url->link('common/dashboard', 'user_token='.$this->session->data['user_token'], true),
         );
 
         $data['breadcrumbs'][] = array(
             'text' => 'Заказы',
-            'href' => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true)
+            'href' => $this->url->link('sale/order', 'user_token='.$this->session->data['user_token'], true),
         );
 
         $data['breadcrumbs'][] = array(
-            'text' => 'Возвраты заказа №' . $orderId,
-            'href' => $this->url->link('extension/payment/yandex_money/refund', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $orderId, true)
+            'text' => 'Возвраты заказа №'.$orderId,
+            'href' => $this->url->link('extension/payment/yandex_money/refund',
+                'user_token='.$this->session->data['user_token'].'&order_id='.$orderId, true),
         );
 
         $this->response->setOutput($this->load->view('extension/payment/yandex_money/refund', $data));
@@ -1171,6 +1299,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      * @param array $order
      * @param float $amount
      * @param string $comment
+     *
      * @return bool
      */
     private function refundPayment($payment, $order, $amount, $comment)
@@ -1179,13 +1308,14 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($response === null) {
             return false;
         }
+
         return true;
     }
 
     protected function sendResponseJson($json)
     {
         if (isset($this->request->server['HTTP_ORIGIN'])) {
-            $this->response->addHeader('Access-Control-Allow-Origin: ' . $this->request->server['HTTP_ORIGIN']);
+            $this->response->addHeader('Access-Control-Allow-Origin: '.$this->request->server['HTTP_ORIGIN']);
             $this->response->addHeader('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
             $this->response->addHeader('Access-Control-Max-Age: 1000');
             $this->response->addHeader('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
@@ -1200,6 +1330,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             <i class="fa fa-exclamation-circle"></i> '.$text.'
                 <button type="button" class="close" data-dismiss="alert">×</button>
         </div>';
+
         return $html;
     }
 
@@ -1208,7 +1339,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if (empty($checked)) {
             $checked = array();
         }
-        $html = '';
+        $html       = '';
         $categories = $this->getCategories($id_cat);
         foreach ($categories as $category) {
             if (is_array($checked)) {
@@ -1227,7 +1358,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function getCategories($parent_id = 0)
     {
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "category_to_store c2s ON (c.category_id = c2s.category_id) WHERE c.parent_id = '" . (int)$parent_id . "' AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND c2s.store_id = '" . (int)$this->config->get('config_store_id') . "'  AND c.status = '1' ORDER BY c.sort_order, LCASE(cd.name)");
+        $query = $this->db->query("SELECT * FROM ".DB_PREFIX."category c LEFT JOIN ".DB_PREFIX."category_description cd ON (c.category_id = cd.category_id) LEFT JOIN ".DB_PREFIX."category_to_store c2s ON (c.category_id = c2s.category_id) WHERE c.parent_id = '".(int)$parent_id."' AND cd.language_id = '".(int)$this->config->get('config_language_id')."' AND c2s.store_id = '".(int)$this->config->get('config_store_id')."'  AND c.status = '1' ORDER BY c.sort_order, LCASE(cd.name)");
+
         return $query->rows;
     }
 
@@ -1235,11 +1367,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $html = '<li class="tree-item">
             <span class="tree-item-name">
-                <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($checked?' checked':'').'>
+                <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($checked ? ' checked' : '').'>
                 <i class="tree-dot"></i>
                 <label class="">'.$name.'</label>
             </span>
         </li>';
+
         return $html;
     }
 
@@ -1247,12 +1380,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $html = '<li class="tree-folder">
             <span class="tree-folder-name">
-                <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($checked?' checked':'').'>
+                <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($checked ? ' checked' : '').'>
                 <i class="icon-folder-open"></i>
                 <label class="tree-toggler">'.$name.'</label>
             </span>
             <ul class="tree" style="display: block;">'.$this->treeCat($id, $list).'</ul>
         </li>';
+
         return $html;
     }
 }
