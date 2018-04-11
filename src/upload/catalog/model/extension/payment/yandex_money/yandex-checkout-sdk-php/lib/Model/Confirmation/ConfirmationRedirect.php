@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,7 +38,10 @@ use YandexCheckout\Model\ConfirmationType;
  * оплаты банковскими картами. По умолчанию определяется политикой платежной системы.
  * @property string $returnUrl URL на который вернется плательщик после подтверждения или отмены платежа на
  * странице партнера.
+ * @property string $return_url URL на который вернется плательщик после подтверждения или отмены платежа на
+ * странице партнера.
  * @property string $confirmationUrl URL на который необходимо перенаправить плательщика для подтверждения оплаты.
+ * @property string $confirmation_url URL на который необходимо перенаправить плательщика для подтверждения оплаты.
  */
 class ConfirmationRedirect extends AbstractConfirmation
 {

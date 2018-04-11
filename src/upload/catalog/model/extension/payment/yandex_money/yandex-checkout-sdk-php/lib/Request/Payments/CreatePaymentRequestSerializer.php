@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,8 +46,6 @@ class CreatePaymentRequestSerializer
         'reference_id'        => 'referenceId',
         'payment_token'       => 'paymentToken',
         'payment_method_id'   => 'paymentMethodId',
-        'save_payment_method' => 'savePaymentMethod',
-        'capture'             => 'capture',
         'client_ip'           => 'clientIp',
     );
 
@@ -69,6 +67,9 @@ class CreatePaymentRequestSerializer
         $result = array(
             'amount' => $this->serializeAmount($request->getAmount()),
         );
+        if ($request->hasDescription()) {
+            $result['description'] = $request->getDescription();
+        }
         if ($request->hasReceipt()) {
             $receipt = $request->getReceipt();
             if ($receipt->notEmpty()) {
@@ -122,6 +123,12 @@ class CreatePaymentRequestSerializer
         if ($request->hasMetadata()) {
             $result['metadata'] = $request->getMetadata()->toArray();
         }
+        if ($request->hasCapture()) {
+            $result['capture'] = $request->getCapture();
+        }
+        if ($request->hasSavePaymentMethod()) {
+            $result['save_payment_method'] = $request->getSavePaymentMethod();
+        }
 
         foreach (self::$propertyMap as $name => $property) {
             $value = $request->{$property};
@@ -162,12 +169,6 @@ class CreatePaymentRequestSerializer
         $result = array(
             'type' => $paymentData->getType(),
         );
-        if ($paymentData->getAccountNumber() !== null) {
-            $result['account_number'] = $paymentData->getAccountNumber();
-        }
-        if ($paymentData->getPhone() !== null) {
-            $result['phone'] = $paymentData->getPhone();
-        }
         return $result;
     }
 
@@ -187,9 +188,6 @@ class CreatePaymentRequestSerializer
         $result = array(
             'type' => $paymentData->getType(),
         );
-        if ($paymentData->getBindId() !== null) {
-            $result['bind_id'] = $paymentData->getBindId();
-        }
         if ($paymentData->getPhone() !== null) {
             $result['phone'] = $paymentData->getPhone();
         }

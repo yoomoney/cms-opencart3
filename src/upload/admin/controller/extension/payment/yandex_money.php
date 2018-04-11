@@ -133,7 +133,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.4';
+        $data['module_version'] = '1.0.5';
         $data['breadcrumbs']    = $this->getBreadCrumbs();
         $data['kassaTaxRates']  = $this->getKassaTaxRates();
         $data['shopTaxRates']   = $this->getShopTaxRates();
