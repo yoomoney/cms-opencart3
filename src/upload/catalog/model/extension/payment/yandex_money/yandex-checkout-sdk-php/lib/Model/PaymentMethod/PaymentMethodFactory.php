@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,7 +47,6 @@ class PaymentMethodFactory
         'card_type'      => 'cardType',
         'expiry_month'   => 'expiryMonth',
         'expiry_year'    => 'expiryYear',
-        'bind_id'        => 'bindId',
         'account_number' => 'accountNumber',
     );
 
@@ -84,15 +83,24 @@ class PaymentMethodFactory
                 );
             }
         }
+
         $paymentData = $this->factory($type);
+        $this->fillModel($paymentData, $data);
+
+        return $paymentData;
+    }
+
+    private function fillModel(AbstractPaymentMethod $paymentData, array $data)
+    {
         foreach ($data as $key => $value) {
             if (array_key_exists($key, $this->optionsMap)) {
                 $key = $this->optionsMap[$key];
             }
             if ($paymentData->offsetExists($key)) {
                 $paymentData->offsetSet($key, $value);
+            } else if (is_array($value)) {
+                $this->fillModel($paymentData, $value);
             }
         }
-        return $paymentData;
     }
 }

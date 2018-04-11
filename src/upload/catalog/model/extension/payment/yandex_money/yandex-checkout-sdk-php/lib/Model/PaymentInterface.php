@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,15 +38,17 @@ use YandexCheckout\Model\PaymentMethod\AbstractPaymentMethod;
  * @property-read RecipientInterface $recipient Получатель платежа
  * @property-read AmountInterface $amount Сумма заказа
  * @property-read AbstractPaymentMethod $paymentMethod Способ проведения платежа
- * @property-read string $referenceId Идентификатор заказа
+ * @property-read AbstractPaymentMethod $payment_method Способ проведения платежа
  * @property-read \DateTime $createdAt Время создания заказа
+ * @property-read \DateTime $created_at Время создания заказа
  * @property-read \DateTime $capturedAt Время подтверждения платежа магазином
+ * @property-read \DateTime $captured_at Время подтверждения платежа магазином
  * @property-read Confirmation\AbstractConfirmation $confirmation Способ подтверждения платежа
- * @property-read AmountInterface $charge Сумма к оплате покупателем
- * @property-read AmountInterface $income Сумма к получению магазином
- * @property-read AmountInterface $refunded Сумма возвращенных средств платежа
+ * @property-read AmountInterface $refundedAmount Сумма возвращенных средств платежа
+ * @property-read AmountInterface $refunded_amount Сумма возвращенных средств платежа
  * @property-read bool $paid Признак оплаты заказа
  * @property-read string $receiptRegistration Состояние регистрации фискального чека
+ * @property-read string $receipt_registration Состояние регистрации фискального чека
  * @property-read Metadata $metadata Метаданные платежа указанные мерчантом
  */
 interface PaymentInterface
@@ -122,4 +124,11 @@ interface PaymentInterface
      * @return Metadata Метаданные платежа указанные мерчантом
      */
     public function getMetadata();
+
+    /**
+     * Возвращает время до которого можно бесплатно отменить или подтвердить платеж или null если оно не задано
+     * @return \DateTime|null Время, до которого можно бесплатно отменить или подтвердить платеж
+     * @since 1.0.2
+     */
+    public function getExpiresAt();
 }

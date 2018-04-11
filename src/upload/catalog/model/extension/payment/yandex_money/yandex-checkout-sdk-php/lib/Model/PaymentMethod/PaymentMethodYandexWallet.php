@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,14 +37,10 @@ use YandexCheckout\Model\PaymentMethodType;
  * Объект, описывающий метод оплаты, при оплате через Яндекс Деньги
  * @property string $type Тип объекта
  * @property string $accountNumber Номер кошелька в Яндекс.Деньгах с которого была произведена оплата.
+ * @property string $account_number Номер кошелька в Яндекс.Деньгах с которого была произведена оплата.
  */
 class PaymentMethodYandexWallet extends AbstractPaymentMethod
 {
-    /**
-     * @var string Номер телефона в формате ITU-T E.164 с которого была произведена оплата.
-     */
-    private $_phone;
-
     /**
      * @var string Номер кошелька в Яндекс.Деньгах с которого была произведена оплата.
      */

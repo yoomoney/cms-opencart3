@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -334,7 +334,7 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
      * @param string $value Одноразовый токен для проведения оплаты
      * @return CreatePaymentRequestBuilder Инстанс текущего билдера
      *
-     * @throws InvalidPropertyValueException Выбрасывается если переданное значение длинее 200 символов
+     * @throws InvalidPropertyValueException Выбрасывается если переданное значение превышает допустимую длину
      * @throws InvalidPropertyValueTypeException Выбрасывается если переданное значение не является строкой
      */
     public function setPaymentToken($value)
@@ -445,7 +445,7 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает метаданные, привязанные к платежу
-     * @param Metadata|null $value Метаданные платежа, устанавливаемые мерчантом
+     * @param Metadata|array|null $value Метаданные платежа, устанавливаемые мерчантом
      * @return CreatePaymentRequestBuilder Инстанс текущего билдера
      *
      * @throws InvalidPropertyValueTypeException Выбрасывается если переданные данные не удалось интерпретировать как
@@ -454,6 +454,20 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
     public function setMetadata($value)
     {
         $this->currentObject->setMetadata($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает описание транзакции
+     * @param string $value Описание транзакции
+     * @return CreatePaymentRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueException Выбрасывается если переданное значение превышает допустимую длину
+     * @throws InvalidPropertyValueTypeException Выбрасывается если переданное значение не является строкой
+     */
+    public function setDescription($value)
+    {
+        $this->currentObject->setDescription($value);
         return $this;
     }
 

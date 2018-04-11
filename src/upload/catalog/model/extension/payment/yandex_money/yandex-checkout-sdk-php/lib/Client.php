@@ -11,10 +11,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,6 +33,7 @@ use YandexCheckout\Common\Exceptions\ForbiddenException;
 use YandexCheckout\Common\Exceptions\JsonException;
 use YandexCheckout\Common\Exceptions\InternalServerError;
 use YandexCheckout\Common\Exceptions\NotFoundException;
+use YandexCheckout\Common\Exceptions\ResponseProcessingException;
 use YandexCheckout\Common\Exceptions\TooManyRequestsException;
 use YandexCheckout\Common\Exceptions\UnauthorizedException;
 use YandexCheckout\Common\HttpVerb;
@@ -41,6 +42,7 @@ use YandexCheckout\Common\ResponseObject;
 use YandexCheckout\Helpers\Config\ConfigurationLoader;
 use YandexCheckout\Helpers\Config\ConfigurationLoaderInterface;
 use YandexCheckout\Helpers\TypeCast;
+use YandexCheckout\Helpers\UUID;
 use YandexCheckout\Model\PaymentInterface;
 use YandexCheckout\Request\PaymentOptionsRequest;
 use YandexCheckout\Request\PaymentOptionsRequestInterface;
@@ -71,13 +73,41 @@ use YandexCheckout\Request\Refunds\RefundsRequestSerializer;
 use YandexCheckout\Request\Refunds\RefundsResponse;
 
 /**
- * Class Client
+ * Класс клиента API
  *
  * @package YandexCheckout
+ *
+ * @since 1.0.1
  */
 class Client
 {
+    const PAYMENTS_PATH = '/payments';
+    const REFUNDS_PATH = '/refunds';
+    /**
+     * Текущая версия библиотеки
+     */
+    const SDK_VERSION = '1.0.6';
+
+    /**
+     * Имя HTTP заголовка, используемого для передачи idempotence key
+     */
     const IDEMPOTENCY_KEY_HEADER = 'Idempotence-Key';
+
+    /**
+     * Значение по умолчанию времени ожидания между запросами при отправке повторного запроса в случае получения
+     * ответа с HTTP статусом 202
+     */
+    const DEFAULT_DELAY = 1800;
+
+    /**
+     * Значение по умолчанию количества попыток получения информации от API если пришёл ответ с HTTP статусом 202
+     */
+    const DEFAULT_TRIES_COUNT = 3;
+
+    /**
+     * Значение по умолчанию количества попыток получения информации от API если пришёл ответ с HTTP статусом 202
+     */
+    const DEFAULT_ATTEMPTS_COUNT = 3;
 
     /**
      * @var null|Client\ApiClientInterface
@@ -100,6 +130,22 @@ class Client
     private $config;
 
     /**
+     * Время через которое будут осуществляться повторные запросы
+     * Значение по умолчанию - 1800 миллисекунд.
+     * @link https://kassa.yandex.ru/docs/checkout-api/?php#asinhronnost
+     * @var int значение в миллисекундах
+     */
+    private $timeout;
+
+    /**
+     * Количество повторных запросов при ответе API статусом 202
+     * Значение по умолчанию 3
+     * @link https://kassa.yandex.ru/docs/checkout-api/?php#asinhronnost
+     * @var int
+     */
+    private $attempts;
+
+    /**
      * @var LoggerInterface|null
      */
     private $logger;
@@ -109,32 +155,34 @@ class Client
      *
      * @param Client\ApiClientInterface|null $apiClient
      * @param ConfigurationLoaderInterface|null $configLoader
-     * @internal-param null|ConfigurationLoader $config
      */
-    public function __construct(Client\ApiClientInterface $apiClient = null, ConfigurationLoaderInterface $configLoader = null)
-    {
+    public function __construct(
+        Client\ApiClientInterface $apiClient = null,
+        ConfigurationLoaderInterface $configLoader = null
+    ) {
         if ($apiClient === null) {
             $apiClient = new Client\CurlClient();
         }
 
         if ($configLoader === null) {
             $configLoader = new ConfigurationLoader();
-            $config = $configLoader->load()->getConfig();
+            $config       = $configLoader->load()->getConfig();
             $this->setConfig($config);
             $apiClient->setConfig($config);
         }
-
+        $this->attempts  = self::DEFAULT_ATTEMPTS_COUNT;
         $this->apiClient = $apiClient;
     }
 
     /**
      * @param $login
      * @param $password
+     *
      * @return Client $this
      */
     public function setAuth($login, $password)
     {
-        $this->login = $login;
+        $this->login    = $login;
         $this->password = $password;
 
         $this->apiClient
@@ -168,6 +216,7 @@ class Client
 
     /**
      * Устанавливает логгер приложения
+     *
      * @param null|callable|object|LoggerInterface $value Инстанс логгера
      */
     public function setLogger($value)
@@ -185,7 +234,9 @@ class Client
     /**
      * Доступные способы оплаты.
      * Используйте этот метод, чтобы получить способы оплаты и сценарии, доступные для вашего заказа.
+     *
      * @param PaymentOptionsRequestInterface|array $paymentOptionsRequest
+     *
      * @return PaymentOptionsResponse
      */
     public function getPaymentOptions($paymentOptionsRequest = null)
@@ -198,30 +249,33 @@ class Client
             if (is_array($paymentOptionsRequest)) {
                 $paymentOptionsRequest = PaymentOptionsRequest::builder()->build($paymentOptionsRequest);
             }
-            $serializer = new PaymentOptionsRequestSerializer();
+            $serializer  = new PaymentOptionsRequestSerializer();
             $queryParams = $serializer->serialize($paymentOptionsRequest);
         }
 
-        $response = $this->apiClient->call($path, HttpVerb::GET, $queryParams);
+        $response = $this->execute($path, HttpVerb::GET, $queryParams);
 
         $result = null;
         if ($response->getCode() == 200) {
             $responseArray = $this->decodeData($response);
-            $result = new PaymentOptionsResponse($responseArray);
+            $result        = new PaymentOptionsResponse($responseArray);
         } else {
             $this->handleError($response);
         }
+
         return $result;
     }
 
     /**
      * Получить список платежей магазина.
+     *
      * @param PaymentsRequestInterface|array|null $filter
+     *
      * @return PaymentsResponse
      */
     public function getPayments($filter = null)
     {
-        $path = '/payments';
+        $path = self::PAYMENTS_PATH;
 
         if ($filter === null) {
             $queryParams = array();
@@ -229,18 +283,20 @@ class Client
             if (is_array($filter)) {
                 $filter = PaymentsRequest::builder()->build($filter);
             }
-            $serializer = new PaymentsRequestSerializer();
+            $serializer  = new PaymentsRequestSerializer();
             $queryParams = $serializer->serialize($filter);
         }
 
-        $response = $this->apiClient->call($path, HttpVerb::GET, $queryParams);
+        $response = $this->execute($path, HttpVerb::GET, $queryParams);
+
         $paymentResponse = null;
         if ($response->getCode() == 200) {
-            $responseArray = $this->decodeData($response);
+            $responseArray   = $this->decodeData($response);
             $paymentResponse = new PaymentsResponse($responseArray);
         } else {
             $this->handleError($response);
         }
+
         return $paymentResponse;
     }
 
@@ -268,39 +324,39 @@ class Client
      * </ul>
      *
      * @param CreatePaymentRequestInterface|array $payment
-     * @param string|null $idempotencyKey
+     * @param string $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
      *
      * @return CreatePaymentResponse
-     * @throws BadApiRequestException
-     * @throws ForbiddenException
-     * @throws InternalServerError
-     * @throws UnauthorizedException
      */
     public function createPayment($payment, $idempotencyKey = null)
     {
-        $path = '/payments';
+        $path = self::PAYMENTS_PATH;
 
         $headers = array();
 
         if ($idempotencyKey) {
             $headers[self::IDEMPOTENCY_KEY_HEADER] = $idempotencyKey;
+        } else {
+            $headers[self::IDEMPOTENCY_KEY_HEADER] = UUID::v4();
         }
         if (is_array($payment)) {
             $payment = CreatePaymentRequest::builder()->build($payment);
         }
 
-        $serializer = new CreatePaymentRequestSerializer();
+        $serializer     = new CreatePaymentRequestSerializer();
         $serializedData = $serializer->serialize($payment);
-        $httpBody = $this->encodeData($serializedData);
+        $httpBody       = $this->encodeData($serializedData);
 
-        $response = $this->apiClient->call($path, HttpVerb::POST, null, $httpBody, $headers);
+        $response = $this->execute($path, HttpVerb::POST, null, $httpBody, $headers);
+
         $paymentResponse = null;
         if ($response->getCode() == 200) {
-            $resultArray = $this->decodeData($response);
+            $resultArray     = $this->decodeData($response);
             $paymentResponse = new CreatePaymentResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $paymentResponse;
     }
 
@@ -310,6 +366,7 @@ class Client
      * Выдает объект платежа {@link PaymentInterface} по его уникальному идентификатору.
      *
      * @param string $paymentId
+     *
      * @return PaymentInterface
      */
     public function getPaymentInfo($paymentId)
@@ -322,16 +379,18 @@ class Client
             throw new \InvalidArgumentException('Invalid paymentId value');
         }
 
-        $path = '/payments/' . $paymentId;
+        $path = self::PAYMENTS_PATH.'/'.$paymentId;
 
-        $response = $this->apiClient->call($path, HttpVerb::GET, null);
+        $response = $this->execute($path, HttpVerb::GET, null);
+
         $result = null;
         if ($response->getCode() == 200) {
             $resultArray = $this->decodeData($response);
-            $result = new PaymentResponse($resultArray);
+            $result      = new PaymentResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $result;
     }
 
@@ -348,7 +407,8 @@ class Client
      *
      * @param CreateCaptureRequestInterface|array $captureRequest
      * @param $paymentId
-     * @param null $idempotencyKey
+     * @param $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
+     *
      * @return CreateCaptureResponse
      */
     public function capturePayment($captureRequest, $paymentId, $idempotencyKey = null)
@@ -361,29 +421,33 @@ class Client
             throw new \InvalidArgumentException('Invalid paymentId value');
         }
 
-        $path = '/payments/' . $paymentId . '/capture';
+        $path = '/payments/'.$paymentId.'/capture';
 
         $headers = array();
 
         if ($idempotencyKey) {
             $headers[self::IDEMPOTENCY_KEY_HEADER] = $idempotencyKey;
+        } else {
+            $headers[self::IDEMPOTENCY_KEY_HEADER] = UUID::v4();
         }
         if (is_array($captureRequest)) {
             $captureRequest = CreateCaptureRequest::builder()->build($captureRequest);
         }
 
-        $serializer = new CreateCaptureRequestSerializer();
+        $serializer     = new CreateCaptureRequestSerializer();
         $serializedData = $serializer->serialize($captureRequest);
-        $httpBody = $this->encodeData($serializedData);
-        $response = $this->apiClient->call($path, HttpVerb::POST, null, $httpBody, $headers);
+        $httpBody       = $this->encodeData($serializedData);
+
+        $response = $this->execute($path, HttpVerb::POST, null, $httpBody, $headers);
 
         $result = null;
         if ($response->getCode() == 200) {
             $resultArray = $this->decodeData($response);
-            $result = new CreateCaptureResponse($resultArray);
+            $result      = new CreateCaptureResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $result;
     }
 
@@ -396,7 +460,8 @@ class Client
      * Для остальных способов оплаты возврат может занимать до нескольких дней.
      *
      * @param $paymentId
-     * @param null $idempotencyKey
+     * @param $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
+     *
      * @return CancelResponse
      */
     public function cancelPayment($paymentId, $idempotencyKey = null)
@@ -409,32 +474,37 @@ class Client
             throw new \InvalidArgumentException('Invalid paymentId value');
         }
 
-        $path = '/payments/' . $paymentId . '/cancel';
+        $path    = self::PAYMENTS_PATH.'/'.$paymentId.'/cancel';
         $headers = array();
         if ($idempotencyKey) {
             $headers[self::IDEMPOTENCY_KEY_HEADER] = $idempotencyKey;
+        } else {
+            $headers[self::IDEMPOTENCY_KEY_HEADER] = UUID::v4();
         }
 
-        $response = $this->apiClient->call($path, HttpVerb::POST, null, null, $headers);
+        $response = $this->execute($path, HttpVerb::POST, null, null, $headers);
 
         $result = null;
         if ($response->getCode() == 200) {
             $resultArray = $this->decodeData($response);
-            $result = new CancelResponse($resultArray);
+            $result      = new CancelResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $result;
     }
 
     /**
      * Получить список возвратов платежей
+     *
      * @param RefundsRequestInterface|array|null $filter
+     *
      * @return RefundsResponse
      */
     public function getRefunds($filter = null)
     {
-        $path = '/refunds';
+        $path = self::REFUNDS_PATH;
 
         if ($filter === null) {
             $queryParams = array();
@@ -442,18 +512,20 @@ class Client
             if (is_array($filter)) {
                 $filter = RefundsRequest::builder()->build($filter);
             }
-            $serializer = new RefundsRequestSerializer();
+            $serializer  = new RefundsRequestSerializer();
             $queryParams = $serializer->serialize($filter);
         }
 
-        $response = $this->apiClient->call($path, HttpVerb::GET, $queryParams);
+        $response = $this->execute($path, HttpVerb::GET, $queryParams);
+
         $refundsResponse = null;
         if ($response->getCode() == 200) {
-            $resultArray = $this->decodeData($response);
+            $resultArray     = $this->decodeData($response);
             $refundsResponse = new RefundsResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $refundsResponse;
     }
 
@@ -465,40 +537,47 @@ class Client
      * возврата нет. Комиссия, которую Яндекс.Касса берёт за проведение исходного платежа, не возвращается.
      *
      * @param CreateRefundRequestInterface|array $request
-     * @param null $idempotencyKey
+     * @param null $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
+     *
      * @return CreateRefundResponse
      */
     public function createRefund($request, $idempotencyKey = null)
     {
-        $path = '/refunds';
+        $path = self::REFUNDS_PATH;
 
         $headers = array();
 
         if ($idempotencyKey) {
             $headers[self::IDEMPOTENCY_KEY_HEADER] = $idempotencyKey;
+        } else {
+            $headers[self::IDEMPOTENCY_KEY_HEADER] = UUID::v4();
         }
         if (is_array($request)) {
             $request = CreateRefundRequest::builder()->build($request);
         }
 
-        $serializer = new CreateRefundRequestSerializer();
+        $serializer     = new CreateRefundRequestSerializer();
         $serializedData = $serializer->serialize($request);
-        $httpBody = $this->encodeData($serializedData);
-        $response = $this->apiClient->call($path, HttpVerb::POST, null, $httpBody, $headers);
+        $httpBody       = $this->encodeData($serializedData);
+
+        $response = $this->execute($path, HttpVerb::POST, null, $httpBody, $headers);
 
         $result = null;
         if ($response->getCode() == 200) {
             $resultArray = $this->decodeData($response);
-            $result = new CreateRefundResponse($resultArray);
+            $result      = new CreateRefundResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $result;
     }
 
     /**
      * Получить информацию о возврате
+     *
      * @param $refundId
+     *
      * @return RefundResponse
      */
     public function getRefundInfo($refundId)
@@ -510,17 +589,18 @@ class Client
         } elseif (strlen($refundId) !== 36) {
             throw new \InvalidArgumentException('Invalid refundId value');
         }
+        $path = self::REFUNDS_PATH.'/'.$refundId;
 
-        $path = '/refunds/' . $refundId;
-        $response = $this->apiClient->call($path, HttpVerb::GET, null);
+        $response = $this->execute($path, HttpVerb::GET, null);
 
         $result = null;
         if ($response->getCode() == 200) {
             $resultArray = $this->decodeData($response);
-            $result = new RefundResponse($resultArray);
+            $result      = new RefundResponse($resultArray);
         } else {
             $this->handleError($response);
         }
+
         return $result;
     }
 
@@ -541,7 +621,36 @@ class Client
     }
 
     /**
+     * Установка значение задержки между повторными запросами
+     *
+     * @param int $timeout
+     *
+     * @return Client
+     */
+    public function setRetryTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+
+        return $this;
+    }
+
+    /**
+     * Установка значения количества попыток повторных запросов при статусе 202
+     *
+     * @param int $attempts
+     *
+     * @return Client
+     */
+    public function setMaxRequestAttempts($attempts)
+    {
+        $this->attempts = $attempts;
+
+        return $this;
+    }
+
+    /**
      * @param $serializedData
+     *
      * @return string
      * @throws \Exception
      */
@@ -552,11 +661,13 @@ class Client
             $errorCode = json_last_error();
             throw new JsonException("Failed serialize json.", $errorCode);
         }
+
         return $result;
     }
 
     /**
      * @param ResponseObject $response
+     *
      * @return array
      */
     private function decodeData(ResponseObject $response)
@@ -565,16 +676,21 @@ class Client
         if ($resultArray === null) {
             throw new JsonException('Failed to decode response', json_last_error());
         }
+
         return $resultArray;
     }
 
     /**
      * @param ResponseObject $response
+     *
+     * @throws ApiException
      * @throws BadApiRequestException
      * @throws ForbiddenException
      * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
      * @throws UnauthorizedException
-     * @throws ApiException
      */
     private function handleError(ResponseObject $response)
     {
@@ -597,6 +713,9 @@ class Client
             case TooManyRequestsException::HTTP_CODE:
                 throw new TooManyRequestsException($response->getHeaders(), $response->getBody());
                 break;
+            case ResponseProcessingException::HTTP_CODE:
+                throw new ResponseProcessingException($response->getHeaders(), $response->getBody());
+                break;
             default:
                 if ($response->getCode() > 399) {
                     throw new ApiException(
@@ -607,5 +726,51 @@ class Client
                     );
                 }
         }
+    }
+
+    /**
+     * Задержка между повторными запросами
+     *
+     * @param $response
+     */
+    protected function delay($response)
+    {
+        $timeout      = $this->timeout;
+        $responseData = $this->decodeData($response);
+        if ($timeout) {
+            $delay = $timeout;
+        } else {
+            if (isset($responseData['retry_after'])) {
+                $delay = $responseData['retry_after'];
+            } else {
+                $delay = self::DEFAULT_DELAY;
+            }
+        }
+        usleep($delay * 1000);
+    }
+
+    /**
+     * Выполнение запроса и обработка 202 статуса
+     *
+     * @param $path
+     * @param $method
+     * @param $queryParams
+     * @param null $httpBody
+     * @param array $headers
+     *
+     * @return ResponseObject
+     */
+    private function execute($path, $method, $queryParams, $httpBody = null, $headers = array())
+    {
+        $attempts = $this->attempts;
+        $response = $this->apiClient->call($path, $method, $queryParams, $httpBody, $headers);
+
+        while ($response->getCode() == 202 && $attempts > 0) {
+            $this->delay($response);
+            $attempts--;
+            $response = $this->apiClient->call($path, $method, $queryParams, $httpBody, $headers);
+        }
+
+        return $response;
     }
 }

@@ -133,11 +133,11 @@ class ModelExtensionPaymentYandexMoney extends Model
             $builder->setAmount($amount)
                 ->setCurrency('RUB')
                 ->setClientIp($_SERVER['REMOTE_ADDR'])
-                ->setCapture(false)
+                ->setCapture(true)
                 ->setMetadata(array(
                     'order_id' => $orderId,
                     'cms_name' => 'ya_api_ycms_opencart',
-                    'module_version' => '1.0.4',
+                    'module_version' => '1.0.5',
                 ));
 
             $confirmation = array(
@@ -215,7 +215,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $builder->setAmount($amount)
                 ->setCurrency('RUB')
                 ->setClientIp($_SERVER['REMOTE_ADDR'])
-                ->setCapture(false);
+                ->setCapture(true);
 
             $confirmation = array(
                 'type' => \YandexCheckout\Model\ConfirmationType::REDIRECT,

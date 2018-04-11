@@ -35,22 +35,18 @@ use YandexCheckout\Model\PaymentInterface;
 use YandexCheckout\Request\Payments\PaymentResponse;
 
 /**
- * Класс объекта, присылаемого API при изменении статуса платежа на "waiting_for_capture"
- *
- * При создании платежа с флагом "capture" равным false, после того как клиент проводит платёж, от API на эндпоинт,
- * указанный в настройках API посылается уведомление о том, что платёж теперь может быть проведён. В классе описана
- * структура такого объекта для магазинов, которые получают уведомления на HTTPS endpoint.
+ * Класс объекта, присылаемого API при изменении статуса платежа на "succeeded"
  *
  * @package YandexCheckout\Model\Notification
  *
- * @property-read PaymentInterface $object Объект с информацией о платеже, который можно подтвердить или отменить
+ * @property-read PaymentInterface $object Объект с информацией о платеже
  */
-class NotificationWaitingForCapture extends AbstractNotification
+class NotificationSucceeded extends AbstractNotification
 {
     /**
      * Объект платежа, для которого пришла нотификация. Так как нотификация может быть сгенерирована и поставлена в
      * очередь на отправку гораздо раньше, чем она будет получена на сайте, то опираться на статус пришедшего
-     *платежа не стоит, лучше запросить текущую информацию о платеже у API.
+     * платежа не стоит, лучше запросить текущую информацию о платеже у API.
      *
      * @var Payment Объект платежа
      */
@@ -66,13 +62,13 @@ class NotificationWaitingForCapture extends AbstractNotification
      * @param array $source Ассоциативный массив с информацией о уведомлении
      *
      * @throws InvalidPropertyValueException Генерируется если значение типа нотификации или события не равны
-     * "notification" и "payment.waiting_for_capture" соответственно, что может говорить о том, что переданные в
+     * "notification" и "payment.succeeded" соответственно, что может говорить о том, что переданные в
      * конструктор данные не являются уведомлением нужного типа.
      */
     public function __construct(array $source)
     {
         $this->_setType(NotificationType::NOTIFICATION);
-        $this->_setEvent(NotificationEventType::PAYMENT_WAITING_FOR_CAPTURE);
+        $this->_setEvent(NotificationEventType::PAYMENT_SUCCEEDED);
         if (!empty($source['type'])) {
             if ($this->getType() !== $source['type']) {
                 throw new InvalidPropertyValueException(
@@ -88,7 +84,7 @@ class NotificationWaitingForCapture extends AbstractNotification
             }
         }
         if (empty($source['object'])) {
-            throw new EmptyPropertyValueException('Parameter object in NotificationWaitingForCapture is empty');
+            throw new EmptyPropertyValueException('Parameter object in NotificationSucceeded is empty');
         }
         $this->_object = new PaymentResponse($source['object']);
     }
@@ -100,7 +96,7 @@ class NotificationWaitingForCapture extends AbstractNotification
      * получена на сайте, то опираться на статус пришедшего платежа не стоит, лучше запросить текущую информацию о
      * платеже у API.
      *
-     * @return PaymentInterface Объект с информацией о платеже, который можно подтвердить или отменить
+     * @return PaymentInterface Объект с информацией о платеже
      */
     public function getObject()
     {
