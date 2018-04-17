@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <modification>
-    <name>Y.CMS for Opencart 2.0.x - 2.3.x</name>
+    <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
