@@ -133,7 +133,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.5';
+        $data['module_version'] = '1.0.6';
         $data['breadcrumbs']    = $this->getBreadCrumbs();
         $data['kassaTaxRates']  = $this->getKassaTaxRates();
         $data['shopTaxRates']   = $this->getShopTaxRates();
@@ -962,8 +962,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this->goCurl(
             'p',
             'grant_type=authorization_code&code='.$this->request->get['code']
-            .'&client_id='.$this->config->get('yandex_money__pokupki_idapp')
-            .'&client_secret='.$this->config->get('yandex_money__pokupki_pw')
+            .'&client_id='.$this->config->get('yandex_money_pokupki_idapp')
+            .'&client_secret='.$this->config->get('yandex_money_pokupki_pw')
         );
     }
 
