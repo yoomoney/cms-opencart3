@@ -44,6 +44,11 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
         $this->useYandexButton = $value ? true : false;
     }
 
+    public function setUseInstallmentsButton($value)
+    {
+        $this->useInstallmentsButton = (bool)$value;
+    }
+
     public function setPaymentMethodFlag($paymentMethod, $value)
     {
         if (array_key_exists($paymentMethod, $this->paymentMethods)) {

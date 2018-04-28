@@ -41,6 +41,7 @@ class PaymentDataFactory
         PaymentMethodType::QIWI           => 'PaymentDataQiwi',
         PaymentMethodType::WEBMONEY       => 'PaymentDataWebmoney',
         PaymentMethodType::ALFABANK       => 'PaymentDataAlfabank',
+        PaymentMethodType::INSTALLMENTS   => 'PaymentDataInstallments',
     );
 
     /**

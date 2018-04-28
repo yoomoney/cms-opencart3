@@ -24,27 +24,36 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Model\PaymentMethod;
+namespace YandexCheckout\Model;
 
-use YandexCheckout\Common\AbstractEnum;
 
-class PaymentMethodCardType extends AbstractEnum
+interface AirlineInterface
 {
-    const MASTER_CARD = 'MasterCard';
-    const VISA = 'Visa';
-    const MIR = 'MIR';
-    const UNION_PAY = 'UnionPay';
-    const JCB = 'JCB';
-    const AMERICAN_EXPRESS = 'AmericanExpress';
-    const UNKNOWN = 'Unknown';
+    /**
+     * Номер бронирования. Обязателен на этапе создания платежа.
+     *
+     * @return string
+     */
+    public function getBookingReference();
 
-    protected static $validValues = array(
-        self::MASTER_CARD => true,
-        self::VISA => true,
-        self::MIR => true,
-        self::UNION_PAY => true,
-        self::JCB => true,
-        self::AMERICAN_EXPRESS => true,
-        self::UNKNOWN => true,
-    );
+    /**
+     * Уникальный номер билета. Обязателен на этапе подтверждения платежа
+     *
+     * @return string
+     */
+    public function getTicketNumber();
+
+    /**
+     * Список объектов-контейнеров с данными пассажиров
+     *
+     * @return PassengerInterface[]
+     */
+    public function getPassengers();
+
+    /**
+     * Список объектов-контейнеров с данными о маршруте
+     *
+     * @return LegInterface[]
+     */
+    public function getLegs();
 }
