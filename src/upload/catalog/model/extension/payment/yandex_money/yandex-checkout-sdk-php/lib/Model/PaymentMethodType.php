@@ -40,7 +40,8 @@ use YandexCheckout\Common\AbstractEnum;
  * |apple_pay|Платеж ApplePay|
  * |android_pay|Платеж AndroidPay|
  * |qiwi|Платеж из кошелька Qiwi|
- * 
+ * |installments|Заплатить по частям|
+ *
  */
 class PaymentMethodType extends AbstractEnum
 {
@@ -54,6 +55,7 @@ class PaymentMethodType extends AbstractEnum
     const QIWI = 'qiwi';
     const WEBMONEY = 'webmoney';
     const ALFABANK = 'alfabank';
+    const INSTALLMENTS = 'installments';
 
     protected static $validValues = array(
         self::YANDEX_MONEY => true,
@@ -64,7 +66,8 @@ class PaymentMethodType extends AbstractEnum
         self::APPLE_PAY => false,
         self::ANDROID_PAY => false,
         self::QIWI => true,
-        self::ALFABANK => true,
         self::WEBMONEY => true,
+        self::ALFABANK => true,
+        self::INSTALLMENTS => true,
     );
 }

@@ -41,6 +41,7 @@ class PaymentMethodFactory
         PaymentMethodType::QIWI           => 'PaymentMethodQiwi',
         PaymentMethodType::WEBMONEY       => 'PaymentMethodWebmoney',
         PaymentMethodType::ALFABANK       => 'PaymentMethodAlfaBank',
+        PaymentMethodType::INSTALLMENTS   => 'PaymentMethodInstallments',
     );
 
     private $optionsMap = array(

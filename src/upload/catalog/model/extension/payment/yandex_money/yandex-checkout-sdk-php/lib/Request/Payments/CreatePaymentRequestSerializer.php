@@ -28,6 +28,8 @@ namespace YandexCheckout\Request\Payments;
 
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ConfirmationType;
+use YandexCheckout\Model\LegInterface;
+use YandexCheckout\Model\PassengerInterface;
 use YandexCheckout\Model\PaymentData\AbstractPaymentData;
 use YandexCheckout\Model\PaymentData\PaymentDataAlfabank;
 use YandexCheckout\Model\PaymentData\PaymentDataBankCard;
@@ -43,10 +45,10 @@ use YandexCheckout\Model\PaymentMethodType;
 class CreatePaymentRequestSerializer
 {
     private static $propertyMap = array(
-        'reference_id'        => 'referenceId',
-        'payment_token'       => 'paymentToken',
-        'payment_method_id'   => 'paymentMethodId',
-        'client_ip'           => 'clientIp',
+        'reference_id'      => 'referenceId',
+        'payment_token'     => 'paymentToken',
+        'payment_method_id' => 'paymentMethodId',
+        'client_ip'         => 'clientIp',
     );
 
     private static $paymentDataSerializerMap = array(
@@ -60,6 +62,7 @@ class CreatePaymentRequestSerializer
         PaymentMethodType::QIWI           => 'serializePaymentDataMobilePhone',
         PaymentMethodType::CASH           => 'serializePaymentDataMobilePhone',
         PaymentMethodType::MOBILE_BALANCE => 'serializePaymentDataMobilePhone',
+        PaymentMethodType::INSTALLMENTS   => 'serializePaymentData',
     );
 
     public function serialize(CreatePaymentRequestInterface $request)
@@ -105,14 +108,14 @@ class CreatePaymentRequestSerializer
             $result['recipient']['gateway_id'] = $request->getRecipient()->getGatewayId();
         }
         if ($request->hasPaymentMethodData()) {
-            $method = self::$paymentDataSerializerMap[$request->getPaymentMethodData()->getType()];
+            $method                        = self::$paymentDataSerializerMap[$request->getPaymentMethodData()->getType()];
             $result['payment_method_data'] = $this->{$method}($request->getPaymentMethodData());
         }
         if ($request->hasConfirmation()) {
             $result['confirmation'] = array(
                 'type' => $request->getConfirmation()->getType(),
             );
-            $confirmation = $request->getConfirmation();
+            $confirmation           = $request->getConfirmation();
             if ($confirmation->getType() === ConfirmationType::REDIRECT) {
                 if ($confirmation->getEnforce()) {
                     $result['confirmation']['enforce'] = $confirmation->getEnforce();
@@ -129,6 +132,36 @@ class CreatePaymentRequestSerializer
         if ($request->hasSavePaymentMethod()) {
             $result['save_payment_method'] = $request->getSavePaymentMethod();
         }
+        if ($request->hasAirline()) {
+            $airline           = $request->getAirline();
+            $result['airline'] = array();
+
+            $ticketNumber = $airline->getTicketNumber();
+            if (!empty($ticketNumber)) {
+                $result['airline']['ticket_number'] = $ticketNumber;
+            }
+            $bookingReference = $airline->getBookingReference();
+            if (!empty($bookingReference)) {
+                $result['airline']['booking_reference'] = $bookingReference;
+            }
+
+            /** @var PassengerInterface $passenger */
+            foreach ($airline->getPassengers() as $passenger) {
+                $result['airline']['passengers'][] = array(
+                    'first_name' => $passenger->getFirstName(),
+                    'last_name'  => $passenger->getLastName(),
+                );
+            }
+
+            /** @var LegInterface $leg */
+            foreach ($airline->getLegs() as $leg) {
+                $result['airline']['legs'][] = array(
+                    'departure_airport'   => $leg->getDepartureAirport(),
+                    'destination_airport' => $leg->getDestinationAirport(),
+                    'departure_date'      => $leg->getDepartureDate(),
+                );
+            }
+        }
 
         foreach (self::$propertyMap as $name => $property) {
             $value = $request->{$property};
@@ -136,9 +169,10 @@ class CreatePaymentRequestSerializer
                 $result[$name] = $value;
             }
         }
+
         return $result;
     }
-    
+
     private function serializeAmount(AmountInterface $amount)
     {
         return array(
@@ -154,13 +188,14 @@ class CreatePaymentRequestSerializer
         );
         if ($paymentData->getCard() !== null) {
             $result['card'] = array(
-                'cardholder' => $paymentData->getCard()->getCardholder(),
-                'expiry_year' => $paymentData->getCard()->getExpiryYear(),
+                'cardholder'   => $paymentData->getCard()->getCardholder(),
+                'expiry_year'  => $paymentData->getCard()->getExpiryYear(),
                 'expiry_month' => $paymentData->getCard()->getExpiryMonth(),
-                'number' => $paymentData->getCard()->getNumber(),
-                'csc' => $paymentData->getCard()->getCsc(),
+                'number'       => $paymentData->getCard()->getNumber(),
+                'csc'          => $paymentData->getCard()->getCsc(),
             );
         }
+
         return $result;
     }
 
@@ -169,6 +204,7 @@ class CreatePaymentRequestSerializer
         $result = array(
             'type' => $paymentData->getType(),
         );
+
         return $result;
     }
 
@@ -180,6 +216,7 @@ class CreatePaymentRequestSerializer
         if ($paymentData->getPaymentData() !== null) {
             $result['payment_data'] = $paymentData->getPaymentData();
         }
+
         return $result;
     }
 
@@ -191,6 +228,7 @@ class CreatePaymentRequestSerializer
         if ($paymentData->getPhone() !== null) {
             $result['phone'] = $paymentData->getPhone();
         }
+
         return $result;
     }
 
@@ -202,13 +240,14 @@ class CreatePaymentRequestSerializer
         if ($paymentData->getLogin() !== null) {
             $result['login'] = $paymentData->getLogin();
         }
+
         return $result;
     }
 
     private function serializePaymentData(AbstractPaymentData $paymentData)
     {
         return array(
-            'type'  => $paymentData->getType(),
+            'type' => $paymentData->getType(),
         );
     }
 
@@ -220,6 +259,7 @@ class CreatePaymentRequestSerializer
         if ($paymentData->getPhone() !== null) {
             $result['phone'] = $paymentData->getPhone();
         }
+
         return $result;
     }
 }

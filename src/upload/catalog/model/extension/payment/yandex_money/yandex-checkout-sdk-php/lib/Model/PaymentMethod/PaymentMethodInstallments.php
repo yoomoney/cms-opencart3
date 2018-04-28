@@ -26,25 +26,17 @@
 
 namespace YandexCheckout\Model\PaymentMethod;
 
-use YandexCheckout\Common\AbstractEnum;
+use YandexCheckout\Model\PaymentMethodType;
 
-class PaymentMethodCardType extends AbstractEnum
+/**
+ * PaymentMethodInstallments
+ * Объект, описывающий метод оплаты при оплате по частям
+ * @property string $type Тип объекта
+ */
+class PaymentMethodInstallments extends AbstractPaymentMethod
 {
-    const MASTER_CARD = 'MasterCard';
-    const VISA = 'Visa';
-    const MIR = 'MIR';
-    const UNION_PAY = 'UnionPay';
-    const JCB = 'JCB';
-    const AMERICAN_EXPRESS = 'AmericanExpress';
-    const UNKNOWN = 'Unknown';
-
-    protected static $validValues = array(
-        self::MASTER_CARD => true,
-        self::VISA => true,
-        self::MIR => true,
-        self::UNION_PAY => true,
-        self::JCB => true,
-        self::AMERICAN_EXPRESS => true,
-        self::UNKNOWN => true,
-    );
+    public function __construct()
+    {
+        $this->_setType(PaymentMethodType::INSTALLMENTS);
+    }
 }

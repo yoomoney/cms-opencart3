@@ -26,6 +26,7 @@
 
 namespace YandexCheckout\Request\Payments;
 
+use YandexCheckout\Model\Airline;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ConfirmationAttributes\AbstractConfirmationAttributes;
 use YandexCheckout\Model\Metadata;
@@ -198,4 +199,16 @@ interface CreatePaymentRequestInterface
      * @return bool True если метаданные были установлены, false если нет
      */
     function hasMetadata();
+
+    /**
+     * Проверяет были ли установлены данные длинной записи
+     * @return bool
+     */
+    function hasAirline();
+
+    /**
+     * Возвращает данные длинной записи
+     * @return Airline
+     */
+    function getAirline();
 }

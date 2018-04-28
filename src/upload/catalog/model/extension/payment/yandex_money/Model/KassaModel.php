@@ -7,6 +7,8 @@ use YandexCheckout\Model\PaymentMethodType;
 
 class KassaModel extends AbstractPaymentModel
 {
+    const MIN_INSTALLMENTS_AMOUNT = 3000;
+
     private static $_enabledTestMethods = array(
         PaymentMethodType::YANDEX_MONEY => true,
         PaymentMethodType::BANK_CARD => true,
@@ -16,6 +18,7 @@ class KassaModel extends AbstractPaymentModel
     protected $password;
     protected $epl;
     protected $useYandexButton;
+    protected $useInstallmentsButton;
     protected $paymentMethods;
     protected $sendReceipt;
     protected $defaultTaxRate;
@@ -32,6 +35,7 @@ class KassaModel extends AbstractPaymentModel
         $this->password = $this->getConfigValue('password');
         $this->epl = $this->getConfigValue('payment_mode') !== 'shop';
         $this->useYandexButton = (bool)$this->getConfigValue('use_yandex_button');
+        $this->useInstallmentsButton = (bool)$this->getConfigValue('use_installments_button');
 
         $this->testMode = false;
         if ($this->enabled && strncmp('test_', $this->password, 5) === 0) {
@@ -90,6 +94,11 @@ class KassaModel extends AbstractPaymentModel
     public function useYandexButton()
     {
         return $this->useYandexButton;
+    }
+
+    public function useInstallmentsButton()
+    {
+        return $this->useInstallmentsButton;
     }
 
     public function getPaymentMethods()

@@ -31,6 +31,8 @@ use YandexCheckout\Common\Exceptions\EmptyPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 use YandexCheckout\Common\Exceptions\InvalidRequestException;
+use YandexCheckout\Model\Airline;
+use YandexCheckout\Model\AirlineInterface;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ConfirmationAttributes\AbstractConfirmationAttributes;
 use YandexCheckout\Model\ConfirmationAttributes\ConfirmationAttributesFactory;
@@ -83,6 +85,11 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
     private $confirmationFactory;
 
     /**
+     * @var Airline Длинная запись
+     */
+    private $airline;
+
+    /**
      * Инициализирует объект запроса, который в дальнейшем будет собираться билдером
      * @return CreatePaymentRequest Инстанс собираемого объекта запроса к API
      */
@@ -91,6 +98,7 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
         $request = new CreatePaymentRequest();
 
         $this->recipient = new Recipient();
+        $this->airline = new Airline();
         $this->receipt = new Receipt();
         $this->amount = new MonetaryAmount();
 
@@ -193,8 +201,30 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
+     * @param AirlineInterface|array $value объект данных длинной записи или ассоциативный массив с данными
+     *
+     * @return CreatePaymentRequestBuilder
+     */
+    public function setAirline($value)
+    {
+        if (is_array($value)) {
+            $this->airline->fromArray($value);
+        } elseif ($value instanceof AirlineInterface) {
+            $this->receipt = clone $value;
+        } else {
+            throw new InvalidPropertyValueTypeException('Invalid receipt value type', 0, 'receipt', $value);
+        }
+
+
+        return $this;
+    }
+
+    /**
      * Устанавливает чек
+     *
      * @param ReceiptInterface|array $value Инстанс чека или ассоциативный массив с данными чека
+     *
+     * @return $this
      */
     public function setReceipt($value)
     {
@@ -205,6 +235,7 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
         } else {
             throw new InvalidPropertyValueTypeException('Invalid receipt value type', 0, 'receipt', $value);
         }
+        return $this;
     }
 
     /**
@@ -490,6 +521,9 @@ class CreatePaymentRequestBuilder extends AbstractRequestBuilder
         }
         if ($this->receipt->notEmpty()) {
             $this->currentObject->setReceipt($this->receipt);
+        }
+        if($this->airline->notEmpty()){
+            $this->currentObject->setAirline($this->airline);
         }
         $this->currentObject->setAmount($this->amount);
         return parent::build();

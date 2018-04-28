@@ -30,6 +30,7 @@ use YandexCheckout\Common\AbstractRequest;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 use YandexCheckout\Helpers\TypeCast;
+use YandexCheckout\Model\AirlineInterface;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\Payment;
 use YandexCheckout\Model\PaymentData\AbstractPaymentData;
@@ -122,6 +123,8 @@ class CreatePaymentRequest extends AbstractRequest implements CreatePaymentReque
      * @var string IPv4 или IPv6-адрес покупателя. Если не указан, используется IP-адрес TCP-подключения.
      */
     private $_clientIp;
+
+    private $_airline;
 
     /**
      * @var Metadata Метаданные привязанные к платежу
@@ -535,6 +538,32 @@ class CreatePaymentRequest extends AbstractRequest implements CreatePaymentReque
                 'Invalid clientIp value type in CreatePaymentRequest', 0, 'CreatePaymentRequest.clientIp', $value
             );
         }
+    }
+
+    /**
+     * @return AirlineInterface
+     */
+    public function getAirline()
+    {
+        return $this->_airline;
+    }
+
+
+    /**
+     * @param AirlineInterface $value
+     */
+    public function setAirline(AirlineInterface $value)
+    {
+        $this->_airline = $value;
+    }
+
+    /**
+     * Проверяет были ли установлены данные длинной записи
+     * @return bool
+     */
+    function hasAirline()
+    {
+        return $this->_airline !== null;
     }
 
     /**

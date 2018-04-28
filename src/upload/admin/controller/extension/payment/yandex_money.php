@@ -133,7 +133,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.6';
+        $data['module_version'] = '1.0.7';
         $data['breadcrumbs']    = $this->getBreadCrumbs();
         $data['kassaTaxRates']  = $this->getKassaTaxRates();
         $data['shopTaxRates']   = $this->getShopTaxRates();
@@ -663,6 +663,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $value = isset($request->post['yandex_money_kassa_use_yandex_button']) ? $request->post['yandex_money_kassa_use_yandex_button'] : 'off';
         $kassa->setUseYandexButton($value === 'on');
         $request->post['yandex_money_kassa_use_yandex_button'] = $kassa->useYandexButton();
+        $value = isset($request->post['yandex_money_kassa_use_installments_button']) ? $request->post['yandex_money_kassa_use_installments_button'] : 'off';
+        $kassa->setUseInstallmentsButton($value === 'on');
+        $request->post['yandex_money_kassa_use_installments_button'] = $kassa->useInstallmentsButton();
 
         $selected = false;
         foreach ($kassa->getPaymentMethods() as $id => $value) {
