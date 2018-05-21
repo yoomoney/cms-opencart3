@@ -10,10 +10,6 @@
         margin:0px !important;
         position:relative !important;
     }
-    input[name="payment-type"] {
-        margin:0px !important;
-        position:relative !important;
-    }
 
     </style>
     <form action="{{ action }}" id="paymentForm" method="POST">
@@ -21,11 +17,11 @@
         <table class="radio">
             <tbody>
             <tr class="highlight">
-                <td><input type="radio" name="payment-type" value="PC" checked id="ym1"></td>
+                <td><input type="radio" name="paymentType" value="PC" checked id="ym1"></td>
                 <td><label for="ym1">{{ language.get('text_method_yandex_money') }}</label></td>
             </tr>
             <tr class="highlight">
-                <td><input type="radio" name="payment-type" value="AC" id="ym2"></td>
+                <td><input type="radio" name="paymentType" value="AC" id="ym2"></td>
                 <td><label for="ym2">{{ language.get('text_method_bank_card') }}</label></td>
             </tr>
             </tbody>
@@ -59,7 +55,7 @@
             type: 'get',
             url: '{{ validate_url }}',
             data: {
-                payment_type: jQuery('#paymentForm')[0]['payment-type'].value
+                payment_type: jQuery('#paymentForm')[0]['paymentType'].value
             },
             cache: false,
             success: function() {
