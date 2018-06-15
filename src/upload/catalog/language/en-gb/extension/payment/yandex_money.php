@@ -27,3 +27,5 @@ $_['text_order'] = 'Заказ';
 $_['text_comment'] = 'Комментарий';
 
 $_['yamoney_pay_button_text'] = '<span>Pay</span>with Yandex';
+
+$_['kassa_default_payment_description'] = 'Payment for order No. %order_id%';

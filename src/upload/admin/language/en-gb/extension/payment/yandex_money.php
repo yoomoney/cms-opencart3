@@ -121,6 +121,11 @@ $_['metrika_tab_header'] = 'Яндекс.Метрика';
 $_['market_tab_header'] = 'Яндекс.Маркет';
 $_['orders_tab_header'] = 'Заказы в Маркете';
 
+$_['kassa_payment_description_label'] = 'Transaction data';
+$_['kassa_payment_description_description'] = 'Full description of the transaction that the user will see during the checkout process. You can find it in your Yandex.Checkout Merchant Profile. For example, "Payment for order No. 72 by user@yandex.ru".
+Limitations: no more than 128 symbols';
+$_['kassa_default_payment_description'] = 'Payment for order No. %order_id%';
+
 $_['wallet_page_title'] = 'Настройки Яндекс.Денег';
 $_['wallet_header_description'] = '';
 $_['wallet_version_string'] = 'Версия модуля';
@@ -284,3 +289,35 @@ $_['error_permission']   = 'You do not have the right to manage the module!';
 $_['active_on']          = 'Activated';
 $_['active_off']          = 'Disabled';
 $_['active']          = 'Activity';
+
+//Updater
+$_['updater_tab_header'] = 'Module update';
+$_['updater_success_message'] = 'Module version %s successfully downloaded and installed';
+$_['updater_error_unpack_failed'] = 'Unable to extract archive %s. More about the error in <a href="">module\'s logs</a>';
+$_['updater_error_backup_create_failed'] = 'Unable to create a backup copy of the installed module version. More about the error in <a href="%s">module\'s logs</a>';
+$_['updater_error_archive_load'] = 'Unable to load the latest module version archive. More about the error in <a href="%s">module\'s logs</a>';
+$_['updater_restore_backup_message'] = 'Module version %s successfully restored from backup %s';
+$_['updater_error_restore_backup'] = 'Unable to restore data from the backup. More about the error in <a href="%s">module\'s logs</a>';
+$_['updater_backup_deleted_message'] = 'Backup %s successfully deleted';
+$_['updater_error_delete_backup'] = 'Unable to delete backup %s. More about the error in the <a href="%s">module\'s logs</a>';
+$_['updater_error_create_directory'] = 'Unable to create directory %s';
+$_['updater_error_load'] = 'Unable to load the archive with the update';
+$_['updater_header_text'] = 'New module versions with added features and fixed errors will appear here. Click the Update button to install the latest module version.';
+$_['updater_about_title'] = 'About the module';
+$_['updater_current_version'] = 'Current module version';
+$_['updater_last_version'] = 'Latest available module version';
+$_['updater_last_check_date'] = 'Date of the last check for updates';
+$_['updater_check_updates'] = 'Check for updates';
+$_['updater_history_title'] = 'Changelog:';
+$_['updater_update'] = 'Update module';
+$_['updater_error_load'] = 'Unable to load the archive with the update';
+$_['updater_last_version_installed'] = 'You have the latest module version installed.';
+$_['updater_backups_title'] = 'Backups';
+$_['updater_module_version'] = 'Module version';
+$_['updater_date_create'] = 'Creation date';
+$_['updater_file_name'] = 'File name';
+$_['updater_file_size'] = 'File size';
+$_['updater_restore'] = 'Restore';
+$_['updater_delete'] = 'Delete';
+$_['updater_delete_message'] = 'Do you really want to delete the backup copy of this module version ';
+$_['updater_restore_message'] = 'Do you really want to restore the module from the backup copy of this version';
