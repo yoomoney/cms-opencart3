@@ -27,3 +27,5 @@ $_['text_order'] = 'Заказ';
 $_['text_comment'] = 'Комментарий';
 
 $_['yamoney_pay_button_text'] = '<span>Заплатить</span>через Яндекс';
+
+$_['kassa_default_payment_description'] = 'Оплата заказа №%order_id%';

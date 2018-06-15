@@ -138,44 +138,46 @@
                     }
                 });
             });
+            {% if kassa.useInstallmentsButton() %}
+                const YandexCheckoutCreditUI = YandexCheckoutCreditUI || null;
 
-            function createCheckoutCreditUI() {
-                if (!YandexCheckoutCreditUI) {
-                    setTimeout(createCheckoutCreditUI, 200);
-                }
-                const checkoutCreditUI = YandexCheckoutCreditUI({
-                    shopId: {{ kassa.getShopId() }},
-                    sum: {{ amount }},
-                    language: "{{ language.get('code') }}"
-                });
-                const checkoutCreditButton = checkoutCreditUI({
-                    type: 'button',
-                    domSelector: '.ya_kassa_installments_button_container'
-                });
-                checkoutCreditButton.on('click', function () {
-                    jQuery.ajax({
-                        url: "{{ validate_url }}",
-                        dataType: "json",
-                        method: "GET",
-                        data: {
-                            paymentType: "installments",
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                document.location = data.redirect;
-                            } else {
-                                onValidateError(data.error);
-                            }
-                        },
-                        failure: function () {
-                            onValidateError("Failed to create payment");
-                        }
+                function createCheckoutCreditUI() {
+                    if (!YandexCheckoutCreditUI) {
+                        setTimeout(createCheckoutCreditUI, 200);
+                    }
+                    const checkoutCreditUI = YandexCheckoutCreditUI({
+                        shopId: {{ kassa.getShopId() }},
+                        sum: {{ amount }},
+                        language: "{{ language.get('code') }}"
                     });
-                });
-            }
+                    const checkoutCreditButton = checkoutCreditUI({
+                        type: 'button',
+                        domSelector: '.ya_kassa_installments_button_container'
+                    });
+                    checkoutCreditButton.on('click', function () {
+                        jQuery.ajax({
+                            url: "{{ validate_url }}",
+                            dataType: "json",
+                            method: "GET",
+                            data: {
+                                paymentType: "installments",
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    document.location = data.redirect;
+                                } else {
+                                    onValidateError(data.error);
+                                }
+                            },
+                            failure: function () {
+                                onValidateError("Failed to create payment");
+                            }
+                        });
+                    });
+                }
 
-            setTimeout(createCheckoutCreditUI, 200);
-
+                setTimeout(createCheckoutCreditUI, 200);
+            {% endif %}
             function onValidateError(errorMessage) {
                 var warning = jQuery('#yandex-money-payment-form .alert');
                 if (warning.length > 0) {

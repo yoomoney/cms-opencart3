@@ -11,7 +11,7 @@ class KassaModel extends AbstractPaymentModel
 
     private static $_enabledTestMethods = array(
         PaymentMethodType::YANDEX_MONEY => true,
-        PaymentMethodType::BANK_CARD => true,
+        PaymentMethodType::BANK_CARD    => true,
     );
 
     protected $shopId;
@@ -26,16 +26,18 @@ class KassaModel extends AbstractPaymentModel
     protected $log;
     protected $testMode;
     protected $showInFooter;
+    protected $payment_description;
 
     public function __construct(Config $config)
     {
         parent::__construct($config, 'kassa');
 
-        $this->shopId = $this->getConfigValue('shop_id');
-        $this->password = $this->getConfigValue('password');
-        $this->epl = $this->getConfigValue('payment_mode') !== 'shop';
-        $this->useYandexButton = (bool)$this->getConfigValue('use_yandex_button');
+        $this->shopId                = $this->getConfigValue('shop_id');
+        $this->password              = $this->getConfigValue('password');
+        $this->epl                   = $this->getConfigValue('payment_mode') !== 'shop';
+        $this->useYandexButton       = (bool)$this->getConfigValue('use_yandex_button');
         $this->useInstallmentsButton = (bool)$this->getConfigValue('use_installments_button');
+        $this->payment_description   = $this->getConfigValue('payment_description');
 
         $this->testMode = false;
         if ($this->enabled && strncmp('test_', $this->password, 5) === 0) {
@@ -44,19 +46,19 @@ class KassaModel extends AbstractPaymentModel
 
         $this->paymentMethods = array();
         foreach (PaymentMethodType::getEnabledValues() as $value) {
-            $property = 'payment_method_' . $value;
-            $enabled = (bool)$this->getConfigValue($property);
+            $property = 'payment_method_'.$value;
+            $enabled  = (bool)$this->getConfigValue($property);
             if (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods)) {
                 $this->paymentMethods[$value] = $enabled;
             }
         }
 
-        $this->sendReceipt = (bool)$this->getConfigValue('send_receipt');
+        $this->sendReceipt    = (bool)$this->getConfigValue('send_receipt');
         $this->defaultTaxRate = (int)$this->getConfigValue('tax_rate_default');
-        $this->log = (bool)$this->getConfigValue('debug_log');
+        $this->log            = (bool)$this->getConfigValue('debug_log');
 
         $this->taxRates = array();
-        $tmp = $this->getConfigValue('tax_rates');
+        $tmp            = $this->getConfigValue('tax_rates');
         if (!empty($tmp)) {
             if (is_array($tmp)) {
                 foreach ($tmp as $shopTaxRateId => $kassaTaxRateId) {
@@ -65,7 +67,7 @@ class KassaModel extends AbstractPaymentModel
             }
         }
 
-        $this->createOrderBeforeRedirect = $this->getConfigValue('create_order_before_redirect');
+        $this->createOrderBeforeRedirect   = $this->getConfigValue('create_order_before_redirect');
         $this->clearCartAfterOrderCreation = $this->getConfigValue('clear_cart_before_redirect');
 
         $this->showInFooter = $this->getConfigValue('show_in_footer');
@@ -114,6 +116,7 @@ class KassaModel extends AbstractPaymentModel
                 $result[] = $method;
             }
         }
+
         return $result;
     }
 
@@ -142,6 +145,7 @@ class KassaModel extends AbstractPaymentModel
         if (isset($this->taxRates[$shopTaxRateId])) {
             return $this->taxRates[$shopTaxRateId];
         }
+
         return $this->defaultTaxRate;
     }
 
@@ -163,21 +167,30 @@ class KassaModel extends AbstractPaymentModel
     /**
      * @param array $templateData
      * @param $controller
+     *
      * @return string
      */
     public function applyTemplateVariables($controller, &$templateData, $orderInfo)
     {
-        $templateData['kassa'] = $this;
-        $templateData['image_base_path'] = HTTPS_SERVER . 'image/catalog/payment/yandex_money';
-        $prefix = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
-        $templateData['validate_url'] = $controller->url->link($prefix.'payment/yandex_money/create', '', true);
+        $templateData['kassa']           = $this;
+        $templateData['image_base_path'] = HTTPS_SERVER.'image/catalog/payment/yandex_money';
+        $prefix                          = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
+        $templateData['validate_url']    = $controller->url->link($prefix.'payment/yandex_money/create', '', true);
 
-        $templateData['amount'] = $orderInfo['total'];
-        $templateData['comment'] = $orderInfo['comment'];
-        $templateData['orderId'] = $orderInfo['order_id'];
-        $templateData['customerNumber'] = trim($orderInfo['order_id'] . ' ' . $orderInfo['email']);
-        $templateData['orderText'] = $orderInfo['comment'];
+        $templateData['amount']         = $orderInfo['total'];
+        $templateData['comment']        = $orderInfo['comment'];
+        $templateData['orderId']        = $orderInfo['order_id'];
+        $templateData['customerNumber'] = trim($orderInfo['order_id'].' '.$orderInfo['email']);
+        $templateData['orderText']      = $orderInfo['comment'];
 
         return 'extension/payment/yandex_money/kassa_form';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentDescription()
+    {
+        return $this->payment_description;
     }
 }

@@ -26,7 +26,6 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         {%  endif %}
-
         <ul class="nav nav-tabs">
             <li{{ (lastActiveTab == 'tab-kassa' ? ' class="active"' : '') }}><a href="#tab-kassa" data-toggle="tab">{{ language.get('kassa_tab_header') }}</a></li>
             <li{{ (lastActiveTab == 'tab-wallet' ? ' class="active"' : '') }}><a href="#tab-wallet" data-toggle="tab">{{ language.get('wallet_tab_header') }}</a></li>
@@ -34,6 +33,7 @@
             <li{{ (lastActiveTab == 'tab-metrika' ? ' class="active"' : '') }}><a href="#tab-metrika" data-toggle="tab">{{ language.get('metrika_tab_header') }}</a></li>
             <li{{ (lastActiveTab == 'tab-market' ? ' class="active"' : '') }}><a href="#tab-market" data-toggle="tab">{{ language.get('market_tab_header') }}</a></li>
             <li{{ (lastActiveTab == 'tab-orders' ? ' class="active"' : '') }}><a href="#tab-orders" data-toggle="tab">{{ language.get('orders_tab_header') }}</a></li>
+            <li{{ (lastActiveTab == 'tab-updater' ? ' class="active"' : '') }}><a href="#tab-updater" data-toggle="tab">{{ language.get('updater_tab_header') }}</a></li>
         </ul>
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment-yandex-money" class="form-horizontal">
             <input type="hidden" name="language_reload" value="1" />
@@ -53,6 +53,9 @@
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-market' ? ' active' : '') }}" id="tab-market">
                     {% include 'extension/payment/yandex_money/market.twig' %}
+                </div>
+                <div class="tab-pane{{ (lastActiveTab == 'tab-updater' ? ' active' : '') }}" id="tab-updater">
+                    {% include 'extension/payment/yandex_money/updater.twig' %}
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-orders' ? ' active' : '') }}" id="tab-orders">
                     {% include 'extension/payment/yandex_money/orders.twig' %}

@@ -8,6 +8,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
+    const MODULE_VERSION = '1.0.9';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -102,7 +103,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if (($this->request->server['REQUEST_METHOD'] == 'POST')) {
             if ($this->validate($this->request)) {
                 if (isset($this->request->post['yandex_money_market_categories']) && $this->request->post['yandex_money_market_categories']) {
-                    $this->request->post['yandex_money_market_categories'] = implode(',', $this->request->post['yandex_money_market_categories']);
+                    $this->request->post['yandex_money_market_categories'] = implode(',',
+                        $this->request->post['yandex_money_market_categories']);
                 }
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $this->request->post);
                 if (isset($this->request->post['yandex_money_market_categories'])) {
@@ -133,7 +135,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->session->data['last-active-tab'] = $tab;
         }
 
-        $data['module_version'] = '1.0.8';
+        $data['module_version'] = self::MODULE_VERSION;
         $data['breadcrumbs']    = $this->getBreadCrumbs();
         $data['kassaTaxRates']  = $this->getKassaTaxRates();
         $data['shopTaxRates']   = $this->getShopTaxRates();
@@ -229,6 +231,29 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } else {
             $data['err_token'] = '';
         }
+
+        /*
+         * Updater section
+         */
+        $data['update_action']       = $this->url->link('extension/payment/'.self::MODULE_NAME.'/update',
+            'user_token='.$this->session->data['user_token'], true);
+        $data['backup_action']       = $this->url->link('extension/payment/'.self::MODULE_NAME.'/backups',
+            'user_token='.$this->session->data['user_token'], true);
+        $version_info                = $this->getModel()->checkModuleVersion(false);
+        $data['kassa_payments_link'] = $this->url->link('extension/payment/'.self::MODULE_NAME.'/payments',
+            'user_token='.$this->session->data['user_token'], true);
+        if (version_compare($version_info['version'], self::MODULE_VERSION) > 0) {
+            $data['new_version_available'] = true;
+            $data['changelog']             = $this->getModel()->getChangeLog(self::MODULE_VERSION,
+                $version_info['version']);
+            $data['new_version']           = $version_info['version'];
+        } else {
+            $data['new_version_available'] = false;
+            $data['changelog']             = '';
+            $data['new_version']           = self::MODULE_VERSION;
+        }
+        $data['new_version_info'] = $version_info;
+        $data['backups']          = $this->getModel()->getBackupList();
 
         // kassa
         $arLang = array(
@@ -663,7 +688,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $value = isset($request->post['yandex_money_kassa_use_yandex_button']) ? $request->post['yandex_money_kassa_use_yandex_button'] : 'off';
         $kassa->setUseYandexButton($value === 'on');
         $request->post['yandex_money_kassa_use_yandex_button'] = $kassa->useYandexButton();
-        $value = isset($request->post['yandex_money_kassa_use_installments_button']) ? $request->post['yandex_money_kassa_use_installments_button'] : 'off';
+        $value                                                 = isset($request->post['yandex_money_kassa_use_installments_button']) ? $request->post['yandex_money_kassa_use_installments_button'] : 'off';
         $kassa->setUseInstallmentsButton($value === 'on');
         $request->post['yandex_money_kassa_use_installments_button'] = $kassa->useInstallmentsButton();
 
@@ -1391,5 +1416,82 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         </li>';
 
         return $html;
+    }
+
+    /**
+     * Экшен автообления.
+     */
+    public function update()
+    {
+        $data = array();
+        $link = $this->url->link('extension/payment/'.self::MODULE_NAME,
+            'user_token='.$this->session->data['user_token'],
+            true);
+
+        $versionInfo = $this->getModel()->checkModuleVersion();
+
+        if (isset($this->request->post['update']) && $this->request->post['update'] == '1') {
+            $fileName = $this->getModel()->downloadLastVersion($versionInfo['tag']);
+            $logs     = $this->url->link('extension/payment/'.self::MODULE_NAME.'/logs',
+                'user_token='.$this->session->data['user_token'], true);
+            if (!empty($fileName)) {
+                if ($this->getModel()->createBackup(self::MODULE_VERSION)) {
+                    if ($this->getModel()->unpackLastVersion($fileName)) {
+                        $this->session->data['flash_message'] = sprintf($this->language->get('updater_success_message'),
+                            $this->request->post['version']);
+                        $this->response->redirect($link);
+                    } else {
+                        $data['errors'][] = sprintf($this->language->get('updater_error_unpack_failed'), $fileName);
+                    }
+                } else {
+                    $data['errors'][] = sprintf($this->language->get('updater_error_backup_create_failed'), $logs);
+                }
+            } else {
+                $data['errors'][] = sprintf($this->language->get('updater_error_archive_load'), $logs);
+            }
+        }
+
+        $this->response->redirect($link);
+    }
+
+    /**
+     * Экшен работы с бекапами.
+     */
+    public function backups()
+    {
+        $link = $this->url->link('extension/payment/'.self::MODULE_NAME, 'user_token='.$this->session->data['user_token'],
+            true);
+
+        if (!empty($this->request->post['action'])) {
+            $logs = $this->url->link('extension/payment/'.self::MODULE_NAME.'/logs',
+                'user_token='.$this->session->data['user_token'],
+                true
+            );
+            switch ($this->request->post['action']) {
+                case 'restore';
+                    if (!empty($this->request->post['file_name'])) {
+                        if ($this->getModel()->restoreBackup($this->request->post['file_name'])) {
+                            $this->session->data['flash_message'] = sprintf($this->language->get('updater_restore_backup_message'),
+                                $this->request->post['version'], $this->request->post['file_name']);
+                            $this->response->redirect($link);
+                        }
+                        $data['errors'][] = sprintf($this->language->get('updater_error_restore_backup'), $logs);
+                    }
+                    break;
+                case 'remove':
+                    if (!empty($this->request->post['file_name'])) {
+                        if ($this->getModel()->removeBackup($this->request->post['file_name'])) {
+                            $this->session->data['flash_message'] = sprintf($this->language->get('updater_backup_deleted_message'),
+                                $this->request->post['file_name']);
+                            $this->response->redirect($link);
+                        }
+                        $data['errors'][] = sprintf($this->language->get('updater_error_delete_backup'),
+                            $this->request->post['file_name'], $logs);
+                    }
+                    break;
+            }
+        }
+
+        $this->response->redirect($link);
     }
 }
