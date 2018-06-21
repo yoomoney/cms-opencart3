@@ -119,7 +119,6 @@ $_['wallet_tab_header'] = 'Яндекс.Деньги';
 $_['billing_tab_header'] = 'Яндекс.Платёжка';
 $_['metrika_tab_header'] = 'Яндекс.Метрика';
 $_['market_tab_header'] = 'Яндекс.Маркет';
-$_['orders_tab_header'] = 'Заказы в Маркете';
 
 $_['kassa_payment_description_label'] = 'Transaction data';
 $_['kassa_payment_description_description'] = 'Full description of the transaction that the user will see during the checkout process. You can find it in your Yandex.Checkout Merchant Profile. For example, "Payment for order No. 72 by user@yandex.ru".
@@ -234,35 +233,6 @@ $_['text_success']       = 'Settings saved';
 $_['market_color_option'] = 'Color parameters';
 $_['market_size_option']  = 'Size parameters';
 $_['market_size_unit']      = '';
-
-// pokupki
-$_['pokupki_gtoken']       = 'Get token (push after saving settings)';
-$_['pokupki_stoken']       = 'Authorization token from the Yandex.Market settings';
-$_['pokupki_yapi']       = 'URL of Yandex.Market\'s partner API';
-$_['pokupki_number']       = 'Campaign number on Yandex.Market';
-$_['pokupki_login']       = 'User\'s login in the Yandex.Market system';
-$_['pokupki_pw']       = 'Password in <a target="_blank" href="https://oauth.yandex.ru">OAuth app</a>';
-$_['pokupki_idapp']       = 'ID in <a target="_blank" href="https://oauth.yandex.ru">OAuth app</a>';
-$_['pokupki_token']       = 'Authorization token';
-$_['pokupki_idpickup']       = 'Identifier of the pickup location';
-$_['pokupki_method']       = 'Available payment methods';
-$_['pokupki_sapi']       = 'URL API';
-$_['pokupki_set_1']       = 'Advance payment - Paying when placing the order';
-$_['pokupki_set_3']       = 'Post-payment - Paying in cash when receiving the product';
-$_['pokupki_set_4']       = 'Post-payment - Paying with bank card when receiving the product';
-
-$_['pokupki_text_status_pickup']       = 'Order delivered to pickup location';
-$_['pokupki_text_status_cancelled']       = 'Order cancelled';
-$_['pokupki_text_status_delivery']       = 'Order forwarded to delivery';
-$_['pokupki_text_status_processing']       = 'Order in progress';
-$_['pokupki_text_status_unpaid']       = 'Order created, but not paid yet';
-$_['pokupki_text_status_delivered']       = 'Order received by the buyer';
-$_['pokupki_text_status']       = 'Statuses to be sent to Yandex.Market';
-$_['pokupki_callback']       = 'Callback URL for <a target="_blank" href="https://oauth.yandex.ru">OAuth app</a>';
-
-$_['pokupki_sv']       = 'Save';
-
-$_['pokupki_upw']       = 'Password of the user in the Yandex.Market system';
 
 // metrika
 $_['metrika_gtoken']       = 'Get token for accessing Yandex.Metrica';

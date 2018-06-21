@@ -138,12 +138,11 @@
                     }
                 });
             });
-            {% if kassa.useInstallmentsButton() %}
-                const YandexCheckoutCreditUI = YandexCheckoutCreditUI || null;
-
+            {% if kassa.isInstallmentsOn() %}
                 function createCheckoutCreditUI() {
-                    if (!YandexCheckoutCreditUI) {
+                    if (typeof YandexCheckoutCreditUI === "undefined") {
                         setTimeout(createCheckoutCreditUI, 200);
+                        return;
                     }
                     const checkoutCreditUI = YandexCheckoutCreditUI({
                         shopId: {{ kassa.getShopId() }},
@@ -177,6 +176,14 @@
                 }
 
                 setTimeout(createCheckoutCreditUI, 200);
+
+                jQuery.get("https://money.yandex.ru/credit/order/ajax/credit-pre-schedule?shopId="
+                    + {{ kassa.getShopId() }} +"&sum=" + {{ amount }}, function (data) {
+                    const ym_installments_amount_text = "{{ language.get('text_method_installments_amount') }}";
+                    if (ym_installments_amount_text && data && data.amount) {
+                        jQuery('label.kassa_payment_method_installments').append(ym_installments_amount_text.replace('%s', data.amount));
+                    }
+                });
             {% endif %}
             function onValidateError(errorMessage) {
                 var warning = jQuery('#yandex-money-payment-form .alert');
@@ -193,14 +200,6 @@
                     jQuery('#yandex-money-payment-form .alert').fadeIn(300);
                 }
             }
-
-            jQuery.get("https://money.yandex.ru/credit/order/ajax/credit-pre-schedule?shopId="
-                + {{ kassa.getShopId() }} +"&sum=" + {{ amount }}, function (data) {
-                const ym_installments_amount_text = "{{ language.get('text_method_installments_amount') }}";
-                if (ym_installments_amount_text && data && data.amount) {
-                    jQuery('label.kassa_payment_method_installments').append(ym_installments_amount_text.replace('%s', data.amount));
-                }
-            });
         });
         //--></script>
 

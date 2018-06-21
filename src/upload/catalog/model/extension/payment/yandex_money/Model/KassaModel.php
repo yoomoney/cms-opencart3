@@ -103,6 +103,15 @@ class KassaModel extends AbstractPaymentModel
         return $this->useInstallmentsButton;
     }
 
+    public function isEnabledInstallmentsMethod()
+    {
+        return $this->isPaymentMethodEnabled(PaymentMethodType::INSTALLMENTS);
+    }
+
+    public function isInstallmentsOn(){
+        return $this->getEPL() ? $this->useInstallmentsButton() : $this->isEnabledInstallmentsMethod();
+    }
+
     public function getPaymentMethods()
     {
         return $this->paymentMethods;

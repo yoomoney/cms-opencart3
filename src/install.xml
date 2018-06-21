@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -305,15 +305,17 @@
             <search><![CDATA[{{ footer }}]]></search>
             <add position="before"><![CDATA[
                 <script>
-                    const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
-                        shopId: '{{ yamoney_shop_id }}',
-                        sum: parseFloat('{{ cost }}'),
-                        language: '{{ yamoney_language_code }}'
-                    });
-                    const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
-                        type: 'info',
-                        domSelector: '.installments-info'
-                    });
+                    if (typeof YandexCheckoutCreditUI !== "undefined") {
+                        const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+                            shopId: '{{ yamoney_shop_id }}',
+                            sum: parseFloat('{{ cost }}'),
+                            language: '{{ yamoney_language_code }}'
+                        });
+                        const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
+                            type: 'info',
+                            domSelector: '.installments-info'
+                        });
+                    }
                 </script>
             ]]></add>
         </operation>
