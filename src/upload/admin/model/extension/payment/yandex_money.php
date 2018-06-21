@@ -340,55 +340,6 @@ class ModelExtensionPaymentYandexMoney extends Model
         return $this->billingModel;
     }
 
-    public function carrierList()
-    {
-        $prefix = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
-        $types  = array(
-            'POST'     => "Доставка почтой",
-            'PICKUP'   => "Самовывоз",
-            'DELIVERY' => "Доставка курьером",
-        );
-        $this->load->model('setting/extension');
-        $extensions = $this->model_setting_extension->getInstalled('shipping');
-        foreach ($extensions as $key => $value) {
-            if (!file_exists(DIR_APPLICATION.'controller/shipping/'.$value.'.php')) {
-                unset($extensions[$key]);
-            }
-        }
-        $data['extensions'] = array();
-        $files              = glob(DIR_APPLICATION.'controller/shipping/*.php');
-        if ($files) {
-            foreach ($files as $file) {
-                $extension = basename($file, '.php');
-                if (in_array($extension, $extensions)) {
-                    $this->load->language($prefix.'shipping/'.$extension);
-                    $data['extensions'][] = array(
-                        'name'       => $this->language->get('heading_title'),
-                        'sort_order' => $this->config->get($extension.'_sort_order'),
-                        'installed'  => in_array($extension, $extensions),
-                        'ext'        => $extension,
-                    );
-                }
-            }
-        }
-        $html      = '';
-        $save_data = $this->config->get('yandex_money_pokupki_carrier');
-        foreach ($data['extensions'] as $row) {
-            $html .= '<div class="form-group">
-                <label class="col-sm-4 control-label" for="yandex_money_pokupki_carrier">'.$row['name'].'</label>
-                <div class="col-sm-8">
-                    <select name="yandex_money_pokupki_carrier['.$row['ext'].']" id="yandex_money_pokupki_carrier" class="form-control">';
-            foreach ($types as $t => $t_name) {
-                $html .= '<option value="'.$t.'" '.((isset($save_data[$row['ext']]) && $save_data[$row['ext']] == $t) ? 'selected="selected"' : '').'>'.$t_name.'</option>';
-            }
-            $html .= '</select>
-                </div>
-            </div>';
-        }
-
-        return $html;
-    }
-
     public function refundPayment($payment, $order, $amount, $comment)
     {
         try {

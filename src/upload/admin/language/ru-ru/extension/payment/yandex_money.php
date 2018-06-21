@@ -123,7 +123,6 @@ $_['wallet_tab_header'] = 'Яндекс.Деньги';
 $_['billing_tab_header'] = 'Яндекс.Платёжка';
 $_['metrika_tab_header'] = 'Яндекс.Метрика';
 $_['market_tab_header'] = 'Яндекс.Маркет';
-$_['orders_tab_header'] = 'Заказы в Маркете';
 
 $_['wallet_page_title'] = 'Настройки Яндекс.Денег';
 $_['wallet_header_description'] = '';
@@ -233,37 +232,6 @@ $_['text_success']       = 'Настройки сохранены';
 $_['market_color_option'] = 'Параметры цвета';
 $_['market_size_option']  = 'Параметры размеров';
 $_['market_size_unit'] 	 = '';//'Шкала или единица измерения размеров:<br/><span class="help">Размер должен быть числом, кроме размеров международной шкалы: XS, S, M, L, и т.д., для бюстгальтеров: AA, A, B, C и т.д.</span>';
-
-
-// pokupki
-$_['pokupki_gtoken']       = 'Получить токен (нажмите после сохранения настроек)';
-$_['pokupki_stoken']       = 'Авторизационный токен из настроек Маркета';
-$_['pokupki_yapi']       = 'URL партнёрского API Яндекс.Маркет';
-$_['pokupki_number']       = 'Номер кампании на Маркете';
-$_['pokupki_login']       = 'Логин пользователя в системе Яндекс.Маркет';
-$_['pokupki_pw']       = 'Пароль <a target="_blank" href="https://oauth.yandex.ru">приложения OAuth</a>';
-$_['pokupki_idapp']       = 'ID <a target="_blank" href="https://oauth.yandex.ru">приложения OAuth</a>';
-$_['pokupki_token']       = 'Авторизационный токен';
-$_['pokupki_idpickup']       = 'Идентификатор пункта самовывоза';
-$_['pokupki_method']       = 'Разрешённые методы оплаты';
-$_['pokupki_sapi']       = 'URL API';
-$_['pokupki_set_1']       = 'Предоплата - Оплата при оформлении';
-//$_['pokupki_set_2']       = 'Предоплата - Напрямую магазину (только для Украины)';
-$_['pokupki_set_3']       = 'Постоплата - Наличный расчёт при получении товара';
-$_['pokupki_set_4']       = 'Постоплата - Оплата банковской картой при получении заказа';
-
-$_['pokupki_text_status_pickup']       = 'Заказ доставлен в пункт самовывоза';
-$_['pokupki_text_status_cancelled']       = 'Заказ отменен';
-$_['pokupki_text_status_delivery']       = 'Заказ передан в доставку';
-$_['pokupki_text_status_processing']       = 'Заказ находится в обработке';
-$_['pokupki_text_status_unpaid']       = 'Заказ оформлен, но еще не оплачен';
-$_['pokupki_text_status_delivered']       = 'Заказ получен покупателем';
-$_['pokupki_text_status']       = 'Статусы для отправки в Яндекс.Маркет';
-$_['pokupki_callback']       = 'Callback URL для <a target="_blank" href="https://oauth.yandex.ru">приложения OAuth</a>';
-
-$_['pokupki_sv']       = 'Сохранить';
-
-$_['pokupki_upw']       = 'Пароль пользователя в системе Яндекс.Маркет';
 
 // metrika
 $_['metrika_gtoken']       = 'Получить токен для доступа к Яндекс.Метрика';

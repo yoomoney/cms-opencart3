@@ -8,7 +8,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.9';
+    const MODULE_VERSION = '1.0.10';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -46,26 +46,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         'yandex_money_market_color_options',
         'yandex_money_market_size_options',
         'yandex_money_market_categories',
-    );
-
-    public $fields_orders = array(
-        'yandex_money_pokupki_stoken',
-        'yandex_money_pokupki_yapi',
-        'yandex_money_pokupki_number',
-        'yandex_money_pokupki_idapp',
-        'yandex_money_pokupki_pw',
-        'yandex_money_pokupki_idpickup',
-        'yandex_money_pokupki_yandex',
-        'yandex_money_pokupki_sprepaid',
-        'yandex_money_pokupki_cash',
-        'yandex_money_pokupki_bank',
-        'yandex_money_pokupki_carrier',
-        'yandex_money_pokupki_status_pickup',
-        'yandex_money_pokupki_status_cancelled',
-        'yandex_money_pokupki_status_delivery',
-        'yandex_money_pokupki_status_delivered',
-        'yandex_money_pokupki_status_processing',
-        'yandex_money_pokupki_status_unpaid',
     );
 
     private $error = array();
@@ -220,11 +200,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('setting/setting');
         $this->load->model('catalog/option');
         $this->load->model('localisation/order_status');
-        $data['data_carrier']   = $this->getModel()->carrierList();
         $data['metrika_status'] = '';
         $data['market_status']  = '';
-        $data['pokupki_status'] = '';
-        $array_init             = array_merge($this->fields_metrika, $this->fields_market, $this->fields_orders);
+        $array_init             = array_merge($this->fields_metrika, $this->fields_market);
 
         if (isset($this->request->get['err'])) {
             $data['err_token'] = $this->request->get['err'];
@@ -275,24 +253,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'metrika_set_5',
             'celi_cart',
             'celi_order',
-            'pokupki_gtoken',
-            'pokupki_stoken',
-            'pokupki_yapi',
-            'pokupki_number',
-            'pokupki_login',
-            'pokupki_pw',
-            'pokupki_idapp',
-            'pokupki_token',
-            'pokupki_idpickup',
-            'pokupki_method',
-            'pokupki_sapi',
-            'pokupki_set_1',
-            'pokupki_set_2',
-            'pokupki_set_3',
-            'pokupki_set_4',
-            'pokupki_sv',
-            'pokupki_upw',
-            'pokupki_callback',
             'market_color_option',
             'market_size_option',
             'market_size_unit',
@@ -337,7 +297,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'text_license',
             'market',
             'metrika',
-            'pokupki',
             'active',
             'active_on',
             'active_off',
@@ -346,16 +305,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'text_installed',
             'button_save',
             'button_cancel',
-            'pokupki_text_status',
         );
         foreach ($arLang as $lang_name) {
             $data[$lang_name] = $this->language->get($lang_name);
         }
 
-        foreach (array('pickup', 'cancelled', 'delivery', 'processing', 'unpaid', 'delivered') as $val) {
-            $data['pokupki_text_status_value'][$val]   = $this->language->get('pokupki_text_status_'.$val);
-            $data['yandex_money_pokupki_status'][$val] = $this->config->get('yandex_money_pokupki_status_'.$val);
-        }
         $data['yandex_money_market_stock_days'] = $this->config->get('yandex_money_market_stock_days');
         $data['yandex_money_market_stock_cost'] = $this->config->get('yandex_money_market_stock_cost');
 
@@ -408,9 +362,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         if (isset($this->session->data['market_status']) && !empty($this->session->data['market_status'])) {
             $data['market_status'] = array_merge($data['market_status'], $this->session->data['market_status']);
-        }
-        if (isset($this->session->data['pokupki_status']) && !empty($this->session->data['pokupki_status'])) {
-            $data['pokupki_status'] = array_merge($data['pokupki_status'], $this->session->data['pokupki_status']);
         }
 
         $this->response->setOutput($this->load->view('extension/payment/yandex_money', $data));
@@ -638,7 +589,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         $request->post['payment_yandex_money_status'] = $enabled;
 
-        $properties = array_merge($this->fields_orders, $this->fields_market, $this->fields_metrika);
+        $properties = array_merge($this->fields_market, $this->fields_metrika);
         foreach ($properties as $property) {
             if (empty($request->post[$property])) {
                 $request->post[$property] = false;
@@ -949,7 +900,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         $url                               = new Url(HTTPS_CATALOG);
-        $data['yandex_money_pokupki_sapi'] = $url->link('extension/yandex_market', '', true);
         if ($this->config->get('config_secure')) {
             $data['ya_kassa_fail']               = HTTPS_CATALOG.'index.php?route=checkout/failure';
             $data['ya_kassa_success']            = HTTPS_CATALOG.'index.php?route=checkout/success';
@@ -965,10 +915,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['yandex_money_metrika_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='.$this->config->get('yandex_money_metrika_idapp').'&device_id='.md5('metrika'.$this->config->get('yandex_money_metrika_idapp')).'&client_secret='.$this->config->get('yandex_money_metrika_pw');
         $data['yandex_money_metrika_callback']     = $this->url->link('extension/payment/yandex_money/prepare_m',
             'user_token='.$this->session->data['user_token'], true);
-        $data['yandex_money_pokupki_callback_url'] = 'https://oauth.yandex.ru/authorize?response_type=code&client_id='.$this->config->get('yandex_money_pokupki_idapp').'&device_id='.md5('pokupki'.$this->config->get('yandex_money_pokupki_idapp')).'&client_secret='.$this->config->get('yandex_money_pokupki_pw');
-        $data['yandex_money_pokupki_callback']     = $this->url->link('extension/payment/yandex_money/prepare_p',
-            'user_token='.$this->session->data['user_token'], true);
-        $data['yandex_money_pokupki_gtoken']       = $this->config->get('yandex_money_pokupki_gtoken');
         $data['yandex_money_metrika_o2auth']       = $this->config->get('yandex_money_metrika_o2auth');
         $data['token_url']                         = 'https://oauth.yandex.ru/token?';
 
@@ -982,16 +928,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'grant_type=authorization_code&code='.$this->request->get['code']
             .'&client_id='.$this->config->get('yandex_money_metrika_idapp')
             .'&client_secret='.$this->config->get('yandex_money_metrika_pw')
-        );
-    }
-
-    public function prepare_p()
-    {
-        return $this->goCurl(
-            'p',
-            'grant_type=authorization_code&code='.$this->request->get['code']
-            .'&client_id='.$this->config->get('yandex_money_pokupki_idapp')
-            .'&client_secret='.$this->config->get('yandex_money_pokupki_pw')
         );
     }
 
@@ -1018,10 +954,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     $this->model_setting_setting->editSetting('yandex_money_metrika_o2auth', array(
                         'yandex_money_metrika_o2auth' => $data->access_token,
                     ));
-                } elseif ($type == 'p') {
-                    $this->model_setting_setting->editSetting('yandex_money_pokupki_gtoken', array(
-                        'yandex_money_pokupki_gtoken' => $data->access_token,
-                    ));
                 }
                 $this->response->redirect(
                     $this->url->link(
@@ -1039,32 +971,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $data   = array();
         $status = array();
-        foreach (array('pickup', 'cancelled', 'delivery', 'processing', 'unpaid', 'delivered') as $val) {
-            $status[] = $this->config->get('yandex_money_pokupki_status_'.$val);
-        }
-        $status = array_unique($status);
-
-        if ($this->config->get('yandex_money_pokupki_stoken') == '') {
-            $data['pokupki_status'][] = $this->errors_alert('Токен не заполнен!');
-        }
-        if ($this->config->get('yandex_money_pokupki_yapi') == '') {
-            $data['pokupki_status'][] = $this->errors_alert('URL api не заполнен');
-        }
-        if ($this->config->get('yandex_money_pokupki_number') == '') {
-            $data['pokupki_status'][] = $this->errors_alert('Номер кампании не заполнен');
-        }
-        if ($this->config->get('yandex_money_pokupki_idapp') == '') {
-            $data['pokupki_status'][] = $this->errors_alert('ID приложения не заполнен');
-        }
-        if ($this->config->get('yandex_money_pokupki_pw') == '') {
-            $data['pokupki_status'][] = $this->errors_alert('Пароль приложения не заполнен');
-        }
-        if ($this->config->get('yandex_money_pokupki_gtoken') == '') {
-            $data['pokupki_status'][] = $this->errors_alert('Токен yandex не получен!');
-        }
-        if (count($status) != 6) {
-            $data['pokupki_status'][] = $this->errors_alert('Статусы для передачи в Яндекс.Маркет должны быть уникальными');
-        }
 
         if ($this->config->get('yandex_money_market_shopname') == '') {
             $data['market_status'][] = $this->errors_alert('Не введено название магазина');
@@ -1098,9 +1004,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }//$this->success_alert('Все необходимые настроки заполнены!');
         if (empty($data['metrika_status'])) {
             $data['metrika_status'][] = '';
-        }//$this->success_alert('Все необходимые настроки заполнены!');
-        if (empty($data['pokupki_status'])) {
-            $data['pokupki_status'][] = '';
         }//$this->success_alert('Все необходимые настроки заполнены!');
         return $data;
     }
