@@ -138,17 +138,18 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         try {
-            $builder             = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
-            $description = $this->generatePaymentDescription($orderInfo);
+            $builder      = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $description  = $this->generatePaymentDescription($orderInfo);
+            $captureValue = $this->getKassaModel()->getCaptureValue($paymentMethod);
             $builder->setAmount($amount)
                     ->setCurrency('RUB')
                     ->setDescription($description)
                     ->setClientIp($_SERVER['REMOTE_ADDR'])
-                    ->setCapture(true)
+                    ->setCapture($captureValue)
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.0.10',
+                        'module_version' => '1.0.11',
                     ));
 
             $confirmation = array(
@@ -281,14 +282,13 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     /**
      * @param int $orderId
-     * @param \YandexCheckout\Model\PaymentInterface $payment
      */
-    public function confirmOrder($orderId, $payment)
+    public function confirmOrder($orderId)
     {
         $this->load->model('checkout/order');
         $url     = $this->url->link('extension/payment/yandex_money/repay', 'order_id='.$orderId, true);
         $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-        $this->model_checkout_order->addOrderHistory($orderId, 1, $comment, true);
+        $this->model_checkout_order->addOrderHistory($orderId, 1, $comment);
     }
 
     /**
@@ -303,8 +303,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->model_checkout_order->addOrderHistory(
             $orderId,
             $statusId,
-            'Платёж номер "'.$payment->getId().'" подтверждён',
-            true
+            'Платёж номер "'.$payment->getId().'" подтверждён'
         );
         $sql = 'UPDATE `'.DB_PREFIX.'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
                .(int)$orderId.' AND `order_status_id` <= 1';
@@ -315,10 +314,11 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * @param \YandexCheckout\Model\PaymentInterface $payment
      * @param bool $fetchPaymentInfo
+     * @param $amount
      *
      * @return \YandexCheckout\Model\PaymentInterface
      */
-    public function capturePayment($payment, $fetchPaymentInfo = true)
+    public function capturePayment($payment, $fetchPaymentInfo = true, $amount = null)
     {
         if ($fetchPaymentInfo) {
             $tmp = $this->fetchPaymentInfo($payment->getId());
@@ -330,7 +330,12 @@ class ModelExtensionPaymentYandexMoney extends Model
         if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
             try {
                 $builder = \YandexCheckout\Request\Payments\Payment\CreateCaptureRequest::builder();
-                $builder->setAmount($payment->getAmount());
+                if (is_null($amount)) {
+                    $builder->setAmount($payment->getAmount());
+                } else {
+                    $builder->setAmount($amount);
+                }
+
                 $request = $builder->build();
             } catch (InvalidArgumentException $e) {
                 $this->log('error', 'Failed to create capture payment request: '.$e->getMessage());
@@ -348,6 +353,22 @@ class ModelExtensionPaymentYandexMoney extends Model
                 $payment = $response;
                 $this->updatePaymentInDatabase($payment);
             }
+        }
+
+        return $payment;
+    }
+
+    public function cancelPayment($payment)
+    {
+        try {
+            $response = $this->getClient()->cancelPayment($payment->getId());
+        } catch (Exception $e) {
+            $this->log('error', 'Failed to capture payment: '.$e->getMessage());
+            $response = null;
+        }
+        if ($response !== null) {
+            $payment = $response;
+            $this->updatePaymentInDatabase($payment);
         }
 
         return $payment;

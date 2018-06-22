@@ -210,6 +210,22 @@ class ModelExtensionPaymentYandexMoney extends Model
         return true;
     }
 
+    public function cancelPayment($payment)
+    {
+        try {
+            $response = $this->getClient()->cancelPayment($payment->getId());
+        } catch (Exception $e) {
+            $this->log('error', 'Failed to capture payment: '.$e->getMessage());
+            $response = null;
+        }
+        if ($response !== null) {
+            $payment = $response;
+            $this->updatePaymentStatus($payment->getId(), $payment->getStatus(), $payment->getCapturedAt());
+        }
+
+        return $payment;
+    }
+
     /**
      * @param int $orderId
      * @param array $orderInfo

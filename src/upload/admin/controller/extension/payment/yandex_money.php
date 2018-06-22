@@ -1,4 +1,5 @@
 <?php
+use YandexCheckout\Model\PaymentStatus;
 
 /**
  * Class ControllerExtensionPaymentYandexMoney
@@ -8,7 +9,7 @@
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.10';
+    const MODULE_VERSION = '1.0.11';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -899,7 +900,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data[$a] = $this->config->get($a);
         }
 
-        $url                               = new Url(HTTPS_CATALOG);
+        $url = new Url(HTTPS_CATALOG);
         if ($this->config->get('config_secure')) {
             $data['ya_kassa_fail']               = HTTPS_CATALOG.'index.php?route=checkout/failure';
             $data['ya_kassa_success']            = HTTPS_CATALOG.'index.php?route=checkout/success';
@@ -1117,6 +1118,186 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         $json['success'] = sprintf("Счет на оплату заказа %s выставлен", $order_id);
         $this->sendResponseJson($json);
+    }
+
+    /**
+     * Подтверждение холдового платежа
+     */
+    public function capture()
+    {
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
+        $this->load->model('setting/setting');
+
+        $orderId = isset($this->request->get['order_id']) ? (int)$this->request->get['order_id'] : 0;
+
+        if (empty($orderId)) {
+
+            $this->response->redirect($this->url->link('sale/order', 'token='.$this->session->data['token'], true));
+        }
+        $this->load->model('sale/order');
+        $returnUrl  = $this->url->link('sale/order',
+            'user_token='.$this->session->data['user_token'].'&order_id='.$orderId, true);
+        $orderModel = $this->model_sale_order;
+        $orderInfo  = $this->model_sale_order->getOrder($orderId);
+
+        if (empty($orderInfo)) {
+            $this->response->redirect($returnUrl);
+        }
+        $kassaModel = $this->getModel()->getKassaModel();
+        $paymentId  = $this->getModel()->findPaymentIdByOrderId($orderId);
+        if (empty($paymentId)) {
+            $this->response->redirect($returnUrl, 'SSL');
+        }
+        /** @var \YandexCheckout\Request\Payments\PaymentResponse $payment */
+        $payment = $this->getModel()->fetchPaymentInfo($paymentId);
+        if ($payment === null) {
+            $this->response->redirect($returnUrl);
+        }
+        $amount  = $payment->getAmount()->getValue();
+        $comment = '';
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST' && isset($this->request->post['kassa_capture_amount'])) {
+            $action = $this->request->post['action'];
+
+            if ($action == 'capture') {
+                $orderInfo = $this->updateOrder($orderModel, $orderInfo);
+                $amount    = $this->request->post['kassa_capture_amount'];
+                $this->getModel()->capturePayment($payment, $amount);
+            } else if ($action == 'cancel') {
+                $this->getModel()->cancelPayment($payment);
+                $orderInfo['order_status_id'] = $kassaModel->getOrderCanceledStatus();
+                $this->getModel()->updateOrderStatus($orderId, $orderInfo);
+            }
+
+            $this->response->redirect($this->url->link(
+                'extension/payment/yandex_money/capture',
+                'user_token='.$this->session->data['user_token'].'&order_id='.$orderId,
+                true
+            ));
+        }
+
+        $paymentMethod = '';
+        $paymentData   = $payment->getPaymentMethod();
+        if ($paymentData !== null) {
+            $paymentMethod = $this->language->get('kassa_payment_method_'.$paymentData->getType());
+        }
+        $paymentCaptured = in_array($payment->getStatus(), array(PaymentStatus::SUCCEEDED, PaymentStatus::CANCELED));
+        $products        = $this->model_sale_order->getOrderProducts($orderId);
+
+        $data['products']        = $products;
+        $data['kassa']           = $this->getModel()->getKassaModel();
+        $data['paymentCaptured'] = $paymentCaptured;
+        $data['payment']         = $payment;
+        $data['order']           = $orderInfo;
+        $data['paymentMethod']   = $paymentMethod;
+        $data['amount']          = $amount;
+        $data['comment']         = $comment;
+        $data['error']           = isset($this->session->data['error']) ? $this->session->data['error'] : '';
+        $data['capture_amount']  = $amount;
+
+        unset($this->session->data['error']);
+
+        $data['header']      = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer']      = $this->load->controller('common/footer');
+        $data['language']    = $this->language;
+
+        $data['vouchers'] = array();
+
+        $vouchers = $this->model_sale_order->getOrderVouchers($this->request->get['order_id']);
+
+        foreach ($vouchers as $voucher) {
+            $data['vouchers'][] = array(
+                'description' => $voucher['description'],
+                'amount'      => $this->currency->format($voucher['amount'], $orderInfo['currency_code'],
+                    $orderInfo['currency_value']),
+                'href'        => $this->url->link('sale/voucher/edit',
+                    'token='.$this->session->data['token'].'&voucher_id='.$voucher['voucher_id'], true),
+            );
+        }
+
+        $data['totals'] = array();
+
+        $totals = $this->model_sale_order->getOrderTotals($this->request->get['order_id']);
+
+        foreach ($totals as $total) {
+            $data['totals'][] = array(
+                'title' => $total['title'],
+                'text'  => $this->currency->format($total['value'], $orderInfo['currency_code'],
+                    $orderInfo['currency_value']),
+            );
+        }
+
+        $data['breadcrumbs'] = array();
+
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('text_home'),
+            'href' => $this->url->link('common/dashboard', 'user_token='.$this->session->data['user_token'], true),
+        );
+
+        $data['breadcrumbs'][] = array(
+            'text' => 'Заказы',
+            'href' => $this->url->link('sale/order', 'user_token='.$this->session->data['user_token'], true),
+        );
+
+        $data['breadcrumbs'][] = array(
+            'text' => 'Подтверждение заказа №'.$orderId,
+            'href' => $this->url->link('extension/payment/yandex_money/capture',
+                'user_token='.$this->session->data['user_token'].'&order_id='.$orderId, true),
+        );
+
+        $this->response->setOutput($this->load->view('extension/payment/yandex_money/capture', $data));
+    }
+
+    /**
+     * @param ModelSaleOrder $orderModel
+     * @param array $order
+     *
+     * @return array
+     */
+    private function updateOrder($orderModel, $order)
+    {
+        require_once(DIR_CATALOG.'model/checkout/order.php');
+        require_once(DIR_CATALOG.'model/account/customer.php');
+        require_once(DIR_CATALOG.'model/account/order.php');
+        require_once(DIR_CATALOG.'model/extension/total/voucher.php');
+        require_once(DIR_CATALOG.'model/extension/total/sub_total.php');
+        require_once(DIR_CATALOG.'model/extension/total/shipping.php');
+        require_once(DIR_CATALOG.'model/extension/total/tax.php');
+        require_once(DIR_CATALOG.'model/extension/total/total.php');
+
+        $this->registry->set('model_checkout_order', new ModelCheckoutOrder($this->registry));
+        $this->registry->set('model_account_customer', new ModelAccountCustomer($this->registry));
+        $this->registry->set('model_account_order', new ModelAccountOrder($this->registry));
+        $this->registry->set('model_extension_total_voucher', new ModelExtensionTotalVoucher($this->registry));
+        $this->registry->set('model_extension_total_sub_total', new ModelExtensionTotalSubTotal($this->registry));
+        $this->registry->set('model_extension_total_shipping', new ModelExtensionTotalShipping($this->registry));
+        $this->registry->set('model_extension_total_tax', new ModelExtensionTotalTax($this->registry));
+        $this->registry->set('model_extension_total_total', new ModelExtensionTotalTotal($this->registry));
+
+
+        $quantity = $this->request->post['quantity'];
+
+        $products = $orderModel->getOrderProducts($order['order_id']);
+        foreach ($products as $index => $product) {
+            if ($quantity[$product['product_id']] == "0") {
+                unset($products[$index]);
+                continue;
+            }
+            $products[$index]['quantity'] = $quantity[$product['product_id']];
+            $products[$index]['total']    = $products[$index]['price'] * $products[$index]['quantity'];
+            $products[$index]['option']   = $orderModel->getOrderOptions(
+                $order['order_id'],
+                $product['order_product_id']
+            );
+        }
+        $order['products'] = array_values($products);
+        $order['vouchers'] = $orderModel->getOrderVouchers($order['order_id']);
+        $order['totals']   = $orderModel->getOrderTotals($order['order_id']);
+
+        $this->model_checkout_order->editOrder($order['order_id'], $order);
+
+        return $order;
     }
 
     public function refund()
@@ -1362,7 +1543,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     public function backups()
     {
-        $link = $this->url->link('extension/payment/'.self::MODULE_NAME, 'user_token='.$this->session->data['user_token'],
+        $link = $this->url->link('extension/payment/'.self::MODULE_NAME,
+            'user_token='.$this->session->data['user_token'],
             true);
 
         if (!empty($this->request->post['action'])) {
