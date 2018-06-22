@@ -92,6 +92,47 @@
         </div>
 
         <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="kassa-enable-hold-mode" name="yandex_money_kassa_enable_hold_mode" value="on" {{ kassa.getEnableHoldMode() ? 'checked' : '' }}/>
+                    {{ language.get('kassa_hold_setting_label') }}
+                </label>
+            </div>
+
+            <div class="statuses-wrapper">
+
+                <div class="col-sm-2 control-label" for="kassa-statuses-label">
+                </div>
+                <div id="kassa-statuses-label" class="col-sm-10">
+                    <label> {{ language.get('kassa_statuses_description_label') }} </label>
+                </div>
+
+                <label class="col-sm-2 control-label" for="kassa-hold-order-status">
+                    {{ language.get('kassa_hold_order_status_label') }}
+                </label>
+                <div class="col-sm-10" style="margin-bottom: 10px;">
+                    <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status" class="form-control">
+                        {% for id, name in orderStatuses %}
+                            <option value="{{ id }}"{{ kassa.getHoldOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                        {%  endfor %}
+                    </select>
+                </div>
+
+                <label class="col-sm-2 control-label" for="kassa-cancel-order-status">
+                    {{ language.get('kassa_cancel_order_status_label') }}
+                </label>
+                <div class="col-sm-10">
+                    <select id="kassa-cancel-order-status" name="yandex_money_kassa_cnacel_order_status" class="form-control">
+                        {% for id, name in orderStatuses %}
+                            <option value="{{ id }}"{{ kassa.getOrderCanceledStatus() == id ? ' selected' : '' }}>{{ name }}</option>
+                        {%  endfor %}
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="form-group">
             <label class="col-sm-2 control-label" for="kassa-payment-description">{{ language.get('kassa_payment_description_label') }}</label>
             <div class="col-sm-10">
                 <input type="text" name="yandex_money_kassa_payment_description" value="{{ kassa.getPaymentDescription() }}" placeholder="{{ language.get('kassa_default_payment_description') }}" id="kassa-payment-description" class="form-control" />
@@ -330,10 +371,22 @@ jQuery(document).ready(function () {
         }
     }
 
+    function toggleStatuses(value) {
+        if (value) {
+            jQuery('.statuses-wrapper').slideDown();
+        } else {
+            jQuery('.statuses-wrapper').slideUp();
+        }
+    }
+
     var form = document.getElementById('form-payment-yandex-money');
     togglePaymentMode(form.yandex_money_kassa_payment_mode.value);
     toggleSendReceipt(form.yandex_money_kassa_send_receipt.checked);
     toggleInvoice(form.yandex_money_kassa_invoice.checked);
+
+    jQuery('#kassa-enable-hold-mode').bind('change', function () {
+        toggleStatuses(this.checked);
+    });
 
     jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
         togglePaymentMode(form.yandex_money_kassa_payment_mode.value)

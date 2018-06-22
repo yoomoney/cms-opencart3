@@ -339,3 +339,35 @@ $_['updater_restore'] = 'Восстановить';
 $_['updater_delete'] = 'Удалить';
 $_['updater_delete_message'] = 'Вы действительно хотите удалить бэкап модуля версии ';
 $_['updater_restore_message'] = 'Вы действительно хотите восстановить модуль из бэкапа версии';
+$_['text_repay'] = 'Оплатить';
+$_['text_payment_on_hold'] = 'Платеж на удержании';
+
+
+//Подтверждение платежа
+$_['kassa_hold_setting_label']         = 'Включить отложенную оплату';
+$_['kassa_hold_setting_description']   = 'Если опция включена, платежи с карт проходят в 2 этапа: у клиента сумма замораживается, и вам вручную нужно подтвердить её списание – через панель администратора';
+$_['kassa_statuses_description_label'] = 'Какой статус присваивать заказу, если он:';
+$_['kassa_hold_order_status_label']    = 'ожидает подтверждения';
+$_['kassa_cancel_order_status_label']  = 'отменён';
+
+$_['captures_title']                  = 'Подтверждение платежа';
+$_['captures_expires_date']           = 'Подтвердить до';
+$_['captures_new']                    = 'Подтверждение платежа';
+$_['captures_payment_data']           = 'Данные платежа';
+$_['captures_payment_id']             = 'Номер транзакции в Яндекс.Кассе';
+$_['captures_order_id']               = 'Номер заказа';
+$_['captures_payment_method']         = 'Способ оплаты';
+$_['captures_payment_sum']            = 'Сумма платежа';
+$_['captures_capture_data']           = '';
+$_['captures_capture_sum']            = 'Сумма подтверждения';
+$_['captures_capture_create']         = 'Подтвердить платеж';
+$_['cancel_payment_button']           = 'Отменить платеж';
+$_['capture_payment_success_message'] = 'Платеж подтвержден успешно';
+$_['capture_payment_fail_message']    = 'Ошибка подтверждения платежа';
+$_['cancel_payment_success_message']  = 'Платеж отменен успешно';
+$_['cancel_payment_fail_message']     = 'Ошибка отмены платежа';
+
+$_['column_product']  = 'Наименование товара';
+$_['column_quantity'] = 'Количество товара';
+$_['column_price']    = 'Цена товара';
+$_['column_total']    = 'Итого';

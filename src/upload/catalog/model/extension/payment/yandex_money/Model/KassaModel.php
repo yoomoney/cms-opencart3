@@ -27,6 +27,9 @@ class KassaModel extends AbstractPaymentModel
     protected $testMode;
     protected $showInFooter;
     protected $payment_description;
+    protected $enableHoldMode;
+    protected $holdOrderStatus;
+    protected $orderCanceledStatus;
 
     public function __construct(Config $config)
     {
@@ -38,6 +41,9 @@ class KassaModel extends AbstractPaymentModel
         $this->useYandexButton       = (bool)$this->getConfigValue('use_yandex_button');
         $this->useInstallmentsButton = (bool)$this->getConfigValue('use_installments_button');
         $this->payment_description   = $this->getConfigValue('payment_description');
+        $this->enableHoldMode        = (bool)$this->getConfigValue('enable_hold_mode');
+        $this->holdOrderStatus       = $this->getConfigValue('hold_order_status');
+        $this->orderCanceledStatus   = $this->getConfigValue('cancel_order_status');
 
         $this->testMode = false;
         if ($this->enabled && strncmp('test_', $this->password, 5) === 0) {
@@ -201,5 +207,34 @@ class KassaModel extends AbstractPaymentModel
     public function getPaymentDescription()
     {
         return $this->payment_description;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEnableHoldMode()
+    {
+        return $this->enableHoldMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHoldOrderStatusId()
+    {
+        return $this->holdOrderStatus;
+    }
+
+    public function getCaptureValue($paymentMethod)
+    {
+        return !($this->enableHoldMode && in_array($paymentMethod, array('', PaymentMethodType::BANK_CARD)));
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOrderCanceledStatus()
+    {
+        return $this->orderCanceledStatus;
     }
 }

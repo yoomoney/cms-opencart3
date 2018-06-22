@@ -282,10 +282,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->failure('Статус платежа ' . $paymentId . ' заказа №' . $orderId . ' - canceled');
         } elseif ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
             $this->getModel()->log('info', 'Confirm order#' . $orderId . ' with payment ' . $payment->getId());
-            $this->getModel()->confirmOrder($orderId, $payment);
-            if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
-                $payment = $this->getModel()->capturePayment($payment, false);
-            }
         }
         if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
             $this->getModel()->confirmOrderPayment(
@@ -313,7 +309,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $this->load->model('checkout/order');
                 $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
                 $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
-                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
             }
             if ($paymentModel->getClearCartBeforeRedirect()) {
                 $this->cart->clear();
@@ -322,7 +318,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->load->model('checkout/order');
             $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
             $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
-            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment, true);
+            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
         }
     }
 
@@ -365,7 +361,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             return;
         }
         $orderId = $this->getModel()->findOrderIdByPayment($notification->getObject());
-        $this->getModel()->log('info', 'Проведение платежа ' . $notification->getObject()->getId() . ' заказа №' . $orderId);
+
         if ($orderId <= 0) {
             $this->getModel()->log('error', 'Order not exists for payment ' . $notification->getObject()->getId());
             header('HTTP/1.1 404 Order not exists');
@@ -380,24 +376,49 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } elseif ($orderInfo['order_status_id'] <= 0) {
             $this->getModel()->confirmOrder($orderId, $notification->getObject());
         }
-
+        $this->getModel()->updatePaymentInfo($notification->getObject()->getId());
         $result = null;
         if ($notification instanceof NotificationWaitingForCapture) {
-            $result = $this->getModel()->capturePayment($notification->getObject());
+            $payment = $this->getModel()->fetchPaymentInfo($notification->getObject()->getId());
+            if ($payment === null) {
+                header('HTTP/1.1 400 Payment capture error');
+                $this->getModel()->log('error', 'Payment not captured: capture result is null');
+            } elseif ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+                header('HTTP/1.1 400 Invalid payment status');
+                $this->getModel()->log('error',
+                    'Payment not captured: invalid payment status "'.$payment->getStatus().'"');
+            } else {
+                $payment = $notification->getObject();
+                if ($payment->getPaymentMethod()->getType() == \YandexCheckout\Model\PaymentMethodType::BANK_CARD) {
+                    $this->getModel()->confirmOrder($orderId);
+                    $kassa = $this->getModel()->getKassaModel();
+                    $this->model_checkout_order->addOrderHistory(
+                        $orderId,
+                        $kassa->getHoldOrderStatusId(),
+                        $this->language->get('text_payment_on_hold')
+                    );
+                } else {
+                    try {
+                        $this->getModel()->capturePayment($payment);
+                    } catch (\YandexCheckout\Common\Exceptions\ApiException $e) {
+                        $this->getModel()->log('error', 'Payment not captured: Code: "'.$e->getCode().'"');
+                    }
+                }
+            }
         } elseif ($notification instanceof NotificationSucceeded) {
-            $result = $this->getModel()->fetchPaymentInfo($notification->getObject()->getId());;
-        }
-
-        if ($result === null) {
-            header('HTTP/1.1 400 Payment capture error');
-            $this->getModel()->log('error', 'Payment not captured: capture result is null');
-        } elseif ($result->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
-            header('HTTP/1.1 400 Invalid payment status');
-            $this->getModel()->log('error', 'Payment not captured: invalid payment status "' . $result->getStatus() . '"');
-        } else {
-            $this->getModel()->confirmOrderPayment(
-                $orderId, $result, $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
-            );
+            $result = $this->getModel()->fetchPaymentInfo($notification->getObject()->getId());
+            if ($result === null) {
+                header('HTTP/1.1 400 Payment capture error');
+                $this->getModel()->log('error', 'Payment not captured: capture result is null');
+            } elseif ($result->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
+                header('HTTP/1.1 400 Invalid payment status');
+                $this->getModel()->log('error',
+                    'Payment not captured: invalid payment status "'.$result->getStatus().'"');
+            } else {
+                $this->getModel()->confirmOrderPayment(
+                    $orderId, $result, $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
+                );
+            }
         }
         echo json_encode(array('success' => $result));
     }
@@ -415,8 +436,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $this->model_checkout_order->addOrderHistory(
                     $orderId,
                     $wallet->getSuccessOrderStatusId(),
-                    'Платёж номер подтверждён',
-                    true
+                    'Платёж номер подтверждён'
                 );
             }
         } else {

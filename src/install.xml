@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -93,6 +93,7 @@
                 'email'          => (isset($result['email']) && $this->config->get('yandex_money_kassa_enabled')) ? $result['email'] : '',
                 'refund_amount'  => (isset($result['refund_amount']) ? $result['refund_amount'] : ''),
                 'refund_url'     => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link('extension/payment/yandex_money/refund', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
+                'capture_url'    => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link('extension/payment/yandex_money/capture', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
             ]]></add>
         </operation>
         <operation>
@@ -114,6 +115,9 @@
                 {% endif %}
                 {% if order.payment_status is defined and order.payment_status == 'succeeded' %}
                     <li><a href="{{ order.refund_url }}"><i class="fa fa-repeat"></i> Возвраты</a></li>
+                {% endif %}
+                {% if order.payment_status is defined and order.payment_status == 'waiting_for_capture' %}
+                    <li><a href="{{ order.capture_url }}"><i class="fa fa-check"></i> Подтверждение платежа</a></li>
                 {% endif %}
             ]]></add>
         </operation>
