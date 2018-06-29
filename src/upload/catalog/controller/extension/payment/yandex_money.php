@@ -462,6 +462,25 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->response->setOutput($this->payment($order, true));
     }
 
+    public function productInfo()
+    {
+        $productId = !empty($this->request->post['id']) ?
+            $this->request->post['id']
+            : 0;
+
+        $this->load->model('catalog/product');
+        $product     = $this->model_catalog_product->getProduct($productId);
+        $productInfo = array(
+            'id'      => $product['product_id'],
+            'name'    => (string)$product['name'],
+            'price'   => (float)$product['price'],
+            'brand'   => (string)$product['manufacturer'],
+            'variant' => (string)$product['model'],
+        );
+
+        $this->response->setOutput(json_encode($productInfo));
+    }
+
     public function market()
     {
         $this->load->model('catalog/product');
@@ -477,10 +496,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } else {
             die("Need select categories");
         }
-        $products = $model->getProducts($ids_cat, true);
-        if (count($products)) {
-            $products = $model->getProducts($ids_cat, false);
-        }
+        $products = $model->getProducts($ids_cat);
         $currencies = $this->model_localisation_currency->getCurrencies();
         $shop_currency = $this->config->get('config_currency');
         $offers_currency = 'RUB';

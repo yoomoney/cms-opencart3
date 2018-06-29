@@ -112,7 +112,6 @@
                                 <th>ID возврата</th>
                                 <th>Статус</th>
                                 <th>Дата создания</th>
-                                <th>Дата проведения</th>
                                 <th>Сумма</th>
                             </tr>
                             </thead>
@@ -122,7 +121,6 @@
                                 <td>{{ refund.refund_id }}</td>
                                 <td>{{ language.get('kassa_refund_status_' ~ refund.status ~ '_label') }}</td>
                                 <td>{{ refund.created_at }}</td>
-                                <td>{{ refund.authorized_at }}</td>
                                 <td>{{ refund.amount }} {{ refund.currency }}</td>
                             </tr>
                             {% endfor %}

@@ -149,7 +149,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.0.11',
+                        'module_version' => '1.0.12',
                     ));
 
             $confirmation = array(
@@ -529,29 +529,31 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->load->model('checkout/order');
         $order              = $this->model_checkout_order->getOrder($id);
         $product_array      = $this->getOrderProducts($id);
-        $ret                = array();
-        $data               = '';
-        $ret['order_price'] = $order['total'].' '.$order['currency_code'];
-        $ret['order_id']    = $order['order_id'];
-        $ret['currency']    = $order['currency_code'];
-        $ret['payment']     = $order['payment_method'];
         $products           = array();
         foreach ($product_array as $k => $product) {
             $products[$k]['id']       = $product['product_id'];
             $products[$k]['name']     = $product['name'];
-            $products[$k]['quantity'] = $product['quantity'];
-            $products[$k]['price']    = $product['price'];
+            $products[$k]['quantity'] = (int)$product['quantity'];
+            $products[$k]['price']    = (float)$product['price'];
         }
 
-        $ret['goods'] = $products;
-        if ($this->config->get('ya_metrika_order')) {
-            $data = '<script>
-                $(window).load(function() {
-                    metrikaReach(\'metrikaOrder\', '.json_encode($ret).');
-                });
-                </script>
-            ';
-        }
+        $ecommerce = array(
+            'currencyCode' => $order['currency_code'],
+            'purchase'     => array(
+                'actionField' => array(
+                    'id'      => $order['order_id'],
+                    'revenue' => $order['total'],
+                ),
+                'products'    => $products,
+            ),
+        );
+
+        $data = '<script type="text/javascript">
+            $(window).on("load", function() {
+                window.dataLayer = window.dataLayer || [];
+                dataLayer.push({ecommerce: '.json_encode($ecommerce).'});
+            });
+            </script>';
 
         return $data;
     }

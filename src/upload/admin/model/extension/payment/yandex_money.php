@@ -5,6 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     private $kassaModel;
     private $walletModel;
     private $billingModel;
+    private $metrikaModel;
     private $client;
     private $repository = 'yandex-money/yandex-money-ycms-opencart3';
     private $backupDirectory = 'yandex_money/backup';
@@ -283,7 +284,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $result    = array();
         foreach ($recordSet->rows as $record) {
             if ($record['status'] === \YandexCheckout\Model\RefundStatus::PENDING) {
-                $record['status'] = $this->checkRefundStatus($record['refund_id']);
+                $this->checkRefundStatus($record['refund_id']);
             }
             $result[] = $record;
         }
@@ -293,8 +294,6 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     private function checkRefundStatus($refundId)
     {
-        // @todo вернуть выгрузку рефанда после того, как в API появится метод получения информации о нём
-        return;
         try {
             $refund = $this->getClient()->getRefundInfo($refundId);
         } catch (\Exception $e) {
@@ -302,9 +301,6 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
         $sql = 'UPDATE `'.DB_PREFIX.'ya_money_payment` SET `status` = \''
                .$this->db->escape($refund->getStatus()).'\'';
-        if ($refund->getAuthorizedAt() !== null) {
-            $sql .= ', `authorized_at` = \''.$refund->getAuthorizedAt()->format('Y-m-d H:i:s').'\'';
-        }
         $sql .= ' WHERE `refund_id` = \''.$this->db->escape($refund->getId()).'\'';
         $this->db->escape($sql);
     }
@@ -356,6 +352,19 @@ class ModelExtensionPaymentYandexMoney extends Model
         return $this->billingModel;
     }
 
+    /**
+     * @return YandexMoneyMetrikaModel
+     */
+    public function getMetrikaModel()
+    {
+        if ($this->metrikaModel === null) {
+            require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'YandexMoneyMetrikaModel.php';
+            $this->metrikaModel = new YandexMoneyMetrikaModel();
+        }
+
+        return $this->metrikaModel;
+    }
+
     public function refundPayment($payment, $order, $amount, $comment)
     {
         try {
@@ -394,7 +403,6 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         $sql = 'INSERT INTO `'.DB_PREFIX.'ya_money_refunds`('
                .'`refund_id`, `order_id`, `payment_id`, `status`, `amount`, `currency`, `created_at`'
-               .($refund->getAuthorizedAt() !== null ? ',`authorized_at`' : '')
                .') VALUES ('
                ."'".$this->db->escape($refund->getId())."',"
                .(int)$orderId.","
@@ -403,7 +411,6 @@ class ModelExtensionPaymentYandexMoney extends Model
                ."'".$this->db->escape($refund->getAmount()->getValue())."',"
                ."'".$this->db->escape($refund->getAmount()->getCurrency())."',"
                ."'".$this->db->escape($refund->getCreatedAt()->format('Y-m-d H:i:s'))."'"
-               .($refund->getAuthorizedAt() !== null ? (", '".$this->db->escape($refund->getCreatedAt()->format('Y-m-d H:i:s'))."'") : '')
                .')';
         $this->db->query($sql);
     }

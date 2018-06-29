@@ -213,11 +213,11 @@ $_['market_out']          = 'Upload';
 $_['market_out_all']          = 'All products';
 $_['market_out_sel']          = 'Selected categories';
 
-$_['market_dostup']          = 'Term of delivery to pickup location';
-$_['market_dostup_1']          = 'Up to 2 days for all products';
-$_['market_dostup_2']          = 'Up to 2 days for products in stock';
-$_['market_dostup_3']          = 'Fixed individually';
-$_['market_dostup_4']          = 'Pickup is not available';
+$_['market_dostup']   = 'Доступность';
+$_['market_dostup_1'] = 'Все доступны';
+$_['market_dostup_2'] = 'Доступны если > 0, остальные на заказ';
+$_['market_dostup_3'] = 'Если = 0, не выгружать';
+$_['market_dostup_4'] = 'Все на заказ';
 
 $_['market_s_name']          = 'Store name';
 $_['market_d_cost']          = 'Price of delivery in home region';
@@ -235,23 +235,13 @@ $_['market_size_option']  = 'Size parameters';
 $_['market_size_unit']      = '';
 
 // metrika
-$_['metrika_gtoken']       = 'Get token for accessing Yandex.Metrica';
 $_['metrika_number']       = 'Counter number';
-$_['metrika_sv']       = 'Save';
 $_['metrika_pw']       = 'App password';
-$_['metrika_uname']       = 'User\'s login in the Yandex.Metrica system';
-$_['metrika_upw']       = 'User\'s password in the Yandex.Metrica system';
 $_['metrika_idapp']       = 'ID of the app';
-$_['metrika_o2auth']       = 'OAuth token';
 $_['metrika_set']       = 'Settings';
 $_['metrika_set_1']       = 'Webvisor';
 $_['metrika_set_2']       = 'Heatmap';
-$_['metrika_set_3']       = 'External links, file downloads, and report by \'Share\' button';
-$_['metrika_set_4']       = 'Accurate bounce rate';
 $_['metrika_set_5']       = 'Tracking hash in browser\'s URL bar';
-$_['metrika_celi']       = 'Gather statistics on the following targets:';
-$_['celi_cart']       = 'Shopping Cart(Customer clicked \'Add to cart\')';
-$_['celi_order']       = 'Order(Customer placed the order)';
 $_['metrika_callback']       = 'Link for the app';
 
 // Error
