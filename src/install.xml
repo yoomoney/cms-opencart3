@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.0.11</version>
+    <version>1.0.12</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -193,8 +193,10 @@
     <file path="catalog/controller/common/footer.php">
         <operation error="skip">
             <search><![CDATA[$data['newsletter'] = $this->url->link('account/newsletter']]></search>
-            <add position="after"><![CDATA[$data['yandex_metrika'] = $this->config->get('yandex_money_metrika_code') ? html_entity_decode($this->config->get('yandex_money_metrika_code'), ENT_QUOTES, 'UTF-8') : '';
-            $data['yandex_money_metrika_active'] = $this->config->get('yandex_money_metrika_active') ? true : false;
+            <add position="after"><![CDATA[
+            $data['yandex_metrika_html_code'] = $this->config->get('yandex_money_metrika_active') && $this->config->get('yandex_money_metrika_code')
+                ? html_entity_decode($this->config->get('yandex_money_metrika_code'), ENT_QUOTES, 'UTF-8')
+                : '';
             $data['yandex_money_kassa_show_in_footer'] = $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_show_in_footer');
             ]]></add>
         </operation>
@@ -223,37 +225,35 @@
         <operation>
             <search><![CDATA[<footer]]></search>
             <add position="before"><![CDATA[
-            {% if ya_metrika_active is defined and ya_metrika_active %}
-            {{ yandex_metrika }}
+            {{ yandex_metrika_html_code }}
             <script type="text/javascript">
-                var old_addCart = cart.add;
-                cart.add = function (product_id, quantity)
-                {
-                    var params_cart = new Array();
-                    params_cart['name'] = 'product id = '+product_id;
-                    params_cart['quantity'] = quantity;
-                    params_cart['price'] = 0;
-                    old_addCart(product_id, quantity);
-                    metrikaReach('metrikaCart', params_cart);
+                window.dataLayer = window.dataLayer || [];
+                function sendEcommerceAdd(id, quantity) {
+                   $.ajax({
+                        url: 'index.php?route=extension/payment/yandex_money/productInfo',
+                        type: 'post',
+                        data: 'id=' + id,
+                        dataType: 'json',
+                        success: function(json) {
+                            json.quantity = quantity;
+                            dataLayer.push({ecommerce: {add: {products: [json]}}});
+                        }
+                    });
                 }
+                $(window).on("load", function () {
+                    var opencartCartAdd = cart.add;
+                    cart.add = function (product_id, quantity) {
+                        opencartCartAdd(product_id, quantity);
+                        sendEcommerceAdd(product_id, typeof(quantity) !== 'undefined' ? parseInt(quantity) : 1);
+                    };
 
-                $('#button-cart').on('click', function() {
-                    var params_cart = new Array();
-                    params_cart['name'] = 'product id = '+ $('#product input[name="product_id"]').val();
-                    params_cart['quantity'] = $('#product input[name="quantity"]').val();
-                    params_cart['price'] = 0;
-                    metrikaReach('metrikaCart', params_cart);
+                    $('#button-cart').on('click', function() {
+                        var ecommerce_product = new Array();
+                        sendEcommerceAdd($('#product input[name="product_id"]').val(), parseInt($('#product input[name="quantity"]').val()));
+                    });
                 });
-
-                function metrikaReach(goal_name, params) {
-                for (var i in window) {
-                    if (/^yaCounter\d+/.test(i)) {
-                        window[i].reachGoal(goal_name, params);
-                    }
-                }
-            }
             </script>
-        {% endif %}]]></add>
+            ]]></add>
         </operation>
         <operation>
             <search><![CDATA[<p>{{ powered }}</p>]]></search>
@@ -320,6 +320,16 @@
                             domSelector: '.installments-info'
                         });
                     }
+                    $(window).on("load", function () {
+                        window.dataLayer = window.dataLayer || [];
+                        dataLayer.push({ecommerce: {detail: {products: [{
+                            id: "{{ product_id }}",
+                            name: "{{ heading_title }}",
+                            price: parseFloat("0"+"{{ price }}".replace(/[^.\d]+/g,"")),
+                            brand: "{{ manufacturer }}",
+                            variant: "{{ model }}"
+                        }]}}});
+                    });
                 </script>
             ]]></add>
         </operation>
