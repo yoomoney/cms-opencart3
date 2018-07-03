@@ -14,11 +14,6 @@ class YandexMoneyWalletModel extends \YandexMoneyModule\Model\WalletModel
         $this->accountId = $value;
     }
 
-    public function setApplicationId($value)
-    {
-        $this->applicationId = $value;
-    }
-
     public function setPassword($value)
     {
         $this->password = $value;
