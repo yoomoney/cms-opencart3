@@ -125,7 +125,7 @@ $_['metrika_tab_header'] = 'Яндекс.Метрика';
 $_['market_tab_header'] = 'Яндекс.Маркет';
 
 $_['wallet_page_title'] = 'Настройки Яндекс.Денег';
-$_['wallet_header_description'] = '';
+$_['wallet_header_description'] = 'Для работы с модулем нужно открыть <a href=\'https://money.yandex.ru/new\' target=\'_blank\'>кошелек</a> на Яндексе.';
 $_['wallet_version_string'] = 'Версия модуля';
 
 $_['wallet_enable_label'] = 'Включить прием платежей в кошелек на Яндексе';
@@ -133,26 +133,22 @@ $_['wallet_account_id_label'] = 'Номер кошелька';
 $_['wallet_account_id_description'] = '';
 $_['wallet_account_id_error_required'] = 'Укажите номер кошелька';
 
-$_['wallet_application_id_label'] = 'ID приложения';
-$_['wallet_application_id_description'] = '';
-$_['wallet_application_id_error_required'] = 'Укажите идентификатор приложения';
-
 $_['wallet_password_label'] = 'Секретное слово';
-$_['wallet_password_description'] = 'ID и секретное слово вы получите после регистрации приложения на сайте Яндекс.Денег';
+$_['wallet_password_description']    = 'Секретное слово нужно скопировать <a href=\'https://money.yandex.ru/myservices/online.xml\' target=\'_blank\'>со страницы настройки уведомлений</a> на сайте Яндекс.Денег';
 $_['wallet_password_error_required'] = 'Укажите секретное слово';
 
 $_['wallet_display_name_label'] = 'Название платежного сервиса';
 $_['wallet_display_name_description'] = 'Это название увидит пользователь';
 $_['wallet_default_display_name'] = 'Яндекс.Деньги (банковские карты, кошелек)';
 
-$_['wallet_notification_url_label'] = '';
-$_['wallet_notification_url_description'] = 'Скопируйте эту ссылку в поле Redirect URI на <a href=\'https://sp-money.yandex.ru/myservices/new.xml\' target=\'_blank\'>странице регистрации приложения</a>';
+$_['wallet_notification_url_label'] = 'RedirectURL';
+$_['wallet_notification_url_description'] = 'Скопируйте эту ссылку в поле Redirect URI <a href=\'https://money.yandex.ru/myservices/online.xml\' target=\'_blank\'>со страницы настройки уведомлений</a> на сайте Яндекс.Денег';
 
 $_['wallet_success_order_status_label'] = 'Статус заказа после оплаты';
 $_['wallet_success_order_status_description'] = '';
 
 $_['wallet_minimum_payment_amount_label'] = 'Минимальная сумма заказа';
-$_['wallet_minimum_payment_amount_description'] = 'Сумма заказа при которой можно провести платёж с помощью Яндекс.Кассы';
+$_['wallet_minimum_payment_amount_description'] = 'Сумма заказа при которой можно провести платёж';
 
 $_['wallet_before_redirect_label'] = 'Когда пользователь переходит к оплате';
 $_['wallet_create_order_label'] = 'Создать неоплаченный заказ в панели управления';

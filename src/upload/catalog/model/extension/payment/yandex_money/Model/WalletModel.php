@@ -7,7 +7,6 @@ use Config;
 class WalletModel extends AbstractPaymentModel
 {
     protected $accountId;
-    protected $applicationId;
     protected $password;
     protected $testMode;
 
@@ -15,7 +14,6 @@ class WalletModel extends AbstractPaymentModel
     {
         parent::__construct($config, 'wallet');
         $this->accountId = $this->getConfigValue('account_id');
-        $this->applicationId = $this->getConfigValue('application_id');
         $this->password = $this->getConfigValue('password');
         $this->testMode = $this->getConfigValue('test_mode') == '1';
 
@@ -26,11 +24,6 @@ class WalletModel extends AbstractPaymentModel
     public function getAccountId()
     {
         return $this->accountId;
-    }
-
-    public function getApplicationId()
-    {
-        return $this->applicationId;
     }
 
     public function getPassword()

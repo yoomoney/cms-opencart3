@@ -29,16 +29,15 @@
         <input type="hidden" name="receiver" value="{{ wallet.getAccountId() }}">
         <input type="hidden" name="formcomment" value="">
         <input type="hidden" name="short-dest" value="">
-        <input type="hidden" name="writable-targets" value="false">
-        <input type="hidden" name="comment-needed" value="true">
+        <input type="hidden" name="comment-needed" value="false">
         <input type="hidden" name="label" value="{{ orderId }}">
         <input type="hidden" name="successURL" value="{{ successUrl }}" >
         <input type="hidden" name="quickpay-form" value="shop">
         <input type="hidden" name="targets" value="{{ orderText }} {{ orderId }}">
         <input type="hidden" name="sum" value="{{ amount }}" data-type="number" >
         <input type="hidden" name="comment" value="{{ comment }}" >
-        <input type="hidden" name="need-fio" value="true">
-        <input type="hidden" name="need-email" value="true" >
+        <input type="hidden" name="need-fio" value="false">
+        <input type="hidden" name="need-email" value="false" >
         <input type="hidden" name="need-phone" value="false">
         <input type="hidden" name="need-address" value="false">
     </form>
