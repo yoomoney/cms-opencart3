@@ -42,19 +42,16 @@ class ModelExtensionPaymentYandexMoney extends Model
                 `currency`          CHAR(3) NOT NULL,
                 `created_at`        DATETIME NOT NULL,
                 `authorized_at`     DATETIME NOT NULL DEFAULT \'0000-00-00 00:00:00\',
-
+                INDEX `'.DB_PREFIX.'ya_money_refunds_idx_order_id` (`order_id`),
+                INDEX `'.DB_PREFIX.'ya_money_refunds_idx_payment_id` (`payment_id`),
                 CONSTRAINT `'.DB_PREFIX.'ya_money_refunds_pk` PRIMARY KEY (`refund_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=UTF8 COLLATE=utf8_general_ci;
         ');
-        $this->db->query('CREATE INDEX `'.DB_PREFIX.'ya_money_refunds_idx_order_id` ON `'.DB_PREFIX.'ya_money_refunds`(`order_id`)');
-        $this->db->query('CREATE INDEX `'.DB_PREFIX.'ya_money_refunds_idx_payment_id` ON `'.DB_PREFIX.'ya_money_refunds`(`payment_id`)');
     }
 
     public function uninstall()
     {
         $this->log('info', 'uninstall yandex_money module');
-        $this->db->query("DROP TABLE IF EXISTS `' . DB_PREFIX . 'ya_money_payment`;");
-        $this->db->query("DROP TABLE IF EXISTS `' . DB_PREFIX . 'ya_money_refunds`;");
     }
 
     public function log($level, $message, $context = null)
