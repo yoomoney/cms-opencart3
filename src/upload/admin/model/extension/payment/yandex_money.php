@@ -323,7 +323,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     {
         if ($this->kassaModel === null) {
             require_once __DIR__.'/yandex_money/YandexMoneyKassaModel.php';
-            $this->kassaModel = new YandexMoneyKassaModel($this->config);
+            $this->kassaModel = new YandexMoneyKassaModel($this->config, $this->getClient());
         }
 
         return $this->kassaModel;
