@@ -149,7 +149,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.0.14',
+                        'module_version' => '1.0.15',
                     ));
 
             $confirmation = array(
@@ -475,34 +475,23 @@ class ModelExtensionPaymentYandexMoney extends Model
             $builder->setReceiptPhone($orderInfo['phone']);
         }
         $taxRates = $this->config->get('yandex_money_kassa_tax_rates');
-        $builder->setTaxSystemCode($this->config->get('yandex_money_kassa_tax_rate_default'));
+        $defaultVatCode = $this->config->get('yandex_money_kassa_tax_rate_default');
 
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
             $productInfo = $this->model_catalog_product->getProduct($prod['product_id']);
             $price       = $this->currency->format($prod['price'], 'RUB', '', false);
-            if (isset($productInfo['tax_class_id'])) {
-                $taxId = $productInfo['tax_class_id'];
-                if (isset($taxRates[$taxId])) {
-                    $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $taxRates[$taxId]);
-                } else {
-                    $builder->addReceiptItem($prod['name'], $price, $prod['quantity']);
-                }
-            } else {
-                $builder->addReceiptItem($prod['name'], $price, $prod['quantity']);
-            }
+            $vatCode     = isset($taxRates[$productInfo['tax_class_id']])
+                ? $taxRates[$productInfo['tax_class_id']]
+                : $defaultVatCode;
+            $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $vatCode);
         }
 
         $order_totals = $this->model_account_order->getOrderTotals($orderInfo['order_id']);
         foreach ($order_totals as $total) {
             if (isset($total['code']) && $total['code'] === 'shipping') {
                 $price = $this->currency->format($total['value'], 'RUB', '', false);
-                if (isset($total['tax_class_id'])) {
-                    $taxId = $total['tax_class_id'];
-                    $builder->addReceiptShipping($total['title'], $price, $taxRates[$taxId]);
-                } else {
-                    $builder->addReceiptShipping($total['title'], $price);
-                }
+                $builder->addReceiptShipping($total['title'], $price, $defaultVatCode);
             }
         }
     }

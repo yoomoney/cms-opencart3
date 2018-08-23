@@ -8,8 +8,10 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     private $invoiceSubject;
     private $invoiceMessage;
     private $invoiceLogo;
+    /** @var \YandexCheckout\Client */
+    private $apiClient;
 
-    public function __construct(Config $config)
+    public function __construct(Config $config, $apiClient)
     {
         parent::__construct($config);
 
@@ -17,6 +19,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
         $this->invoiceSubject = $config->get('yandex_money_kassa_invoice_subject');
         $this->invoiceMessage = $config->get('yandex_money_kassa_invoice_message');
         $this->invoiceLogo = (bool)$config->get('yandex_money_kassa_invoice_logo');
+        $this->apiClient = $apiClient;
     }
 
     public function setIsEnabled($value)
@@ -189,18 +192,12 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     }
 
     /**
-     * @param null|\Psr\Log\LoggerInterface $logger
      * @return bool
      */
-    public function checkConnection($logger = null)
+    public function checkConnection()
     {
-        $client = new \YandexCheckout\Client();
-        $client->setAuth($this->getShopId(), $this->getPassword());
-        if ($logger !== null) {
-            $client->setLogger($this);
-        }
         try {
-            $payment = $client->getPaymentInfo('00000000-0000-0000-0000-000000000001');
+            $this->apiClient->getPaymentInfo('00000000-0000-0000-0000-000000000001');
         } catch (\YandexCheckout\Common\Exceptions\NotFoundException $e) {
             return true;
         } catch (Exception $e) {
