@@ -1,8 +1,7 @@
-
 {% if kassa.isTestMode() %}
-<div class="alert alert-info">
-    <i class="fa fa-exclamation-circle"></i>{{ language.get('kassa_test_mode_description') }}
-</div>
+    <div class="alert alert-info">
+        <i class="fa fa-exclamation-circle"></i>{{ language.get('kassa_test_mode_description') }}
+    </div>
 {% endif %}
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -15,15 +14,17 @@
         </div>
 
         {% if error_kassa_invalid_credentials is defined %}
-        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_kassa_invalid_credentials }}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
+            <div class="alert alert-danger"><i
+                        class="fa fa-exclamation-circle"></i> {{ error_kassa_invalid_credentials }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
         {% endif %}
 
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
-                    <input type="checkbox" id="kassa-enabled" name="yandex_money_kassa_enabled" value="on"{{ kassa.isEnabled() ? ' checked' : '' }} class="enable-button" />
+                    <input type="checkbox" id="kassa-enabled" name="yandex_money_kassa_enabled"
+                           value="on"{{ kassa.isEnabled() ? ' checked' : '' }} class="enable-button"/>
                     {{ language.get('kassa_enable_label') }}
                 </label>
             </div>
@@ -32,61 +33,76 @@
         <div class="form-group required">
             <label class="col-sm-2 control-label" for="kassa-shop-id">{{ language.get('kassa_shop_id_label') }}</label>
             <div class="col-sm-10">
-                <input type="text" name="yandex_money_kassa_shop_id" value="{{ kassa.getShopId() }}" placeholder="{{ language.get('kassa_shop_id_label') }}" id="kassa-shop-id" class="form-control" />
+                <input type="text" name="yandex_money_kassa_shop_id" value="{{ kassa.getShopId() }}"
+                       placeholder="{{ language.get('kassa_shop_id_label') }}" id="kassa-shop-id" class="form-control"/>
                 {% if error_kassa_shop_id is defined and error_kassa_shop_id %}
-                <div class="text-danger">{{ error_kassa_shop_id }}</div>
+                    <div class="text-danger">{{ error_kassa_shop_id }}</div>
                 {% else %}
-                <p class="help-block">{{ language.get('kassa_shop_id_description') }}</p>
+                    <p class="help-block">{{ language.get('kassa_shop_id_description') }}</p>
                 {% endif %}
             </div>
         </div>
 
         <div class="form-group required">
-            <label class="col-sm-2 control-label" for="kassa-password">{{ language.get('kassa_password_label') }}</label>
+            <label class="col-sm-2 control-label"
+                   for="kassa-password">{{ language.get('kassa_password_label') }}</label>
             <div class="col-sm-10">
-                <input type="text" name="yandex_money_kassa_password" value="{{ kassa.getPassword() }}" placeholder="{{ language.get('kassa_password_label') }}" id="kassa-password" class="form-control" />
+                <input type="text" name="yandex_money_kassa_password" value="{{ kassa.getPassword() }}"
+                       placeholder="{{ language.get('kassa_password_label') }}" id="kassa-password"
+                       class="form-control"/>
                 {% if error_kassa_password is defined and error_kassa_password %}
-                <div class="text-danger">{{ error_kassa_password }}</div>
+                    <div class="text-danger">{{ error_kassa_password }}</div>
                 {% else %}
-                <p class="help-block">{{ language.get('kassa_password_description') }}</p>
+                    <p class="help-block">{{ language.get('kassa_password_description') }}</p>
                 {% endif %}
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-sm-2 control-label" for="kassa-payment-mode">{{ language.get('kassa_payment_mode_label') }}</label>
+            <label class="col-sm-2 control-label"
+                   for="kassa-payment-mode">{{ language.get('kassa_payment_mode_label') }}</label>
             <div class="col-sm-10">
                 <label class="form-check-label">
-                    <input type="radio" name="yandex_money_kassa_payment_mode" value="kassa" id="kassa-payment-mode-kassa" class="form-check-input"{{ kassa.getEpl() ? ' checked' : '' }} />
+                    <input type="radio" name="yandex_money_kassa_payment_mode" value="kassa"
+                           id="kassa-payment-mode-kassa"
+                           class="form-check-input"{{ kassa.getEpl() ? ' checked' : '' }} />
                     {{ language.get('kassa_payment_mode_kassa_label') }}
                 </label>
             </div>
-            <div class="col-sm-10 col-sm-offset-2" style="padding-bottom: 10px;" id="kassa-payment-mode-kassa-container">
+            <div class="col-sm-10 col-sm-offset-2" style="padding-bottom: 10px;"
+                 id="kassa-payment-mode-kassa-container">
                 <label class="form-check-label">
-                    <input type="checkbox" name="yandex_money_kassa_use_yandex_button" value="on" id="kassa-use-yandex-button" class="form-check-input"{{ kassa.useYandexButton() ? ' checked' : '' }} />
+                    <input type="checkbox" name="yandex_money_kassa_use_yandex_button" value="on"
+                           id="kassa-use-yandex-button"
+                           class="form-check-input"{{ kassa.useYandexButton() ? ' checked' : '' }} />
                     {{ language.get('kassa_use_yandex_button_label') }}
                 </label>
-                <br />
+                <br/>
                 <label class="form-check-label">
-                    <input type="checkbox" name="yandex_money_kassa_use_installments_button" value="on" id="kassa-use-installments-button" class="form-check-input"{{ kassa.useInstallmentsButton() ? ' checked' : '' }} />
+                    <input type="checkbox" name="yandex_money_kassa_use_installments_button" value="on"
+                           id="kassa-use-installments-button"
+                           class="form-check-input"{{ kassa.useInstallmentsButton() ? ' checked' : '' }} />
                     {{ language.get('kassa_use_installments_button_label') }}
                 </label>
             </div>
             <div class="col-sm-10 col-sm-offset-2">
                 <label class="form-check-label">
-                    <input type="radio" name="yandex_money_kassa_payment_mode" value="shop" id="kassa-payment-mode-shop" class="form-check-input"{{ kassa.getEpl() ? '' : ' checked' }} />
+                    <input type="radio" name="yandex_money_kassa_payment_mode" value="shop" id="kassa-payment-mode-shop"
+                           class="form-check-input"{{ kassa.getEpl() ? '' : ' checked' }} />
                     {{ language.get('kassa_payment_mode_shop_label') }}
                 </label>
             </div>
             <div class="col-sm-10 col-sm-offset-2" id="kassa-payment-mode-shop-container">
                 {% for id, enabled in kassa.getPaymentMethods() %}
-                <label class="form-check-label">
-                    <input type="checkbox" name="yandex_money_kassa_payment_method_{{ id }}" value="on" id="kassa-payment-method-{{ id }}" class="form-check-input"{{ enabled ? ' checked' : '' }} />
-                    {{ language.get('kassa_payment_method_' ~ id) }}
-                </label><br />
+                    <label class="form-check-label">
+                        <input type="checkbox" name="yandex_money_kassa_payment_method_{{ id }}" value="on"
+                               id="kassa-payment-method-{{ id }}"
+                               class="form-check-input"{{ enabled ? ' checked' : '' }} />
+                        {{ language.get('kassa_payment_method_' ~ id) }}
+                    </label><br/>
                 {% endfor %}
                 {% if error_kassa_payment_method %}
-                <div class="text-danger">{{ error_kassa_payment_method }}</div>
+                    <div class="text-danger">{{ error_kassa_payment_method }}</div>
                 {% endif %}
             </div>
         </div>
@@ -94,7 +110,8 @@
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
-                    <input type="checkbox" id="kassa-enable-hold-mode" name="yandex_money_kassa_enable_hold_mode" value="on" {{ kassa.getEnableHoldMode() ? 'checked' : '' }}/>
+                    <input type="checkbox" id="kassa-enable-hold-mode" name="yandex_money_kassa_enable_hold_mode"
+                           value="on" {{ kassa.getEnableHoldMode() ? 'checked' : '' }}/>
                     {{ language.get('kassa_hold_setting_label') }}
                 </label>
             </div>
@@ -111,21 +128,25 @@
                     {{ language.get('kassa_hold_order_status_label') }}
                 </label>
                 <div class="col-sm-10" style="margin-bottom: 10px;">
-                    <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status" class="form-control">
+                    <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status"
+                            class="form-control">
                         {% for id, name in orderStatuses %}
                             <option value="{{ id }}"{{ kassa.getHoldOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
-                        {%  endfor %}
+                        {% endfor %}
                     </select>
                 </div>
 
                 <label class="col-sm-2 control-label" for="kassa-cancel-order-status">
                     {{ language.get('kassa_cancel_order_status_label') }}
                 </label>
+
                 <div class="col-sm-10">
-                    <select id="kassa-cancel-order-status" name="yandex_money_kassa_cnacel_order_status" class="form-control">
+                    <select id="kassa-cancel-order-status" name="yandex_money_kassa_cancel_order_status"
+                            class="form-control">
+
                         {% for id, name in orderStatuses %}
-                            <option value="{{ id }}"{{ kassa.getOrderCanceledStatus() == id ? ' selected' : '' }}>{{ name }}</option>
-                        {%  endfor %}
+                            <option value="{{ id }}"{{ kassa.getOrderCanceledStatus() == id ? ' selected' : '' }}> {{ name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -133,17 +154,24 @@
         </div>
 
         <div class="form-group">
-            <label class="col-sm-2 control-label" for="kassa-payment-description">{{ language.get('kassa_payment_description_label') }}</label>
+            <label class="col-sm-2 control-label"
+                   for="kassa-payment-description">{{ language.get('kassa_payment_description_label') }}</label>
             <div class="col-sm-10">
-                <input type="text" name="yandex_money_kassa_payment_description" value="{{ kassa.getPaymentDescription() }}" placeholder="{{ language.get('kassa_default_payment_description') }}" id="kassa-payment-description" class="form-control" />
+                <input type="text" name="yandex_money_kassa_payment_description"
+                       value="{{ kassa.getPaymentDescription() }}"
+                       placeholder="{{ language.get('kassa_default_payment_description') }}"
+                       id="kassa-payment-description" class="form-control"/>
                 <p class="help-block">{{ language.get('kassa_payment_description_description') }}</p>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-sm-2 control-label" for="kassa-display-name">{{ language.get('kassa_display_name_label') }}</label>
+            <label class="col-sm-2 control-label"
+                   for="kassa-display-name">{{ language.get('kassa_display_name_label') }}</label>
             <div class="col-sm-10">
-                <input type="text" name="yandex_money_kassa_display_name" value="{{ kassa.getDisplayName() }}" placeholder="{{ language.get('kassa_display_name_label') }}" id="kassa-display-name" class="form-control" />
+                <input type="text" name="yandex_money_kassa_display_name" value="{{ kassa.getDisplayName() }}"
+                       placeholder="{{ language.get('kassa_display_name_label') }}" id="kassa-display-name"
+                       class="form-control"/>
                 <p class="help-block">{{ language.get('kassa_display_name_description') }}</p>
             </div>
         </div>
@@ -151,7 +179,8 @@
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
-                    <input type="checkbox" id="kassa-send-receipt" name="yandex_money_kassa_send_receipt" value="on"{{ kassa.sendReceipt() ? ' checked' : '' }} />
+                    <input type="checkbox" id="kassa-send-receipt" name="yandex_money_kassa_send_receipt"
+                           value="on"{{ kassa.sendReceipt() ? ' checked' : '' }} />
                     {{ language.get('kassa_send_receipt_label') }}
                 </label>
             </div>
@@ -168,7 +197,7 @@
             <div class="col-sm-10">
                 <select id="kassa-tax-rate-default" name="yandex_money_kassa_tax_rate_default" class="form-control">
                     {% for id, name in kassaTaxRates %}
-                    <option value="{{ id }}"{{ kassa.getDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
+                        <option value="{{ id }}"{{ kassa.getDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
                     {% endfor %}
                 </select>
                 <p class="help-block">{{ language.get('kassa_tax_rate_default_description') }}</p>
@@ -188,17 +217,18 @@
                     </thead>
                     <tbody>
                     {% for id, name in shopTaxRates %}
-                    <tr>
-                        <td>
-                            <label class="control-label" for="kassa-tax-rate-{{ id }}">{{ name }}</td>
-                        <td>
-                            <select id="kassa-tax-rate-{{ id }}" name="yandex_money_kassa_tax_rates[{{ id }}]" class="form-control">
-                                {%  for taxRateId, taxRateName in kassaTaxRates %}
-                                <option value="{{ taxRateId }}"{{ kassa.getTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
-                                {%  endfor %}
-                            </select>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <label class="control-label" for="kassa-tax-rate-{{ id }}">{{ name }}</td>
+                            <td>
+                                <select id="kassa-tax-rate-{{ id }}" name="yandex_money_kassa_tax_rates[{{ id }}]"
+                                        class="form-control">
+                                    {% for taxRateId, taxRateName in kassaTaxRates %}
+                                        <option value="{{ taxRateId }}"{{ kassa.getTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -209,8 +239,10 @@
             <label class="col-sm-2 control-label">Показывать ссылку на сайт Кассы</label>
             <div class="col-sm-10">
                 <select id="kassa-debug-log" name="yandex_money_kassa_show_in_footer" class="form-control">
-                    <option value="off" {% if not kassa.getShowLinkInFooter() %}selected{% endif %}>{{ language.get('kassa_debug_log_off') }}</option>
-                    <option value="on"{% if kassa.getShowLinkInFooter() %}selected{% endif %}>{{ language.get('kassa_debug_log_on') }}</option>
+                    <option value="off"
+                            {% if not kassa.getShowLinkInFooter() %}selected{% endif %}>{{ language.get('kassa_debug_log_off') }}</option>
+                    <option value="on"
+                            {% if kassa.getShowLinkInFooter() %}selected{% endif %}>{{ language.get('kassa_debug_log_on') }}</option>
                 </select>
                 <p class="help-block">Ссылка будет отображаться в подвале вашего сайта.</p>
             </div>
@@ -221,7 +253,8 @@
                 {{ language.get('kassa_notification_url_label') }}
             </label>
             <div class="col-sm-10">
-                <input type="text" id="kassa-notification-url" name="kassa_notification_url" value="{{ notificationUrl }}" class="form-control" disabled />
+                <input type="text" id="kassa-notification-url" name="kassa_notification_url"
+                       value="{{ notificationUrl }}" class="form-control" disabled/>
                 <p class="help-block">{{ language.get('kassa_notification_url_description') }}</p>
             </div>
         </div>
@@ -229,7 +262,8 @@
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
-                    <input type="checkbox" id="kassa-invoice" name="yandex_money_kassa_invoice" value="on"{{ kassa.isInvoicesEnabled() ? ' checked' : '' }} />
+                    <input type="checkbox" id="kassa-invoice" name="yandex_money_kassa_invoice"
+                           value="on"{{ kassa.isInvoicesEnabled() ? ' checked' : '' }} />
                     {{ language.get('kassa_invoice_label') }}
                 </label>
             </div>
@@ -240,19 +274,22 @@
                 {{ language.get('kassa_invoice_subject_label') }}
             </label>
             <div class="col-sm-8">
-                <input type="text" id="kassa-invoice-subject" name="yandex_money_kassa_invoice_subject" value="{{ kassa.getInvoiceSubject() }}" class="form-control" />
+                <input type="text" id="kassa-invoice-subject" name="yandex_money_kassa_invoice_subject"
+                       value="{{ kassa.getInvoiceSubject() }}" class="form-control"/>
                 <p class="help-block">{{ language.get('kassa_invoice_subject_description') }}</p>
             </div>
             <label class="col-sm-2 col-sm-offset-2 control-label" for="kassa-invoice-message">
                 {{ language.get('kassa_invoice_message_label') }}
             </label>
             <div class="col-sm-8">
-                <textarea id="kassa-invoice-message" name="yandex_money_kassa_invoice_message" class="form-control">{{ kassa.getInvoiceMessage() }}</textarea>
+                <textarea id="kassa-invoice-message" name="yandex_money_kassa_invoice_message"
+                          class="form-control">{{ kassa.getInvoiceMessage() }}</textarea>
                 <p class="help-block">{{ language.get('kassa_invoice_message_description') }}</p>
             </div>
             <div class="col-sm-10 col-sm-offset-4">
                 <label>
-                    <input type="checkbox" id="kassa-invoice-logo" name="yandex_money_kassa_invoice_logo" value="on"{{ kassa.getSendInvoiceLogo() ? ' checked' : '' }} />
+                    <input type="checkbox" id="kassa-invoice-logo" name="yandex_money_kassa_invoice_logo"
+                           value="on"{{ kassa.getSendInvoiceLogo() ? ' checked' : '' }} />
                     {{ language.get('kassa_invoice_logo_label') }}
                 </label>
             </div>
@@ -262,12 +299,14 @@
             <div class="col-sm-2 control-label"><strong>{{ language.get('kassa_before_redirect_label') }}</strong></div>
             <div class="col-sm-10">
                 <label>
-                    <input type="checkbox" name="yandex_money_kassa_create_order_before_redirect" id="yandex_money_kassa_create_order_before_redirect"
+                    <input type="checkbox" name="yandex_money_kassa_create_order_before_redirect"
+                           id="yandex_money_kassa_create_order_before_redirect"
                            value="on" {% if kassa.getCreateOrderBeforeRedirect() %}checked{% endif %} />
                     {{ language.get('kassa_create_order_label') }}
-                </label><br />
+                </label><br/>
                 <label>
-                    <input type="checkbox" name="yandex_money_kassa_clear_cart_before_redirect" id="yandex_money_kassa_clear_cart_before_redirect"
+                    <input type="checkbox" name="yandex_money_kassa_clear_cart_before_redirect"
+                           id="yandex_money_kassa_clear_cart_before_redirect"
                            value="on" {% if kassa.getClearCartBeforeRedirect() %}checked{% endif %} />
                     {{ language.get('kassa_clear_cart_label') }}
                 </label>
@@ -279,10 +318,11 @@
                 {{ language.get('kassa_success_order_status_label') }}
             </label>
             <div class="col-sm-10">
-                <select id="kassa-success-order-status" name="yandex_money_kassa_success_order_status" class="form-control">
+                <select id="kassa-success-order-status" name="yandex_money_kassa_success_order_status"
+                        class="form-control">
                     {% for id, name in orderStatuses %}
-                    <option value="{{ id }}"{{ kassa.getSuccessOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
-                    {%  endfor %}
+                        <option value="{{ id }}"{{ kassa.getSuccessOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
                 </select>
                 <p class="help-block">{{ language.get('kassa_success_order_status_description') }}</p>
             </div>
@@ -292,7 +332,8 @@
                 {{ language.get('kassa_minimum_payment_amount_label') }}
             </label>
             <div class="col-sm-10">
-                <input type="text" id="kassa-min-payment-amount" name="yandex_money_kassa_minimum_payment_amount" value="{{ kassa.getMinPaymentAmount() }}" class="form-control" />
+                <input type="text" id="kassa-min-payment-amount" name="yandex_money_kassa_minimum_payment_amount"
+                       value="{{ kassa.getMinPaymentAmount() }}" class="form-control"/>
                 <p class="help-block">{{ language.get('kassa_minimum_payment_amount_description') }}</p>
             </div>
         </div>
@@ -304,7 +345,7 @@
                 <select id="kassa-geo-zone" name="yandex_money_kassa_geo_zone" class="form-control">
                     <option value="0"{{ kassa.getGeoZoneId() == 0 ? ' selected' : '' }}>{{ language.get('kassa_any_geo_zone') }}</option>
                     {% for id, name in geoZones %}
-                    <option value="{{ id }}"{{ kassa.getGeoZoneId() == id ? ' selected' : '' }}>{{ name }}</option>
+                        <option value="{{ id }}"{{ kassa.getGeoZoneId() == id ? ' selected' : '' }}>{{ name }}</option>
                     {% endfor %}
                 </select>
                 <p class="help-block">{{ language.get('kassa_geo_zone_description') }}</p>
@@ -326,7 +367,8 @@
         <div class="form-group">
             <label class="col-sm-2 control-label">{{ language.get('kassa_payment_list_label') }}</label>
             <div class="col-sm-9">
-                <p class="help-block"><a href="{{ kassa_payments_link }}">{{ language.get('kassa_payment_list_link') }}</a></p>
+                <p class="help-block"><a
+                            href="{{ kassa_payments_link }}">{{ language.get('kassa_payment_list_link') }}</a></p>
             </div>
         </div>
         <div class="form-group">
@@ -334,7 +376,8 @@
                 {{ language.get('kassa_sort_order_label') }}
             </label>
             <div class="col-sm-10">
-                <input type="text" id="kassa-sort-order" name="yandex_money_kassa_sort_order" value="{{ yandex_money_kassa_sort_order }}" class="form-control" />
+                <input type="text" id="kassa-sort-order" name="yandex_money_kassa_sort_order"
+                       value="{{ yandex_money_kassa_sort_order }}" class="form-control"/>
                 <p class="help-block">{{ language.get('kassa_sort_order_description') }}</p>
             </div>
         </div>
@@ -343,62 +386,62 @@
 
 <script type="text/javascript">
 
-jQuery(document).ready(function () {
+    jQuery(document).ready(function () {
 
-    function togglePaymentMode(value) {
-        if (value == 'kassa') {
-            jQuery('#kassa-payment-mode-kassa-container').slideDown();
-            jQuery('#kassa-payment-mode-shop-container').slideUp();
-        } else {
-            jQuery('#kassa-payment-mode-kassa-container').slideUp();
-            jQuery('#kassa-payment-mode-shop-container').slideDown();
+        function togglePaymentMode(value) {
+            if (value == 'kassa') {
+                jQuery('#kassa-payment-mode-kassa-container').slideDown();
+                jQuery('#kassa-payment-mode-shop-container').slideUp();
+            } else {
+                jQuery('#kassa-payment-mode-kassa-container').slideUp();
+                jQuery('#kassa-payment-mode-shop-container').slideDown();
+            }
         }
-    }
 
-    function toggleSendReceipt(value) {
-        if (value) {
-            jQuery('.receipt-only').slideDown();
-        } else {
-            jQuery('.receipt-only').slideUp();
+        function toggleSendReceipt(value) {
+            if (value) {
+                jQuery('.receipt-only').slideDown();
+            } else {
+                jQuery('.receipt-only').slideUp();
+            }
         }
-    }
 
-    function toggleInvoice(value) {
-        if (value) {
-            jQuery('.invoice-only').slideDown();
-        } else {
-            jQuery('.invoice-only').slideUp();
+        function toggleInvoice(value) {
+            if (value) {
+                jQuery('.invoice-only').slideDown();
+            } else {
+                jQuery('.invoice-only').slideUp();
+            }
         }
-    }
 
-    function toggleStatuses(value) {
-        if (value) {
-            jQuery('.statuses-wrapper').slideDown();
-        } else {
-            jQuery('.statuses-wrapper').slideUp();
+        function toggleStatuses(value) {
+            if (value) {
+                jQuery('.statuses-wrapper').slideDown();
+            } else {
+                jQuery('.statuses-wrapper').slideUp();
+            }
         }
-    }
 
-    var form = document.getElementById('form-payment-yandex-money');
-    togglePaymentMode(form.yandex_money_kassa_payment_mode.value);
-    toggleSendReceipt(form.yandex_money_kassa_send_receipt.checked);
-    toggleInvoice(form.yandex_money_kassa_invoice.checked);
+        var form = document.getElementById('form-payment-yandex-money');
+        togglePaymentMode(form.yandex_money_kassa_payment_mode.value);
+        toggleSendReceipt(form.yandex_money_kassa_send_receipt.checked);
+        toggleInvoice(form.yandex_money_kassa_invoice.checked);
 
-    jQuery('#kassa-enable-hold-mode').bind('change', function () {
-        toggleStatuses(this.checked);
+        jQuery('#kassa-enable-hold-mode').bind('change', function () {
+            toggleStatuses(this.checked);
+        });
+
+        jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
+            togglePaymentMode(form.yandex_money_kassa_payment_mode.value)
+        });
+
+        jQuery('#kassa-send-receipt').bind('change', function () {
+            toggleSendReceipt(this.checked);
+        });
+
+        jQuery('#kassa-invoice').bind('change', function () {
+            toggleInvoice(this.checked);
+        });
     });
-
-    jQuery('input[name=yandex_money_kassa_payment_mode]').click(function () {
-        togglePaymentMode(form.yandex_money_kassa_payment_mode.value)
-    });
-
-    jQuery('#kassa-send-receipt').bind('change', function () {
-        toggleSendReceipt(this.checked);
-    });
-
-    jQuery('#kassa-invoice').bind('change', function () {
-        toggleInvoice(this.checked);
-    });
-});
 
 </script>
