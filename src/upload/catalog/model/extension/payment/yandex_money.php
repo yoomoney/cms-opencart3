@@ -149,7 +149,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.0.15',
+                        'module_version' => '1.1.0',
                     ));
 
             $confirmation = array(

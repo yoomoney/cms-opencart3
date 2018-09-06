@@ -6,6 +6,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     private $walletModel;
     private $billingModel;
     private $metrikaModel;
+    private $market;
     private $client;
     private $repository = 'yandex-money/yandex-money-ycms-opencart3';
     private $backupDirectory = 'yandex_money/backup';
@@ -360,6 +361,28 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
 
         return $this->metrikaModel;
+    }
+
+    /**
+     * @return YandexMoneyMarketModel
+     */
+    public function getMarket()
+    {
+        if ($this->market === null) {
+            require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'YandexMoneyMarketModel.php';
+            $this->load->model('localisation/stock_status');
+            $this->load->model('localisation/tax_class');
+            $this->load->model('catalog/category');
+            $this->load->language('catalog/product');
+            $this->market = new YandexMoneyMarketModel($this->config, $this->db, $this->language,
+                $this->model_localisation_stock_status,
+                $this->model_catalog_option,
+                $this->model_localisation_tax_class,
+                $this->model_catalog_category
+            );
+        }
+
+        return $this->market;
     }
 
     public function refundPayment($payment, $order, $amount, $comment)

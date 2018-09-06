@@ -9,7 +9,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.0.15';
+    const MODULE_VERSION = '1.1.0';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -19,29 +19,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         'yandex_money_metrika_webvizor',
         'yandex_money_metrika_clickmap',
         'yandex_money_metrika_hash',
-    );
-
-    public $fields_market = array(
-        'yandex_money_market_active',
-        'yandex_money_market_catall',
-        'yandex_money_market_prostoy',
-        'yandex_money_market_set_available',
-        'yandex_money_market_shopname',
-        'yandex_money_market_localcoast',
-        'yandex_money_market_localdays',
-        'yandex_money_market_stock_days',
-        'yandex_money_market_stock_cost',
-        'yandex_money_market_available',
-        'yandex_money_market_combination',
-        'yandex_money_market_features',
-        'yandex_money_market_dimensions',
-        'yandex_money_market_allcurrencies',
-        'yandex_money_market_store',
-        'yandex_money_market_delivery',
-        'yandex_money_market_pickup',
-        'yandex_money_market_color_options',
-        'yandex_money_market_size_options',
-        'yandex_money_market_categories',
     );
 
     private $error = array();
@@ -88,10 +65,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                         ? $settings['yandex_money_metrika_code']
                         : '',
                 ), $this->request->post);
-                if (!empty($newSettings['yandex_money_market_categories'])) {
-                    $newSettings['yandex_money_market_categories'] = implode(',',
-                        $newSettings['yandex_money_market_categories']);
-                }
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
                 $this->model_setting_setting->editSetting('payment_'.self::MODULE_NAME, $newSettings);
 
@@ -236,7 +209,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('localisation/order_status');
         $data['metrika_status'] = '';
         $data['market_status']  = '';
-        $array_init             = array_merge($this->fields_metrika, $this->fields_market);
+        $array_init             = array_merge($this->fields_metrika, $this->getModel()->getMarket()->getFields());
 
         if (isset($this->request->get['err'])) {
             $data['err_token'] = $this->request->get['err'];
@@ -277,42 +250,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'metrika_set_1',
             'metrika_set_2',
             'metrika_set_5',
-            'market_color_option',
-            'market_size_option',
-            'market_size_unit',
-            'text_select_all',
-            'text_unselect_all',
-            'text_no',
-            'market_set',
-            'market_set_1',
-            'market_set_2',
-            'market_set_3',
-            'market_set_4',
-            'market_set_5',
-            'market_set_6',
-            'market_set_7',
-            'market_set_8',
-            'market_set_9',
             'market_lnk_yml',
-            'market_cat',
-            'market_out',
-            'market_out_sel',
-            'market_out_all',
-            'market_dostup',
-            'market_dostup_1',
-            'market_dostup_2',
-            'market_dostup_3',
-            'market_dostup_4',
-            'market_s_name',
-            'market_d_cost',
-            'market_d_days',
             'market_sv_all',
             'market_rv_all',
             'market_ch_all',
             'market_unch_all',
-            'market_prostoy',
-            'market_sv',
-            'market_gen',
             'p2p_os',
             'tab_row_sign',
             'tab_row_cause',
@@ -334,52 +276,43 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data[$lang_name] = $this->language->get($lang_name);
         }
 
-        $data['yandex_money_market_stock_days'] = $this->config->get('yandex_money_market_stock_days');
-        $data['yandex_money_market_stock_cost'] = $this->config->get('yandex_money_market_stock_cost');
-
-        $this->load->model('localisation/stock_status');
-        $stock_results = $this->model_localisation_stock_status->getStockStatuses();
-        foreach ($stock_results as $result) {
-            $data['stockstatuses'][] = array(
-                'id'   => $result['stock_status_id'],
-                'name' => $result['name'],
-            );
-        }
-        //
         $data['user_token'] = $this->session->data['user_token'];
 
-        $results                                   = $this->model_catalog_option->getOptions(array('sort' => 'name'));
-        $data['options']                           = $results;
-        $data['tab_general']                       = $this->language->get('tab_general');
-        $data['yandex_money_market_size_options']  = array();
-        $data['yandex_money_market_color_options'] = array();
+        $results             = $this->model_catalog_option->getOptions(array('sort' => 'name'));
+        $data['options']     = $results;
+        $data['tab_general'] = $this->language->get('tab_general');
 
         $this->load->model('localisation/stock_status');
         $data['stock_statuses'] = $this->model_localisation_stock_status->getStockStatuses();
         $this->load->model('catalog/category');
         $data['categories'] = $this->model_catalog_category->getCategories(0);
         $this->document->setTitle($this->language->get('heading_title_ya'));
-        if (isset($this->request->post['yandex_money_market_categories'])) {
-            $categories = $this->request->post['yandex_money_market_categories'];
-        } elseif ($this->config->get('yandex_money_market_categories') != '') {
-            $categories = explode(',', $this->config->get('yandex_money_market_categories'));
+        if (isset($this->request->post['yandex_money_market_category_list'])) {
+            $categories = $this->request->post['yandex_money_market_category_list'];
+        } elseif (is_array($this->config->get('yandex_money_market_category_list'))) {
+            $categories = $this->config->get('yandex_money_market_category_list');
         } else {
             $categories = array();
         }
 
         $this->load->model('localisation/currency');
-        $currencies         = $this->model_localisation_currency->getCurrencies();
-        $allowed_currencies = array_flip(array('RUR', 'RUB', 'BYN', 'KZT', 'UAH'));
-        $data['currencies'] = array_intersect_key($currencies, $allowed_currencies);
 
-        $data                    = array_merge($data, $this->initForm($array_init));
-        $data                    = array_merge($data, $this->initErrors());
-        $data['market_cat_tree'] = $this->treeCat(0, $categories);
-        if (!isset($data['yandex_money_market_size_options'])) {
-            $data['yandex_money_market_size_options'] = array();
+        $data = array_merge($data, $this->initForm($array_init));
+        $data = array_merge($data, $this->initErrors());
+
+        $market                       = $this->getModel()->getMarket();
+        $data['market']               = $market;
+        $data['market_cat_tree']      = $market->treeCat($categories);
+        $data['market_currency_list'] = $market->htmlCurrencyList($this->model_localisation_currency->getCurrencies());
+
+        if (empty($data['yandex_money_market_shopname'])) {
+            $data['yandex_money_market_shopname'] = mb_substr($this->config->get('config_name'), 0, 20);
         }
-        if (!isset($data['yandex_money_market_color_options'])) {
-            $data['yandex_money_market_color_options'] = array();
+        if (empty($data['yandex_money_market_full_shopname'])) {
+            $data['yandex_money_market_full_shopname'] = $this->config->get('config_name');
+        }
+        if (empty($data['yandex_money_market_name_template'])) {
+            $data['yandex_money_market_name_template'] = '%model% %manufacturer% %name%';
         }
         if (isset($this->session->data['metrika_status']) && !empty($this->session->data['metrika_status'])) {
             $data['metrika_status'] = array_merge($data['metrika_status'], $this->session->data['metrika_status']);
@@ -613,7 +546,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         $request->post['payment_yandex_money_status'] = $enabled;
 
-        $properties = array_merge($this->fields_market, $this->fields_metrika);
+        $properties = array_merge($this->getModel()->getMarket()->getFields(), $this->fields_metrika);
         foreach ($properties as $property) {
             if (empty($request->post[$property])) {
                 $request->post[$property] = false;
@@ -1058,15 +991,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     private function initErrors()
     {
         $data   = array();
-
-        if ($this->config->get('yandex_money_market_shopname') == '') {
-            $data['market_status'][] = $this->errors_alert('Не введено название магазина');
-        }
-        if ($this->config->get('yandex_money_market_localcoast') == '') {
-            $data['market_status'][] = $this->errors_alert('Введите стоимость доставки в домашнем регионе');
-        }
-        if ($this->config->get('yandex_money_market_localdays') == '') {
-            $data['market_status'][] = $this->errors_alert('Введите срок доставки в домашнем регионе');
+        $data['market_status'] = array();
+        foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
+            $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
         }
 
         if ($this->config->get('yandex_money_metrika_number') == '') {
@@ -1527,62 +1454,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             <i class="fa fa-exclamation-circle"></i> '.$text.'
                 <button type="button" class="close" data-dismiss="alert">×</button>
         </div>';
-
-        return $html;
-    }
-
-    private function treeCat($id_cat = 0, $checked = array())
-    {
-        if (empty($checked)) {
-            $checked = array();
-        }
-        $html       = '';
-        $categories = $this->getCategories($id_cat);
-        foreach ($categories as $category) {
-            if (is_array($checked)) {
-                $flag = in_array($category['category_id'], $checked);
-            }
-            $children = $this->getCategories($category['category_id']);
-            if (count($children)) {
-                $html .= $this->treeFolder($category['category_id'], $category['name'], $flag, $checked);
-            } else {
-                $html .= $this->treeItem($category['category_id'], $category['name'], $flag);
-            }
-        }
-
-        return $html;
-    }
-
-    public function getCategories($parent_id = 0)
-    {
-        $query = $this->db->query("SELECT * FROM ".DB_PREFIX."category c LEFT JOIN ".DB_PREFIX."category_description cd ON (c.category_id = cd.category_id) LEFT JOIN ".DB_PREFIX."category_to_store c2s ON (c.category_id = c2s.category_id) WHERE c.parent_id = '".(int)$parent_id."' AND cd.language_id = '".(int)$this->config->get('config_language_id')."' AND c2s.store_id = '".(int)$this->config->get('config_store_id')."'  AND c.status = '1' ORDER BY c.sort_order, LCASE(cd.name)");
-
-        return $query->rows;
-    }
-
-    public function treeItem($id, $name, $checked)
-    {
-        $html = '<li class="tree-item">
-            <span class="tree-item-name">
-                <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($checked ? ' checked' : '').'>
-                <i class="tree-dot"></i>
-                <label class="">'.$name.'</label>
-            </span>
-        </li>';
-
-        return $html;
-    }
-
-    public function treeFolder($id, $name, $checked, $list)
-    {
-        $html = '<li class="tree-folder">
-            <span class="tree-folder-name">
-                <input type="checkbox" name="yandex_money_market_categories[]" value="'.$id.'"'.($checked ? ' checked' : '').'>
-                <i class="icon-folder-open"></i>
-                <label class="tree-toggler">'.$name.'</label>
-            </span>
-            <ul class="tree" style="display: block;">'.$this->treeCat($id, $list).'</ul>
-        </li>';
 
         return $html;
     }
