@@ -64,6 +64,16 @@ class MarketModel
         return $query->rows;
     }
 
+    public function getProductCategories($product_id) {
+        $product_category_data = array();
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+        foreach ($query->rows as $result) {
+            $product_category_data[] = $result['category_id'];
+        }
+
+        return $product_category_data;
+    }
+
     public function getProductOptions($option_ids, $product_id)
     {
         $lang = (int)$this->config->get('config_language_id');

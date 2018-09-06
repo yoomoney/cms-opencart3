@@ -2,6 +2,9 @@
 
 use YandexCheckout\Model\Notification\NotificationSucceeded;
 use YandexCheckout\Model\Notification\NotificationWaitingForCapture;
+use YandexMoneyModule\YandexMarket\Currency;
+use YandexMoneyModule\YandexMarket\Offer;
+use YandexMoneyModule\YandexMarket\YandexMarket;
 
 /**
  * Класс контроллера модуля оплаты с помощью Яндекс.Денег
@@ -481,6 +484,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->response->setOutput(json_encode($productInfo));
     }
 
+    /**
+     * @throws Exception
+     */
     public function market()
     {
         $this->load->model('catalog/product');
@@ -488,265 +494,361 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('localisation/currency');
 
         $this->getModel();
-        $model = $this->getMarketModel();
-        $categories = $model->getCategories();
-        $allow_cat_array = explode(',', $this->config->get('yandex_money_market_categories'));
-        if (!empty($allow_cat_array) || $this->config->get('yandex_money_market_catall')) {
-            $ids_cat = ($this->config->get('yandex_money_market_catall')) ? '' : implode(',', $allow_cat_array);
+        $model           = $this->getMarketModel();
+        $categories      = $model->getCategories();
+        $allCategoryIds  = array_map(function ($category) {
+            return $category['category_id'];
+        }, $categories);
+        $allowCategories = (array)$this->config->get('yandex_money_market_category_list');
+        $allowAllCat     = $this->config->get('yandex_money_market_category_all');
+        if (!empty($allowCategories) || $allowAllCat) {
+            $strCategoryIds = $allowAllCat ? null : implode(',', $allowCategories);
         } else {
             die("Need select categories");
         }
-        $products = $model->getProducts($ids_cat);
-        $currencies = $this->model_localisation_currency->getCurrencies();
-        $shop_currency = $this->config->get('config_currency');
-        $offers_currency = 'RUB';
+        $products         = $model->getProducts($strCategoryIds);
+        $currencies       = $this->model_localisation_currency->getCurrencies();
+        $offers_currency  = $this->config->get('config_currency');
         $currency_default = $model->getCurrencyByISO($offers_currency);
-        if (!isset($currency_default['value'])){
+        if (!isset($currency_default['value'])) {
             die("Not exist RUB");
         }
 
-        $decimal_place = 2;
-        $currencies = array_intersect_key($currencies, array_flip(array('RUR', 'RUB', 'USD', 'EUR', 'UAH', 'BYN')));
-        $market = new \YandexMoneyModule\YandexMarket($this->config);
-        $market->yml('utf-8');
-        $market->set_shop(
+        $market     = new YandexMarket();
+        $currencies = array_intersect_key($currencies, array_flip(Currency::getAvailableCurrencies()));
+
+        $market->setShop(
             $this->config->get('yandex_money_market_shopname'),
-            $this->config->get('config_name'),
+            $this->config->get('yandex_money_market_full_shopname'),
             $this->config->get('config_url')
         );
+        $market->getShop()->setPlatform('ya_opencart');
+        $market->getShop()->setVersion(VERSION);
 
-        if ($this->config->get('yandex_money_market_allcurrencies')) {
-            foreach ($currencies as $currency) {
-                if ($currency['status'] == 1) {
-                    $market->add_currency($currency['code'], ((float)$currency_default['value'] / (float)$currency['value']));
+        for ($index = 1; $index <= 5; $index++) {
+            $enabled = $this->getConfig('delivery_enabled', $index);
+            if ($enabled !== 'on') {
+                continue;
+            }
+            $cost = $this->getConfig('delivery_cost', $index);
+            if ($cost === '') {
+                continue;
+            }
+            $daysFrom = $this->getConfig('delivery_days_from', $index);
+            $daysTo   = $this->getConfig('delivery_days_to', $index);
+            $days     = empty($daysTo) || $daysFrom === $daysTo ? $daysFrom : $daysFrom.'-'.$daysTo;
+            if ($days === '') {
+                continue;
+            }
+            $orderBefore = $this->getConfig('delivery_order_before', $index);
+            $market->getShop()->addDeliveryOption($cost, $days, $orderBefore);
+        }
+
+        $cmsCurrencyIds = array_keys($this->model_localisation_currency->getCurrencies());
+        foreach (Currency::getAvailableCurrencies() as $currencyId) {
+            if (!in_array($currencyId, $cmsCurrencyIds)) {
+                continue;
+            }
+            $enabled = $this->getConfig('currency_enabled', $currencyId);
+            if ($enabled !== 'on') {
+                continue;
+            }
+            if ($currencyId === $offers_currency) {
+                $rate = '1';
+                $plus = null;
+            } else {
+                $rate = $this->getConfig('currency_rate', $currencyId);
+                if ($rate === '1') {
+                    continue;
+                }
+                $plus = (float)$this->getConfig('currency_plus', $currencyId, 0.0);
+                if ($rate === '__cms') {
+                    if (!isset($currencies[$currencyId])) {
+                        continue;
+                    }
+                    $rate = (float)$currency_default['value'] / (float)$currencies[$currencyId]['value'];
                 }
             }
-        }
-        else {
-            $market->add_currency($currency_default['code'], ((float)$currency_default['value']));
+            $market->addCurrency($currencyId, $rate, $plus);
         }
 
         foreach ($categories as $category) {
-            if (!$this->config->get('yandex_money_market_catall')) {
-                if (!in_array($category['category_id'], $allow_cat_array)) {
+            if ($this->config->get('yandex_money_market_category_all') !== 'on') {
+                if (!in_array($category['category_id'], $allowCategories)) {
                     continue;
                 }
             }
-            $market->add_category($category['name'], $category['category_id'], $category['parent_id']);
+            $market->addCategory($category['name'], $category['category_id'], $category['parent_id']);
         }
+
+        $additionalConditionIds     = array();
+        $additionalConditionMap     = array();
+        $additionalConditionEnabled = (array)$this->config->get('yandex_money_market_additional_condition_enabled');
+        foreach ($additionalConditionEnabled as $id => $value) {
+            if ($value === 'on') {
+                $additionalConditionIds[] = $id;
+            }
+        }
+        if (!empty($additionalConditionIds)) {
+            foreach ($additionalConditionIds as $conditionId) {
+                $additionalConditionCategoryIds
+                    = $this->getConfig('additional_condition_for_all_cat', $conditionId) === 'on'
+                    ? $allCategoryIds
+                    : $this->getConfig('additional_condition_categories', $conditionId, array());
+                foreach ($additionalConditionCategoryIds as $categoryId) {
+                    $additionalConditionMap[$categoryId][] = $conditionId;
+                }
+            }
+        }
+
+        $nameTemplate = explode('%', $this->config->get('yandex_money_market_name_template'));
         foreach ($products as $product) {
-            if ($this->config->get('yandex_money_market_available') && $product['quantity'] < 1) {
+            $statusId  = $product['quantity'] > 0 ? 'non-zero-quantity' : $product['stock_status_id'];
+            $useStatus = $this->getConfig("available_enabled", $statusId) === 'on';
+            $available = $this->getConfig("available_available", $statusId);
+            if ($useStatus && $available === 'none') {
                 continue;
             }
 
-            $available = false;
-            if ($this->config->get('yandex_money_market_set_available') == 1) {
-                $available = true;
-            } elseif ($this->config->get('yandex_money_market_set_available') == 2) {
-                if ($product['quantity'] > 0) $available = true;
-            } elseif ($this->config->get('yandex_money_market_set_available') == 3) {
-                $available = true;
-                if ($product['quantity'] == 0) {
-                    continue;
-                }
-            } elseif ($this->config->get('yandex_money_market_set_available') == 4) {
-                $available = false;
+            $offer = $market->createOffer($product['product_id'], $product['category_id']);
+            if (!$offer) {
+                continue;
             }
-            $data = array();
-            $data['id'] = $product['product_id'];
-            $data['available'] = $available;
-            $data['url'] = htmlspecialchars_decode($this->url->link('product/product', 'product_id=' . $product['product_id'], true));
+            $offer
+                ->setUrl(htmlspecialchars_decode($this->url->link('product/product',
+                    'product_id='.$product['product_id'], true)))
+                ->setModel($product['name'])
+                ->setVendor($product['manufacturer'])
+                ->setDescription($product['description'])
+                ->setCurrencyId($currency_default['code']);
 
-            $data['price'] = round(floatval($product['price']), 2);
-            if ($product['special'] && $product['special'] < $product['price']){
-                $data['price'] = round(floatval($product['special']), 2);
-                $data['oldprice'] = round(floatval($product['price']), 2);
+            if ($useStatus) {
+                $offer
+                    ->setAvailable($available === 'true')
+                    ->setDelivery($this->getConfig("available_delivery", $statusId) === 'on')
+                    ->setPickup($this->getConfig("available_pickup", $statusId) === 'on')
+                    ->setStore($this->getConfig("available_store", $statusId) === 'on');
             }
 
-            $data['currencyId'] = $currency_default['code'];
-            $data['categoryId'] = $product['category_id'];
-            $data['vendor'] = $product['manufacturer'];
-            $data['vendorCode'] = $product['model'];
-            $data['delivery'] = ($this->config->get('yandex_money_market_delivery') && $product['shipping'] == '1')? 'true' : 'false';
-            $data['pickup'] = ($this->config->get('yandex_money_market_pickup') ? 'true' : 'false');
-            $data['store'] = ($this->config->get('yandex_money_market_store') ? 'true' : 'false');
-            $data['description'] = $product['description'];
-
-            if ($product['quantity'] < 1) {
-                $stock_id = $product['stock_status_id'];
-                $delivery_cost = $this->config->get('yandex_money_market_stock_cost');
-                $delivery_days = $this->config->get('yandex_money_market_stock_days');
-                $data['delivery-options'][] = array(
-                    'cost' => $delivery_cost[$stock_id],
-                    'days' => $delivery_days[$stock_id]
-                );
-            }
-            if ($product['minimum'] > 1) {
-                $data['sales_notes'] = 'Минимальное кол-во для заказа: ' . $product['minimum'];
-            }
-            if ($this->config->get('config_comment')) {
-                $data['sales_notes'] = $this->config->get('config_comment');
+            $offer->setPrice(round(floatval($product['price']), 2));
+            if ($product['special'] && $product['special'] < $product['price']) {
+                $offer->setOldPrice($offer->getPrice());
+                $offer->setPrice(round(floatval($product['special']), 2));
             }
 
-            $data['picture'] = array();
             if (isset($product['image'])) {
-                $data['picture'][] = str_replace(" ", "%20", $this->model_tool_image->resize($product['image'], 600, 600));
+                $offer->addPicture($this->model_tool_image->resize($product['image'], 600, 600));
             }
-            foreach ($this->model_catalog_product->getProductImages($data['id']) as $pic) {
-                if (count($data['picture']) <= 9) {
-                    $data['picture'][] = str_replace(array('&amp;',' '),array('&', '%20'), $this->model_tool_image->resize($pic['image'], 600, 600));
+            foreach ($this->model_catalog_product->getProductImages($product['product_id']) as $pic) {
+                $offer->addPicture($this->model_tool_image->resize($pic['image'], 600, 600));
+                if (count($offer->getPictures()) === 10) {
+                    break;
+                }
+            }
+            if ($product['weight'] > 0) {
+                $offer->setWeight(number_format($product['weight'], 1, '.', ''), $product['weight_unit']);
+            }
+            if (($this->config->get('yandex_money_market_dimensions') === 'on')
+                && $product['length'] > 0 && $product['width'] > 0 && $product['height'] > 0) {
+                $offer->setDimensions(number_format($product['length'], 1, '.', ''),
+                    number_format($product['width'], 1, '.', ''), number_format($product['height'], 1, '.', ''));
+            }
+
+            if ($this->config->get('yandex_money_market_vat_enabled') === 'on') {
+                $vatRates = $this->config->get('yandex_money_market_vat');
+                if (isset($vatRates[$product['tax_class_id']])) {
+                    $offer->setVat($vatRates[$product['tax_class_id']]);
                 }
             }
 
-            if ($this->config->get('yandex_money_market_prostoy')) {
-                $data['price'] = number_format($this->currency->convert($this->tax->calculate($data['price'], $product['tax_class_id'], $this->config->get('config_tax')), $shop_currency, $offers_currency), $decimal_place, '.', '');
-                $data['name'] = $product['name'];
-                if ($data['price'] > 0) {
-                    $market->add_offer($data['id'], $data, $data['available']);
+            if ($this->config->get('yandex_money_market_simple')) {
+                $name = '';
+                foreach ($nameTemplate as $namePart) {
+                    $name .= isset($product[$namePart]) ? $product[$namePart] : $namePart;
                 }
-            } else {
-                $data['model'] = $product['name'];
-                if ($product['weight'] > 0) {
-                    $data['weight'] = number_format($product['weight'], 1, '.', '');
+                $offer->setName($name);
+            }
+
+            if ($this->config->get('yandex_money_market_features') === 'on') {
+                $attributes = $this->model_catalog_product->getProductAttributes($product['product_id']);
+                foreach ($attributes as $attr) {
+                    foreach ($attr['attribute'] as $val) {
+                        $offer->addParameter($val['name'], $val['text']);
+                    }
                 }
-                if ($this->config->get('yandex_money_market_dimensions') && $product['length'] > 0 && $product['width'] > 0 && $product['height'] > 0) {
-                    $data['dimensions'] = number_format($product['length'], 1, '.', '') . '/' . number_format($product['width'], 1, '.', '') . '/' . number_format($product['height'], 1, '.', '');
-                }
-                $data['downloadable'] = 'false';
-                $data['rec'] = explode(',', $product['rel']);
-                $data['param'][] = array('id' => 'weight', 'name' => 'Вес', 'value' => number_format($product['weight'], 1, '.', ''), 'unit' => $product['weight_unit']);
-                if ($this->config->get('yandex_money_market_features')) {
-                    $attributes = $this->model_catalog_product->getProductAttributes($data['id']);
-                    if (count($attributes)) {
-                        foreach ($attributes as $attr) {
-                            foreach ($attr['attribute'] as $val) {
-                                $data['param'][] = array(
-                                    'id' => $val['attribute_id'],
-                                    'name' => $val['name'],
-                                    'value' => $val['text']
-                                );
-                            }
+            }
+
+            $extraCategories = $model->getProductCategories($product['product_id']);
+            $extraCategories[] = (string)$offer->getCategoryId();
+            $allCategories = array_unique($extraCategories);
+
+            foreach ($allCategories as $category) {
+                if (isset($additionalConditionMap[$category])) {
+                    foreach ($additionalConditionMap[$category] as $conditionId) {
+                        $tag       = $this->getConfig('additional_condition_tag', $conditionId);
+                        $typeValue = $this->getConfig('additional_condition_type_value', $conditionId);
+                        if ($typeValue === 'static') {
+                            $value = $this->getConfig('additional_condition_static_value', $conditionId);
+
+                        } else {
+                            $dataValue = $this->getConfig('additional_condition_data_value', $conditionId);
+                            $value     = isset($product[$dataValue]) ? $product[$dataValue] : '';
+                        }
+                        $join = $this->getConfig('additional_condition_join', $conditionId) === 'on';
+
+                        if (!empty($tag) && $value !== '') {
+                            $offer->addCustomTag($tag, $value, $join);
                         }
                     }
                 }
+            }
 
-                if (!$this->makeOfferCombination($data, $product, $shop_currency, $offers_currency, $decimal_place, $market)) {
-                    $data['price'] = number_format(
-                        $this->currency->convert(
-                            $this->tax->calculate(
-                                $data['price'], $product['tax_class_id'], $this->config->get('config_tax')
-                            ),
-                            $shop_currency,
-                            $offers_currency
-                        ),
-                        $decimal_place,
-                        '.',
-                        ''
-                    );
-                    if ($data['price'] > 0) {
-                        $market->add_offer($data['id'], $data, $data['available']);
-                    }
+            if (!$this->makeOfferColorSizeCombination($offer, $product, $market)) {
+                $offer->setPrice($this->formatPrice($offer->getPrice()));
+                if ($offer->getOldPrice()) {
+                    $offer->setOldPrice($this->formatPrice($offer->getOldPrice()));
                 }
+                $market->addOffer($offer);
             }
         }
         $this->response->addHeader('Content-Type: application/xml; charset=utf-8');
-        $this->response->setOutput($market->get_xml());
+        $this->response->setOutput($market->getXml($this->config->get('yandex_money_market_simple')));
     }
 
-    private function makeOfferCombination($data, $product, $shop_currency, $offers_currency, $decimal_place, $object)
-    {
+    /**
+     * @param Offer $commonOffer
+     * @param $product
+     * @param YandexMarket $market
+     * @return bool
+     */
+    private function makeOfferColorSizeCombination(
+        $commonOffer,
+        $product,
+        $market
+    ) {
         $colors = array();
-        $sizes = array();
+        $sizes  = array();
 
-        $opts = $this->config->get('yandex_money_market_color_options');
-        if (!empty($opts) && is_array($opts)) {
-            $colors = $this->getMarketModel()->getProductOptions($opts, $product['product_id']);
+        if ($this->config->get('yandex_money_market_option_color_enabled') === 'on') {
+            $colorOptionId = $this->config->get('yandex_money_market_option_color_option_id');
+            $colors        = $this->getMarketModel()->getProductOptions(array('option_id' => $colorOptionId),
+                $product['product_id']);
         }
-        $opts = $this->config->get('yandex_money_market_size_options');
-        if (!empty($opts) && is_array($opts)) {
-            $sizes = $this->getMarketModel()->getProductOptions($opts, $product['product_id']);
+
+        if ($this->config->get('yandex_money_market_option_size_enabled') === 'on') {
+            $sizeOptionId = $this->config->get('yandex_money_market_option_size_option_id');
+            $sizes        = $this->getMarketModel()->getProductOptions(array('option_id' => $sizeOptionId),
+                $product['product_id']);
         }
 
         if (!count($colors) && !count($sizes)) {
             return false;
         }
 
-        if(count($colors)) {
+        /** @var Offer[] $colorOffers */
+        $colorOffers = array();
+        if (count($colors)) {
             foreach ($colors as $option) {
-                $data_temp = $data;
-                $data_temp['model'].= ', '.$option['option_name'].' '.$option['name'];
-                $data_temp['param'][] = array('name' => $option['option_name'], 'value' => $option['name']);
-                $data_temp['id'] = $product['product_id'].'c'.$option['option_value_id'];
-                $data_temp['available'] = $data['available'];
-                if ($option['price_prefix'] == '+') {
-                    $data_temp['price']+= $option['price'];
-                    if (isset($data_temp['oldprice'])) {
-                        $data_temp['oldprice'] += $option['price'];
-                    }
-                }
-                elseif ($option['price_prefix'] == '-') {
-                    $data_temp['price']-= $option['price'];
-                    if (isset($data_temp['oldprice'])) {
-                        $data_temp['oldprice'] -= $option['price'];
-                    }
-                }
-                elseif ($option['price_prefix'] == '=') {
-                    $data_temp['price'] = $option['price'];
-                }
-                $data_temp = $this->setOptionedWeight($data_temp, $option);
-                $data_temp['url'].= '#'.$option['product_option_value_id'];
-                $colors_array[] = $data_temp;
+                $offer = clone $commonOffer;
+                $offer->setGroupId($product['product_id']);
+                $offer->setId($product['product_id'].'c'.$option['option_value_id']);
+                $offer->setModel($offer->getModel().', '.$option['name']);
+                $offer->addParameter($option['option_name'], $option['name']);
+                $this->updateOfferPrice($offer, $option['price_prefix'], $option['price']);
+                $this->updateOfferWeight($offer, $option, $product['weight_unit']);
+                $offer->setUrl($offer->getUrl().'#'.$option['product_option_value_id']);
+                $colorOffers[] = $offer;
             }
         } else {
-            $colors_array[] = $data;
+            $colorOffers[] = $commonOffer;
         }
 
-        unset($data_temp);
-        unset($option);
-        foreach($colors_array as $i => $data) {
+        foreach ($colorOffers as $colorOffer) {
             if (count($sizes)) {
                 foreach ($sizes as $option) {
-                    $data_temp = $data;
-                    $data_temp['id'] .= 'c' . $option['option_value_id'];
-                    $data_temp['model'] .= ', ' . $option['option_name'] . ' ' . $option['name'];
-                    $data_temp['param'][] = array('name' => $option['option_name'], 'value' => $option['name']);
-                    $data_temp['available'] = $data['available'];
-                    if ($option['price_prefix'] == '+') {
-                        $data_temp['price'] += $option['price'];
-                        if (isset($data_temp['oldprice']))
-                            $data_temp['oldprice'] += $option['price'];
-                    } elseif ($option['price_prefix'] == '-') {
-                        $data_temp['price'] -= $option['price'];
-                        if (isset($data_temp['oldprice']))
-                            $data_temp['oldprice'] -= $option['price'];
-                    } elseif ($option['price_prefix'] == '=') {
-                        $data_temp['price'] = $option['price'];
+                    $offer = clone $colorOffer;
+                    $offer->setGroupId($product['product_id']);
+                    $offer->setId($offer->getId().'s'.$option['option_value_id']);
+                    $offer->setModel($offer->getModel().', '.$option['name']);
+                    $offer->addParameter($option['option_name'], $option['name']);
+                    $this->updateOfferPrice($offer, $option['price_prefix'], $option['price']);
+                    $this->updateOfferWeight($offer, $option, $product['weight_unit']);
+                    $separator = count($colors) ? '-' : '#';
+                    $offer->setUrl($offer->getUrl().$separator.$option['product_option_value_id']);
+                    $offer->setPrice($this->formatPrice($offer->getPrice()));
+                    if ($offer->getOldPrice()) {
+                        $offer->setOldPrice($this->formatPrice($offer->getOldPrice()));
                     }
-
-                    $data_temp = $this->setOptionedWeight($data_temp, $option);
-                    if (count($colors)) {
-                        $data_temp['url'] .= '-' . $option['product_option_value_id'];
-                    } else {
-                        $data_temp['url'] .= '#' . $option['product_option_value_id'];
-                    }
-
-                    $data_temp['price'] = number_format($this->currency->convert($this->tax->calculate($data_temp['price'], $product['tax_class_id'], $this->config->get('config_tax')), $shop_currency, $offers_currency), $decimal_place, '.', '');
-                    if (isset($data_temp['oldprice'])) {
-                        $data_temp['oldprice'] = number_format($this->currency->convert($this->tax->calculate($data_temp['oldprice'], $product['tax_class_id'], $this->config->get('config_tax')), $shop_currency, $offers_currency), $decimal_place, '.', '');
-                    }
-                    if ($data['price'] > 0) {
-                        $object->add_offer($data_temp['id'], $data_temp, $data_temp['available'], $product['product_id']);
-                    }
-                    unset($data_temp);
+                    $market->addOffer($offer);
                 }
             } else {
-                $data['price'] = number_format($this->currency->convert($this->tax->calculate($data['price'], $product['tax_class_id'], $this->config->get('config_tax')), $shop_currency, $offers_currency), $decimal_place, '.', '');
-                if ($data['price'] > 0) {
-                    $object->add_offer($data['id'], $data, $data['available'], $product['product_id']);
+                $colorOffer->setPrice($this->formatPrice($colorOffer->getPrice()));
+                if ($colorOffer->getOldPrice()) {
+                    $colorOffer->setOldPrice($this->formatPrice($colorOffer->getOldPrice()));
                 }
+                $market->addOffer($colorOffer);
             }
         }
         return true;
+    }
+
+    /**
+     * @param $price
+     * @return string
+     */
+    private function formatPrice($price)
+    {
+        $price = number_format((float)$price, 2, '.', '');
+
+        return $price < 0 ? 0 : $price;
+    }
+
+    /**
+     * @param Offer $offer
+     * @param $price_prefix
+     * @param $price
+     */
+    private function updateOfferPrice($offer, $price_prefix, $price)
+    {
+        if ($price_prefix === '+') {
+            $offer->incPrice($price);
+            if ($offer->getOldPrice()) {
+                $offer->incOldPrice($price);
+            }
+        } elseif ($price_prefix === '-') {
+            $offer->decPrice($price);
+            if ($offer->getOldPrice()) {
+                $offer->decOldPrice($price);
+            }
+        } elseif ($price_prefix === '=') {
+            $offer->setPrice($price);
+            if ($offer->getOldPrice()) {
+                $offer->setOldPrice(0);
+            }
+        }
+    }
+
+    /**
+     * @param Offer $offer
+     * @param array $option
+     * @param string $weightUnit
+     */
+    private function updateOfferWeight($offer, $option, $weightUnit)
+    {
+        if (!isset($option['weight']) || !isset($option['weight_prefix'])) {
+            return;
+        }
+        $weight = $offer->getWeight();
+        if (!$weight) {
+            return;
+        }
+        if ($option['weight_prefix'] === '+') {
+            $weight += $option['weight'];
+        } elseif ($option['weight_prefix'] === '-') {
+            $weight -= $option['weight'];
+        }
+
+        $offer->setWeight($weight, $weightUnit);
     }
 
     private function setOptionedWeight($product, $option)
@@ -788,5 +890,33 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->_marketModel = new \YandexMoneyModule\Model\MarketModel($this->registry);
         }
         return $this->_marketModel;
+    }
+
+    /**
+     * @param array $array
+     * @param string $key
+     * @param null $default
+     * @return null
+     */
+    private function array_get($array, $key, $default = null)
+    {
+        return isset($array[$key]) ? $array[$key] : $default;
+    }
+
+    /**
+     * @param $key
+     * @param $index
+     * @param null $default
+     * @return null
+     */
+    private function getConfig($key, $index = null, $default = null)
+    {
+        return $index === null
+            ? $this->config->get('yandex_money_market_'.$key)
+            : $this->array_get(
+                $this->config->get('yandex_money_market_'.$key),
+                $index,
+                $default
+            );
     }
 }
