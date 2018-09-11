@@ -30,6 +30,7 @@ class KassaModel extends AbstractPaymentModel
     protected $enableHoldMode;
     protected $holdOrderStatus;
     protected $orderCanceledStatus;
+    protected $addInstallmentsBlock;
 
     public function __construct(Config $config)
     {
@@ -40,6 +41,7 @@ class KassaModel extends AbstractPaymentModel
         $this->epl                   = $this->getConfigValue('payment_mode') !== 'shop';
         $this->useYandexButton       = (bool)$this->getConfigValue('use_yandex_button');
         $this->useInstallmentsButton = (bool)$this->getConfigValue('use_installments_button');
+        $this->addInstallmentsBlock  = (bool)$this->getConfigValue('add_installments_block');
         $this->payment_description   = $this->getConfigValue('payment_description');
         $this->enableHoldMode        = (bool)$this->getConfigValue('enable_hold_mode');
         $this->holdOrderStatus       = $this->getConfigValue('hold_order_status');
@@ -107,6 +109,16 @@ class KassaModel extends AbstractPaymentModel
     public function useInstallmentsButton()
     {
         return $this->useInstallmentsButton;
+    }
+
+    public function getAddInstallmentsBlock()
+    {
+        return $this->addInstallmentsBlock;
+    }
+
+    public function showInstallmentsBlock()
+    {
+        return $this->useInstallmentsButton() && $this->getAddInstallmentsBlock();
     }
 
     public function isEnabledInstallmentsMethod()

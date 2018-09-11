@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -281,9 +281,10 @@
                     && $this->config->get('yandex_money_kassa_use_installments_button');
                 $enableCreditInShopSide = $this->config->get('yandex_money_kassa_payment_mode') === 'shop'
                     && $this->config->get('yandex_money_kassa_payment_method_installments');
-                $showInstallmentsInfo = $this->config->get('yandex_money_kassa_enabled') && ($enableCreditInEpl || $enableCreditInShopSide);
+                $showInstallmentsBlock = $this->config->get('yandex_money_kassa_enabled') && ($enableCreditInEpl || $enableCreditInShopSide)
+                    && $this->config->get('yandex_money_kassa_add_installments_block');
 
-                $data['yamoney_showInstallmentsInfo'] = $showInstallmentsInfo;
+                $data['yamoney_showInstallmentsBlock'] = $showInstallmentsBlock;
                 $data['yamoney_shop_id'] = $this->config->get('yandex_money_kassa_shop_id');
                 $data['yamoney_language_code'] = $this->language->get('code');
             ]]></add>
@@ -300,7 +301,7 @@
         <operation>
             <search><![CDATA[<div id="product"> {% if options %}]]></search>
             <add position="before"><![CDATA[
-                {% if yamoney_showInstallmentsInfo %}
+                {% if yamoney_showInstallmentsBlock %}
                     <ul class="list-unstyled"><li class="installments-info"></li></ul>
                 {% endif %}
             ]]></add>
@@ -309,17 +310,19 @@
             <search><![CDATA[{{ footer }}]]></search>
             <add position="before"><![CDATA[
                 <script>
-                    if (typeof YandexCheckoutCreditUI !== "undefined") {
-                        const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
-                            shopId: '{{ yamoney_shop_id }}',
-                            sum: parseFloat('{{ cost }}'),
-                            language: '{{ yamoney_language_code }}'
-                        });
-                        const yamoneyCheckoutCreditButton = yamoneyCheckoutCreditUI({
-                            type: 'info',
-                            domSelector: '.installments-info'
-                        });
-                    }
+                    {% if yamoney_showInstallmentsBlock %}
+                        if (typeof YandexCheckoutCreditUI !== "undefined") {
+                            const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+                                shopId: '{{ yamoney_shop_id }}',
+                                sum: parseFloat('{{ cost }}'),
+                                language: '{{ yamoney_language_code }}'
+                            });
+                            yamoneyCheckoutCreditUI({
+                                type: 'info',
+                                domSelector: '.installments-info'
+                            });
+                        }
+                    {% endif %}
                     $(window).on("load", function () {
                         window.dataLayer = window.dataLayer || [];
                         dataLayer.push({ecommerce: {detail: {products: [{
