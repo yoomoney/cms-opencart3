@@ -84,6 +84,12 @@
                            class="form-check-input"{{ kassa.useInstallmentsButton() ? ' checked' : '' }} />
                     {{ language.get('kassa_use_installments_button_label') }}
                 </label>
+                <br>
+                <label class="form-check-label" style="margin-left: 20px;">
+                    <input type="checkbox" name="yandex_money_kassa_add_installments_block" value="on"
+                           class="form-check-input"{{ kassa.getAddInstallmentsBlock() ? ' checked' : '' }} />
+                    {{ language.get('kassa_add_installments_block_label') }}
+                </label>
             </div>
             <div class="col-sm-10 col-sm-offset-2">
                 <label class="form-check-label">
@@ -101,6 +107,11 @@
                         {{ language.get('kassa_payment_method_' ~ id) }}
                     </label><br/>
                 {% endfor %}
+                <label class="form-check-label" style="margin-left: 20px;">
+                    <input type="checkbox" name="yandex_money_kassa_add_installments_block" value="on"
+                           class="form-check-input"{{ kassa.getAddInstallmentsBlock() ? ' checked' : '' }} />
+                    {{ language.get('kassa_add_installments_block_label') }}
+                </label>
                 {% if error_kassa_payment_method %}
                     <div class="text-danger">{{ error_kassa_payment_method }}</div>
                 {% endif %}
@@ -441,6 +452,13 @@
 
         jQuery('#kassa-invoice').bind('change', function () {
             toggleInvoice(this.checked);
+        });
+
+        jQuery('input[name=yandex_money_kassa_add_installments_block]').on('change', function () {
+            var checked = this.checked;
+            jQuery('input[name=yandex_money_kassa_add_installments_block]').each(function() {
+                this.checked = checked;
+            });
         });
     });
 

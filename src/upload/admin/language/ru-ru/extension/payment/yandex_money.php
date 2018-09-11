@@ -29,6 +29,7 @@ $_['kassa_payment_mode_label'] = 'Выбор способа оплаты';
 $_['kassa_payment_mode_kassa_label'] = 'На стороне Кассы';
 $_['kassa_use_yandex_button_label'] = 'Назвать кнопку оплаты «Заплатить через Яндекс»';
 $_['kassa_use_installments_button_label'] = 'Добавить кнопку «Заплатить по частям» на страницу оформления заказа';
+$_['kassa_add_installments_block_label'] = 'Добавить блок «Заплатить по частям» в карточки товаров';
 $_['kassa_payment_mode_shop_label'] = 'На стороне магазина';
 
 $_['kassa_payment_method_bank_card'] = 'Банковские карты';
