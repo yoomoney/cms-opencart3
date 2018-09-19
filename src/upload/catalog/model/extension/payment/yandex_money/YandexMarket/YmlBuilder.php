@@ -208,8 +208,11 @@ class YmlBuilder
 
         if ($offer->hasCustomTags()) {
             foreach ($offer->getCustomTags() as $tag => $values) {
+                $openTag      = htmlspecialchars_decode($tag);
+                $tagAndParams = explode(' ', $openTag, 2);
+                $closeTag     = reset($tagAndParams);
                 foreach ($values as $value) {
-                    $result .= '        <'.$tag.'>'.$value.'</'.$tag.'>'.PHP_EOL;
+                    $result .= '        <'.$openTag.'>'.$value.'</'.$closeTag.'>'.PHP_EOL;
                 }
             }
         }

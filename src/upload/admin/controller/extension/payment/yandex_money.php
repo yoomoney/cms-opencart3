@@ -9,7 +9,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.1.1';
+    const MODULE_VERSION = '1.1.2';
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
