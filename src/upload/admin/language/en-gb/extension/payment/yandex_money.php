@@ -372,3 +372,5 @@ $_['column_product']  = 'Наименование товара';
 $_['column_quantity'] = 'Количество товара';
 $_['column_price']    = 'Цена товара';
 $_['column_total']    = 'Итого';
+
+$_['nps_text'] = '';
