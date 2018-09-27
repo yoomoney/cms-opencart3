@@ -9,7 +9,12 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.1.2';
+    const MODULE_VERSION = '1.1.3';
+
+    /**
+     * @var integer
+     */
+    private $npsRetryAfterDays = 90;
 
     public $fields_metrika = array(
         'yandex_money_metrika_active',
@@ -287,7 +292,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('catalog/category');
         $data['categories'] = $this->model_catalog_category->getCategories(0);
         $this->document->setTitle($this->language->get('heading_title_ya'));
-        if (isset($this->request->post['yandex_money_market_category_list'])) {
+        if (isset($this->request->post['yandex_money_market_category_list'])
+            && is_array($this->request->post['yandex_money_market_category_list'])
+        ) {
             $categories = $this->request->post['yandex_money_market_category_list'];
         } elseif (is_array($this->config->get('yandex_money_market_category_list'))) {
             $categories = $this->config->get('yandex_money_market_category_list');
@@ -321,7 +328,24 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['market_status'] = array_merge($data['market_status'], $this->session->data['market_status']);
         }
 
+        $data['yandex_money_nps_prev_vote_time'] = $this->config->get('yandex_money_nps_prev_vote_time');
+        $data['yandex_money_nps_current_vote_time'] = time();
+        $data['callback_off_nps'] = $this->url->link('extension/payment/'.self::MODULE_NAME.'/vote_nps', 'user_token='.$this->session->data['user_token'], true);
+        $data['nps_block_text'] = sprintf($this->language->get('nps_text'), '<a href="#" onclick="return false;" class="yandex_money_nps_link">', '</a>');
+        $isTimeForVote = $data['yandex_money_nps_current_vote_time'] > (int)$data['yandex_money_nps_prev_vote_time']
+            + $this->npsRetryAfterDays * 86400;
+        $data['is_needed_show_nps'] = $isTimeForVote
+            && substr($this->getModel()->getKassaModel()->getPassword(), 0, 5) === 'live_'
+            && $data['nps_block_text'];
         $this->response->setOutput($this->load->view('extension/payment/yandex_money', $data));
+    }
+
+    /**
+     * Экшен для сохранения времени голосования в NPS
+     */
+    public function vote_nps() {
+        $this->load->model('setting/setting');
+        $this->model_setting_setting->editSettingValue('yandex_money', 'yandex_money_nps_prev_vote_time', time());
     }
 
     public function logs()

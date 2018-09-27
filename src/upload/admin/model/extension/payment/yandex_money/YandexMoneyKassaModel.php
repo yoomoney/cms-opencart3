@@ -11,7 +11,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     /** @var \YandexCheckout\Client */
     private $apiClient;
 
-    public function __construct(Config $config, $apiClient)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 
@@ -19,6 +19,13 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
         $this->invoiceSubject = $config->get('yandex_money_kassa_invoice_subject');
         $this->invoiceMessage = $config->get('yandex_money_kassa_invoice_message');
         $this->invoiceLogo = (bool)$config->get('yandex_money_kassa_invoice_logo');
+    }
+
+    /**
+     * @param $apiClient
+     */
+    public function setApiClient($apiClient)
+    {
         $this->apiClient = $apiClient;
     }
 
@@ -30,11 +37,13 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     public function setShopId($value)
     {
         $this->shopId = $value;
+        $this->apiClient->getApiClient()->setShopId($value);
     }
 
     public function setPassword($value)
     {
         $this->password = $value;
+        $this->apiClient->getApiClient()->setShopPassword($value);
     }
 
     public function setEpl($value)
