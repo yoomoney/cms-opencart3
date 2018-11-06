@@ -26,9 +26,8 @@
 
 namespace YandexCheckout\Request\Payments\Payment;
 
-use YandexCheckout\Common\AbstractRequest;
+use YandexCheckout\Common\AbstractPaymentRequest;
 use YandexCheckout\Model\AmountInterface;
-use YandexCheckout\Model\Receipt;
 use YandexCheckout\Model\ReceiptInterface;
 
 /**
@@ -37,84 +36,8 @@ use YandexCheckout\Model\ReceiptInterface;
  * @property AmountInterface $amount Подтверждаемая сумма оплаты
  * @property ReceiptInterface $receipt Данные фискального чека 54-ФЗ
  */
-class CreateCaptureRequest extends AbstractRequest implements CreateCaptureRequestInterface
+class CreateCaptureRequest extends AbstractPaymentRequest implements CreateCaptureRequestInterface
 {
-    /**
-     * @var AmountInterface Подтверждаемая сумма оплаты
-     */
-    private $_amount;
-
-    /**
-     * @var Receipt Данные фискального чека 54-ФЗ
-     * @since 1.0.2
-     */
-    private $_receipt;
-
-    /**
-     * Возвращает подтвердаемую сумму оплаты
-     * @return AmountInterface Подтверждаемая сумма оплаты
-     */
-    public function getAmount()
-    {
-        return $this->_amount;
-    }
-
-    /**
-     * Проверяет была ли установлена сумма оплаты
-     * @return bool True если сумма оплаты была установлена, false если нет
-     */
-    public function hasAmount()
-    {
-        return !empty($this->_amount);
-    }
-
-    /**
-     * Устанавливает сумму оплаты
-     * @param AmountInterface $value Подтверждаемая сумма оплаты
-     */
-    public function setAmount(AmountInterface $value)
-    {
-        $this->_amount = $value;
-    }
-
-    /**
-     * Возвращает чек, если он есть
-     * @return ReceiptInterface|null Данные фискального чека 54-ФЗ или null если чека нет
-     * @since 1.0.2
-     */
-    public function getReceipt()
-    {
-        return $this->_receipt;
-    }
-
-    /**
-     * Устанавливает чек
-     * @param ReceiptInterface $value Данные фискального чека 54-ФЗ
-     * @since 1.0.2
-     */
-    public function setReceipt(ReceiptInterface $value)
-    {
-        $this->_receipt = $value;
-    }
-
-    /**
-     * Проверяет наличие чека в создаваемом платеже
-     * @return bool True если чек есть, false если нет
-     * @since 1.0.2
-     */
-    public function hasReceipt()
-    {
-        return $this->_receipt !== null;
-    }
-
-    /**
-     * Удаляет чек из запроса
-     * @since 1.0.2
-     */
-    public function removeReceipt()
-    {
-        $this->_receipt = null;
-    }
 
     /**
      * Валидирует объект запроса
@@ -135,14 +58,6 @@ class CreateCaptureRequest extends AbstractRequest implements CreateCaptureReque
             if (empty($email) && empty($phone)) {
                 $this->setValidationError('Both email and phone values are empty in receipt');
                 return false;
-            }
-            if ($this->_receipt->getTaxSystemCode() === null) {
-                foreach ($this->_receipt->getItems() as $item) {
-                    if ($item->getVatCode() === null) {
-                        $this->setValidationError('Item vat_id and receipt tax_system_id not specified');
-                        return false;
-                    }
-                }
             }
         }
         return true;

@@ -117,50 +117,131 @@
                 {% endif %}
             </div>
         </div>
+        <!-- Sbbol Start-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   for="b2b_sberbank_enabled">{{ language.get('b2b_sberbank_label') }}</label>
+            <div class="col-sm-10">
+                <input type="checkbox" id="b2b_sberbank_enabled" name="yandex_money_kassa_b2b_sberbank_enabled"
+                       value="on"{{ kassa.getB2bSberbankEnabled() ? ' checked' : '' }} />
+                {{ language.get('b2b_sberbank_on_label') }}
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"
+                           for="b2b-sberbank-description-template">{{ language.get('b2b_sberbank_template_label') }}</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="yandex_money_kassa_b2b_sberbank_payment_purpose"
+                               value="{{ kassa.getB2bSberbankPaymentPurpose() }}"
+                               placeholder="{{ language.get('kassa_default_payment_description') }}"
+                               id="_b2b_sberbank_payment_purpose" class="form-control"/>
+                        <p class="help-block">{{ language.get('b2b_sberbank_template_help') }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                        {{ language.get('b2b_sberbank_vat_default_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="b2b-tax-rate-default" name="yandex_money_kassa_b2b_tax_rate_default"
+                                class="form-control">
+                            {% for id, name in b2bTaxRates %}
+                                <option value="{{ id }}"{{ kassa.getB2bSberbankDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block">{{ language.get('b2b_sberbank_vat_default_help') }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">
+                        {{ language.get('b2b_sberbank_vat_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>{{ language.get('b2b_sberbank_vat_cms_label') }}</th>
+                                <th>{{ language.get('b2b_sberbank_vat_sbbol_label') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for id, name in shopTaxRates %}
+                                <tr>
+                                    <td>
+                                        <label class="control-label" for="b2b-tax-rate-{{ id }}">{{ name }}</td>
+                                    <td>
+                                        <select id="b2b-tax-rate-{{ id }}"
+                                                name="yandex_money_kassa_b2b_tax_rates[{{ id }}]"
+                                                class="form-control">
+                                            {% for taxRateId, taxRateName in b2bTaxRates %}
+                                                <option value="{{ taxRateId }}"{{ kassa.getB2bTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sbbol End -->
+
 
         <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
                 <label>
-                    <input type="checkbox" id="kassa-enable-hold-mode" name="yandex_money_kassa_enable_hold_mode"
+                    <input type="checkbox" id="kassa-enable-hold-mode"
+                           name="yandex_money_kassa_enable_hold_mode"
                            value="on" {{ kassa.getEnableHoldMode() ? 'checked' : '' }}/>
                     {{ language.get('kassa_hold_setting_label') }}
                 </label>
             </div>
+            <div class="form-group">
+                <div class="col-sm-10 col-sm-offset-2">
+                    <div class="statuses-wrapper">
 
-            <div class="statuses-wrapper">
+                        <div class="col-sm-2 control-label" for="kassa-statuses-label">
+                        </div>
+                        <div id="kassa-statuses-label" class="col-sm-10">
+                            <label> {{ language.get('kassa_statuses_description_label') }} </label>
+                        </div>
 
-                <div class="col-sm-2 control-label" for="kassa-statuses-label">
+                        <label class="col-sm-2 control-label" for="kassa-hold-order-status">
+                            {{ language.get('kassa_hold_order_status_label') }}
+                        </label>
+                        <div class="col-sm-10" style="margin-bottom: 10px;">
+                            <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status"
+                                    class="form-control">
+                                {% for id, name in orderStatuses %}
+                                    <option value="{{ id }}"{{ kassa.getHoldOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <label class="col-sm-2 control-label" for="kassa-cancel-order-status">
+                            {{ language.get('kassa_cancel_order_status_label') }}
+                        </label>
+
+                        <div class="col-sm-10">
+                            <select id="kassa-cancel-order-status" name="yandex_money_kassa_cancel_order_status"
+                                    class="form-control">
+
+                                {% for id, name in orderStatuses %}
+                                    <option value="{{ id }}"{{ kassa.getOrderCanceledStatus() == id ? ' selected' : '' }}> {{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
                 </div>
-                <div id="kassa-statuses-label" class="col-sm-10">
-                    <label> {{ language.get('kassa_statuses_description_label') }} </label>
-                </div>
-
-                <label class="col-sm-2 control-label" for="kassa-hold-order-status">
-                    {{ language.get('kassa_hold_order_status_label') }}
-                </label>
-                <div class="col-sm-10" style="margin-bottom: 10px;">
-                    <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status"
-                            class="form-control">
-                        {% for id, name in orderStatuses %}
-                            <option value="{{ id }}"{{ kassa.getHoldOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <label class="col-sm-2 control-label" for="kassa-cancel-order-status">
-                    {{ language.get('kassa_cancel_order_status_label') }}
-                </label>
-
-                <div class="col-sm-10">
-                    <select id="kassa-cancel-order-status" name="yandex_money_kassa_cancel_order_status"
-                            class="form-control">
-
-                        {% for id, name in orderStatuses %}
-                            <option value="{{ id }}"{{ kassa.getOrderCanceledStatus() == id ? ' selected' : '' }}> {{ name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
             </div>
         </div>
 
@@ -196,56 +277,61 @@
                 </label>
             </div>
         </div>
-        <div class="form-group receipt-only">
+        <div class="form-group">
             <div class="col-sm-10 col-sm-offset-2">
-                <h4>{{ language.get('kassa_send_receipt_tax_rate_title') }}</h4>
+                <div class="form-group receipt-only">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <h4>{{ language.get('kassa_send_receipt_tax_rate_title') }}</h4>
+                    </div>
+                </div>
+                <div class="form-group receipt-only">
+                    <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                        {{ language.get('kassa_tax_rate_default_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="kassa-tax-rate-default" name="yandex_money_kassa_tax_rate_default"
+                                class="form-control">
+                            {% for id, name in kassaTaxRates %}
+                                <option value="{{ id }}"{{ kassa.getDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block">{{ language.get('kassa_tax_rate_default_description') }}</p>
+                    </div>
+                </div>
+                <div class="form-group receipt-only">
+                    <label class="col-sm-2 control-label">
+                        {{ language.get('kassa_tax_rate_table_caption') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>{{ language.get('kassa_shop_tax_rate_header') }}</th>
+                                <th>{{ language.get('kassa_kassa_tax_rate_header') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for id, name in shopTaxRates %}
+                                <tr>
+                                    <td>
+                                        <label class="control-label" for="kassa-tax-rate-{{ id }}">{{ name }}</td>
+                                    <td>
+                                        <select id="kassa-tax-rate-{{ id }}"
+                                                name="yandex_money_kassa_tax_rates[{{ id }}]"
+                                                class="form-control">
+                                            {% for taxRateId, taxRateName in kassaTaxRates %}
+                                                <option value="{{ taxRateId }}"{{ kassa.getTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="form-group receipt-only">
-            <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
-                {{ language.get('kassa_tax_rate_default_label') }}
-            </label>
-            <div class="col-sm-10">
-                <select id="kassa-tax-rate-default" name="yandex_money_kassa_tax_rate_default" class="form-control">
-                    {% for id, name in kassaTaxRates %}
-                        <option value="{{ id }}"{{ kassa.getDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
-                    {% endfor %}
-                </select>
-                <p class="help-block">{{ language.get('kassa_tax_rate_default_description') }}</p>
-            </div>
-        </div>
-        <div class="form-group receipt-only">
-            <label class="col-sm-2 control-label">
-                {{ language.get('kassa_tax_rate_table_caption') }}
-            </label>
-            <div class="col-sm-10">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>{{ language.get('kassa_shop_tax_rate_header') }}</th>
-                        <th>{{ language.get('kassa_kassa_tax_rate_header') }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for id, name in shopTaxRates %}
-                        <tr>
-                            <td>
-                                <label class="control-label" for="kassa-tax-rate-{{ id }}">{{ name }}</td>
-                            <td>
-                                <select id="kassa-tax-rate-{{ id }}" name="yandex_money_kassa_tax_rates[{{ id }}]"
-                                        class="form-control">
-                                    {% for taxRateId, taxRateName in kassaTaxRates %}
-                                        <option value="{{ taxRateId }}"{{ kassa.getTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <div class="form-group">
             <label class="col-sm-2 control-label">Показывать ссылку на сайт Кассы</label>
             <div class="col-sm-10">
@@ -456,7 +542,7 @@
 
         jQuery('input[name=yandex_money_kassa_add_installments_block]').on('change', function () {
             var checked = this.checked;
-            jQuery('input[name=yandex_money_kassa_add_installments_block]').each(function() {
+            jQuery('input[name=yandex_money_kassa_add_installments_block]').each(function () {
                 this.checked = checked;
             });
         });

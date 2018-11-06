@@ -119,7 +119,7 @@ class Receipt extends AbstractObject implements ReceiptInterface
      *
      * @param ReceiptItemInterface $value Объект добавляемой в чек позиции
      */
-    public function addItem(ReceiptItemInterface $value)
+    public function addItem($value)
     {
         $this->_items[] = $value;
         if ($value->isShipping()) {

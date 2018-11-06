@@ -38,36 +38,38 @@ use YandexCheckout\Common\AbstractEnum;
  * |cash|Платеж наличными|
  * |mobile_balance|Платеж с баланса мобильного телефона|
  * |apple_pay|Платеж ApplePay|
- * |android_pay|Платеж AndroidPay|
+ * |google_pay|Платеж Google Pay|
  * |qiwi|Платеж из кошелька Qiwi|
  * |installments|Заплатить по частям|
- *
+ * |b2b_sberbank|Сбербанк Бизнес Онлайн|
  */
 class PaymentMethodType extends AbstractEnum
 {
-    const YANDEX_MONEY = 'yandex_money';
-    const BANK_CARD = 'bank_card';
-    const SBERBANK = 'sberbank';
-    const CASH = 'cash';
+    const YANDEX_MONEY   = 'yandex_money';
+    const BANK_CARD      = 'bank_card';
+    const SBERBANK       = 'sberbank';
+    const CASH           = 'cash';
     const MOBILE_BALANCE = 'mobile_balance';
-    const APPLE_PAY = 'apple_pay';
-    const ANDROID_PAY = 'android_pay';
-    const QIWI = 'qiwi';
-    const WEBMONEY = 'webmoney';
-    const ALFABANK = 'alfabank';
-    const INSTALLMENTS = 'installments';
+    const APPLE_PAY      = 'apple_pay';
+    const GOOGLE_PAY     = 'google_pay';
+    const QIWI           = 'qiwi';
+    const WEBMONEY       = 'webmoney';
+    const ALFABANK       = 'alfabank';
+    const INSTALLMENTS   = 'installments';
+    const B2B_SBERBANK   = 'b2b_sberbank';
 
     protected static $validValues = array(
-        self::YANDEX_MONEY => true,
-        self::BANK_CARD => true,
-        self::SBERBANK => true,
-        self::CASH => true,
+        self::YANDEX_MONEY   => true,
+        self::BANK_CARD      => true,
+        self::SBERBANK       => true,
+        self::CASH           => true,
         self::MOBILE_BALANCE => false,
-        self::APPLE_PAY => false,
-        self::ANDROID_PAY => false,
-        self::QIWI => true,
-        self::WEBMONEY => true,
-        self::ALFABANK => true,
-        self::INSTALLMENTS => true,
+        self::APPLE_PAY      => false,
+        self::GOOGLE_PAY     => false,
+        self::QIWI           => true,
+        self::WEBMONEY       => true,
+        self::ALFABANK       => true,
+        self::INSTALLMENTS   => true,
+        self::B2B_SBERBANK   => true,
     );
 }

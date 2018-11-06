@@ -37,6 +37,7 @@ use YandexCheckout\Model\PaymentMethodType;
  * Объект, описывающий метод оплаты банковской картой
  * @property string $type Тип объекта
  * @property string $last4 Последние 4 цифры номера карты
+ * @property string $first6 Первые 6 цифр номера карты
  * @property string $expiryYear Срок действия, год
  * @property string $expiry_year Срок действия, год
  * @property string $expiryMonth Срок действия, месяц
@@ -50,6 +51,11 @@ class PaymentMethodBankCard extends AbstractPaymentMethod
      * @var string Последние 4 цифры номера карты
      */
     private $_last4;
+
+    /**
+     * @var string Первые 6 цифр номера карты
+     */
+    private $_first6;
 
     /**
      * @var string Срок действия, год
@@ -97,6 +103,38 @@ class PaymentMethodBankCard extends AbstractPaymentMethod
         } else {
             throw new InvalidPropertyValueTypeException(
                 'Invalid card last4 value type', 0, 'PaymentMethodBankCard.last4', $value
+            );
+        }
+    }
+
+    /**
+     * @return string
+     * @since 1.0.14
+     */
+    public function getFirst6()
+    {
+        return $this->_first6;
+    }
+
+    /**
+     * @param $value
+     * @since 1.0.14
+     */
+    public function setFirst6($value)
+    {
+        if ($value === null || $value === '') {
+            throw new EmptyPropertyValueException('Empty card first6 value', 0, 'PaymentMethodBankCard.first6');
+        } elseif (TypeCast::canCastToString($value)) {
+            if (preg_match('/^[0-9]{6}$/', (string)$value)) {
+                $this->_first6 = (string)$value;
+            } else {
+                throw new InvalidPropertyValueException(
+                    'Invalid card first6 value', 0, 'PaymentMethodBankCard.first6', $value
+                );
+            }
+        } else {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid card first6 value type', 0, 'PaymentMethodBankCard.first6', $value
             );
         }
     }

@@ -374,3 +374,18 @@ $_['column_price']    = 'Цена товара';
 $_['column_total']    = 'Итого';
 
 $_['nps_text'] = '';
+
+$_['b2b_sberbank_label']             = 'Enable payments via Sberbank Business Online';
+$_['b2b_sberbank_on_label']          = 'If you enable this option, you will be able to accept online payments from legal entities. Learn more at the <a href="https://checkout.yandex.com">Yandex.Checkout website</a>.';
+$_['b2b_sberbank_template_label']    = 'Template for payment details';
+$_['b2b_sberbank_vat_default_label'] = 'Default VAT rate';
+$_['b2b_sberbank_template_help']     = 'These payment details will be shown in the payment order.';
+$_['b2b_sberbank_vat_default_help']  = 'This rate will be sent to Sberbank Business Online if there\'s no other rate indicated in the payment description.';
+$_['b2b_sberbank_vat_label']         = 'Compare the VAT rates in your store with the rates for Sberbank Business Online';
+$_['b2b_sberbank_vat_cms_label']     = 'VAT rate at your store';
+$_['b2b_sberbank_vat_sbbol_label']   = 'VAT rate for Sberbank Business Online';
+$_['b2b_tax_rate_untaxed_label']     = 'Without VAT';
+$_['b2b_tax_rate_7_label']           = '7%';
+$_['b2b_tax_rate_10_label']          = '10%';
+$_['b2b_tax_rate_18_label']          = '18%';
+$_['b2b_sberbank_tax_message']       = 'There is a restriction for payments via Sberbank Business Online: one receipt can only contain products with the same VAT rate. If the client wants to pay for products with different VAT rates at the same time, we will show him the message explaining that it\'s not possible.';

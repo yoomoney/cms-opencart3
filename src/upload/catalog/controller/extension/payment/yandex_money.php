@@ -36,7 +36,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     public function index()
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('heading_title'));
 
         $model = $this->getModel()->getPaymentModel();
@@ -45,29 +45,30 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         if ($model->getMinPaymentAmount() > 0 && $model->getMinPaymentAmount() > $this->cart->getSubTotal()) {
-            $this->failure(sprintf($this->language->get('error_minimum'), $this->currency->format($model->getMinPaymentAmount(), $this->session->data['currency'])));
+            $this->failure(sprintf($this->language->get('error_minimum'),
+                $this->currency->format($model->getMinPaymentAmount(), $this->session->data['currency'])));
         }
 
         $this->load->model('checkout/order');
         $orderInfo = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-        $template = $model->applyTemplateVariables($this, $data, $orderInfo);
+        $template  = $model->applyTemplateVariables($this, $data, $orderInfo);
 
         $data['language'] = $this->language;
         $data['fullView'] = false;
 
-        $data['column_left'] = $this->load->controller('common/column_left');
-        $data['column_right'] = $this->load->controller('common/column_right');
-        $data['content_top'] = $this->load->controller('common/content_top');
+        $data['column_left']    = $this->load->controller('common/column_left');
+        $data['column_right']   = $this->load->controller('common/column_right');
+        $data['content_top']    = $this->load->controller('common/content_top');
         $data['content_bottom'] = $this->load->controller('common/content_bottom');
-        $data['footer'] = $this->load->controller('common/footer');
-        $data['header'] = $this->load->controller('common/header');
+        $data['footer']         = $this->load->controller('common/footer');
+        $data['header']         = $this->load->controller('common/header');
 
         return $this->load->view($template, $data);
     }
 
     private function payment($orderInfo, $fullView = false)
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('heading_title'));
 
         $model = $this->getModel()->getPaymentModel();
@@ -90,12 +91,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['fullView'] = $fullView;
 
         if ($fullView) {
-            $data['column_left'] = $this->load->controller('common/column_left');
-            $data['column_right'] = $this->load->controller('common/column_right');
-            $data['content_top'] = $this->load->controller('common/content_top');
+            $data['column_left']    = $this->load->controller('common/column_left');
+            $data['column_right']   = $this->load->controller('common/column_right');
+            $data['content_top']    = $this->load->controller('common/content_top');
             $data['content_bottom'] = $this->load->controller('common/content_bottom');
-            $data['footer'] = $this->load->controller('common/footer');
-            $data['header'] = $this->load->controller('common/header');
+            $data['footer']         = $this->load->controller('common/footer');
+            $data['header']         = $this->load->controller('common/header');
         }
 
         return $this->load->view($template, $data);
@@ -116,7 +117,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         if (!$this->customer->isLogged()) {
             $this->session->data['redirect'] = $this->url->link(
-                'extension/payment/yandex_money/repay', 'order_id=' . $orderId, 'SSL'
+                'extension/payment/yandex_money/repay', 'order_id='.$orderId, 'SSL'
             );
             $this->response->redirect($this->url->link('account/login', '', true));
         }
@@ -125,30 +126,30 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $order = $this->model_account_order->getOrder($orderId);
         if (empty($order)) {
             $this->response->redirect(
-                $this->url->link('account/order/info', 'order_id=' . $orderId, true)
+                $this->url->link('account/order/info', 'order_id='.$orderId, true)
             );
         }
 
-        $query = $this->db->query("SELECT `payment_code`, `order_status_id` FROM `" . DB_PREFIX . "order` WHERE order_id = '" . $orderId . "'");
+        $query = $this->db->query("SELECT `payment_code`, `order_status_id` FROM `".DB_PREFIX."order` WHERE order_id = '".$orderId."'");
         if (empty($query)) {
             $this->response->redirect(
-                $this->url->link('account/order/info', 'order_id=' . $orderId, true)
+                $this->url->link('account/order/info', 'order_id='.$orderId, true)
             );
         }
         if ($query->row['payment_code'] !== 'yandex_money') {
             $this->session->data['error'] = 'Не верный способ оплаты заказа';
             $this->response->redirect(
-                $this->url->link('account/order/info', 'order_id=' . $orderId, true)
+                $this->url->link('account/order/info', 'order_id='.$orderId, true)
             );
         }
         if ($query->row['order_status_id'] == $kassa->getSuccessOrderStatusId()) {
             $this->session->data['error'] = 'Заказ уже оплачен';
             $this->response->redirect(
-                $this->url->link('account/order/info', 'order_id=' . $orderId, true)
+                $this->url->link('account/order/info', 'order_id='.$orderId, true)
             );
         }
 
-        $this->getModel()->log('info', 'Создание платежа для заказа №' . $orderId);
+        $this->getModel()->log('info', 'Создание платежа для заказа №'.$orderId);
 
         $payment = $this->getModel()->createOrderPayment($order, false);
         if ($payment === null) {
@@ -162,7 +163,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
         $this->session->data['error'] = 'Не удалось инициализировать платёж';
         $this->response->redirect(
-            $this->url->link('account/order/info', 'order_id=' . $orderId, true)
+            $this->url->link('account/order/info', 'order_id='.$orderId, true)
         );
     }
 
@@ -175,12 +176,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->response->redirect($this->url->link('checkout/checkout', '', true));
     }
 
-    private function jsonError($message)
+    public function jsonError($message)
     {
         $this->getModel()->log('info', $message);
         echo json_encode(array(
             'success' => false,
-            'error' => $message,
+            'error'   => $message,
         ));
         exit();
     }
@@ -199,7 +200,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->jsonError('Cart is empty');
         }
         $orderId = $this->session->data['order_id'];
-        $this->getModel()->log('info', 'Создание платежа для заказа №' . $orderId);
+        $this->getModel()->log('info', 'Создание платежа для заказа №'.$orderId);
         if (!isset($this->request->get['paymentType'])) {
             $this->jsonError('Payment method not specified');
         }
@@ -228,8 +229,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
             $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
         }
-        $result = array(
-            'success' => true,
+        $result       = array(
+            'success'  => true,
             'redirect' => $this->url->link('checkout/success', '', true),
         );
         $confirmation = $payment->getConfirmation();
@@ -238,17 +239,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         if ($kassa->getCreateOrderBeforeRedirect()) {
-            $this->getModel()->log('debug', 'Confirm order#' . $orderId . ' after payment creation');
+            $this->getModel()->log('debug', 'Confirm order#'.$orderId.' after payment creation');
             $this->getModel()->confirmOrder($orderId, $payment);
         }
         if ($kassa->getClearCartBeforeRedirect()) {
-            $this->getModel()->log('debug', 'Clear order#' . $orderId . ' cart after payment creation');
+            $this->getModel()->log('debug', 'Clear order#'.$orderId.' cart after payment creation');
             $this->cart->clear();
         }
 
         $output = ob_get_clean();
         if (!empty($output)) {
-            $this->getModel()->log('warning', 'Non empty buffer: ' . $output);
+            $this->getModel()->log('warning', 'Non empty buffer: '.$output);
         }
 
         echo json_encode($result);
@@ -261,30 +262,30 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      */
     public function confirm()
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         if (empty($_GET['order_id'])) {
             $this->failure('Не был передан идентификатор платежа');
         }
-        $this->getModel()->log('info', 'Подтверждение платежа для заказа №' . $_GET['order_id']);
+        $this->getModel()->log('info', 'Подтверждение платежа для заказа №'.$_GET['order_id']);
         $kassa = $this->getModel()->getKassaModel();
         if (!$kassa->isEnabled()) {
             $this->failure('Модуль оплаты выключен');
         }
-        $orderId = (int)$_GET['order_id'];
+        $orderId   = (int)$_GET['order_id'];
         $paymentId = $this->getModel()->findPaymentIdByOrderId($orderId);
         if (empty($paymentId)) {
-            $this->failure('Не удалось получить ID платежа для заказа №' . $orderId);
+            $this->failure('Не удалось получить ID платежа для заказа №'.$orderId);
         }
         $this->load->model('checkout/order');
         $payment = $this->getModel()->updatePaymentInfo($paymentId);
         if ($payment === null) {
-            $this->failure('Не найден платёж ' . $paymentId . ' для заказа №' . $orderId);
+            $this->failure('Не найден платёж '.$paymentId.' для заказа №'.$orderId);
         } elseif (!$payment->getPaid()) {
             $this->failure('Платёж не был проведён');
         } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
-            $this->failure('Статус платежа ' . $paymentId . ' заказа №' . $orderId . ' - canceled');
+            $this->failure('Статус платежа '.$paymentId.' заказа №'.$orderId.' - canceled');
         } elseif ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
-            $this->getModel()->log('info', 'Confirm order#' . $orderId . ' with payment ' . $payment->getId());
+            $this->getModel()->log('info', 'Confirm order#'.$orderId.' with payment '.$payment->getId());
         }
         if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
             $this->getModel()->confirmOrderPayment(
@@ -296,7 +297,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function validate()
     {
-        $this->load->language('extension/payment/' . self::MODULE_NAME);
+        $this->load->language('extension/payment/'.self::MODULE_NAME);
         if (empty($_GET['payment_type'])) {
             $this->jsonError('Unknown payment type');
         }
@@ -310,8 +311,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         if ($paymentModel instanceof \YandexMoneyModule\Model\WalletModel) {
             if ($paymentModel->getCreateOrderBeforeRedirect()) {
                 $this->load->model('checkout/order');
-                $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
-                $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
+                $url     = $this->url->link('extension/payment/yandex_money/repay',
+                    'order_id='.$this->session->data['order_id'], true);
+                $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
                 $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
             }
             if ($paymentModel->getClearCartBeforeRedirect()) {
@@ -319,8 +321,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             }
         } else {
             $this->load->model('checkout/order');
-            $url = $this->url->link('extension/payment/yandex_money/repay', 'order_id=' . $this->session->data['order_id'], true);
-            $comment = '<a href="' . $url . '" class="button">' . $this->language->get('text_repay') . '</a>';
+            $url     = $this->url->link('extension/payment/yandex_money/repay',
+                'order_id='.$this->session->data['order_id'], true);
+            $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
             $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
         }
     }
@@ -332,11 +335,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         if (!$this->getModel()->getKassaModel()->isEnabled()) {
             header('HTTP/1.1 403 Module disabled');
+
             return;
         }
         $source = file_get_contents('php://input');
         if (empty($source)) {
             header('HTTP/1.1 400 Empty request body');
+
             return;
         }
         $json = json_decode($source, true);
@@ -344,14 +349,15 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if (json_last_error() === JSON_ERROR_NONE) {
                 $message = 'empty object in body';
             } else {
-                $message = 'invalid object in body: ' . $source;
+                $message = 'invalid object in body: '.$source;
             }
-            $this->getModel()->log('warning', 'Invalid parameters in capture notification controller - ' . $message);
+            $this->getModel()->log('warning', 'Invalid parameters in capture notification controller - '.$message);
             header('HTTP/1.1 400 Invalid json object in body');
+
             return;
         }
 
-        $this->getModel()->log('info', 'Notification: ' . $source);
+        $this->getModel()->log('info', 'Notification: '.$source);
 
         try {
             $notification = ($json['event'] === YandexCheckout\Model\NotificationEventType::PAYMENT_SUCCEEDED)
@@ -359,21 +365,23 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 : new NotificationWaitingForCapture($json);
 
         } catch (\Exception $e) {
-            $this->getModel()->log('error', 'Invalid notification object - ' . $e->getMessage());
+            $this->getModel()->log('error', 'Invalid notification object - '.$e->getMessage());
             header('HTTP/1.1 400 Invalid object in body');
+
             return;
         }
         $orderId = $this->getModel()->findOrderIdByPayment($notification->getObject());
 
         if ($orderId <= 0) {
-            $this->getModel()->log('error', 'Order not exists for payment ' . $notification->getObject()->getId());
+            $this->getModel()->log('error', 'Order not exists for payment '.$notification->getObject()->getId());
             header('HTTP/1.1 404 Order not exists');
+
             return;
         }
         $this->load->model('checkout/order');
         $orderInfo = $this->model_checkout_order->getOrder($orderId);
         if (empty($orderInfo)) {
-            $this->getModel()->log('warning', 'Empty order#' . $orderId . ' in notification');
+            $this->getModel()->log('warning', 'Empty order#'.$orderId.' in notification');
             header('HTTP/1.1 405 Invalid order payment method');
             exit();
         } elseif ($orderInfo['order_status_id'] <= 0) {
@@ -428,13 +436,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     public function callback()
     {
-        $data = $_POST;
+        $data   = $_POST;
         $wallet = $this->getModel()->getWalletModel();
-        $this->getModel()->log('info', 'callback:  request ' . serialize($_REQUEST));
+        $this->getModel()->log('info', 'callback:  request '.serialize($_REQUEST));
         $orderId = isset($data['label']) ? (int)$data['label'] : 0;
         if ($wallet->isEnabled()) {
             $this->getModel()->log('info', 'callback:  orderid='.$orderId);
-            if($this->getModel()->checkSign($data, $wallet->getPassword())) {
+            if ($this->getModel()->checkSign($data, $wallet->getPassword())) {
                 $this->load->model('checkout/order');
                 $this->model_checkout_order->addOrderHistory(
                     $orderId,
@@ -451,7 +459,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         if (!$this->customer->isLogged()) {
             $this->session->data['redirect'] = $this->url->link(
-                'extension/payment/yandex_money/repay', 'order_id=' . $this->request->get['order_id'], true
+                'extension/payment/yandex_money/repay', 'order_id='.$this->request->get['order_id'], true
             );
             $this->response->redirect($this->url->link('account/login', '', true));
         }
@@ -459,7 +467,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $order = $this->model_account_order->getOrder((int)$this->request->get['order_id']);
         if (empty($order)) {
             $this->response->redirect(
-                $this->url->link('account/order/info', 'order_id=' . $this->request->get['order_id'], true)
+                $this->url->link('account/order/info', 'order_id='.$this->request->get['order_id'], true)
             );
         }
         $this->response->setOutput($this->payment($order, true));
@@ -649,7 +657,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $offer->setWeight(number_format($product['weight'], 1, '.', ''), $product['weight_unit']);
             }
             if (($this->config->get('yandex_money_market_dimensions') === 'on')
-                && $product['length'] > 0 && $product['width'] > 0 && $product['height'] > 0) {
+                && $product['length'] > 0 && $product['width'] > 0 && $product['height'] > 0
+            ) {
                 $offer->setDimensions(number_format($product['length'], 1, '.', ''),
                     number_format($product['width'], 1, '.', ''), number_format($product['height'], 1, '.', ''));
             }
@@ -678,9 +687,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 }
             }
 
-            $extraCategories = $model->getProductCategories($product['product_id']);
+            $extraCategories   = $model->getProductCategories($product['product_id']);
             $extraCategories[] = (string)$offer->getCategoryId();
-            $allCategories = array_unique($extraCategories);
+            $allCategories     = array_unique($extraCategories);
 
             foreach ($allCategories as $category) {
                 if (isset($additionalConditionMap[$category])) {
@@ -719,6 +728,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      * @param Offer $commonOffer
      * @param $product
      * @param YandexMarket $market
+     *
      * @return bool
      */
     private function makeOfferColorSizeCombination(
@@ -789,11 +799,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $market->addOffer($colorOffer);
             }
         }
+
         return true;
     }
 
     /**
      * @param $price
+     *
      * @return string
      */
     private function formatPrice($price)
@@ -865,18 +877,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 }
             }
         }
+
         return $product;
     }
 
     /**
      * @return ModelExtensionPaymentYandexMoney
      */
-    private function getModel()
+    public function getModel()
     {
         if ($this->_model === null) {
             $this->load->model('extension/payment/yandex_money');
             $this->_model = $this->model_extension_payment_yandex_money;
         }
+
         return $this->_model;
     }
 
@@ -889,6 +903,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->load->model('extension/payment/yandex_money');
             $this->_marketModel = new \YandexMoneyModule\Model\MarketModel($this->registry);
         }
+
         return $this->_marketModel;
     }
 
@@ -896,6 +911,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      * @param array $array
      * @param string $key
      * @param null $default
+     *
      * @return null
      */
     private function array_get($array, $key, $default = null)
@@ -907,6 +923,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
      * @param $key
      * @param $index
      * @param null $default
+     *
      * @return null
      */
     private function getConfig($key, $index = null, $default = null)

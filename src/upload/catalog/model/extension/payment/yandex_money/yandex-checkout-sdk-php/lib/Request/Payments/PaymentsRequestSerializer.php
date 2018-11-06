@@ -37,18 +37,14 @@ class PaymentsRequestSerializer
      * @var array Карта маппинга свойств объекта запроса на поля отправляемого запроса
      */
     private static $propertyMap = array(
-        'paymentId'      => 'payment_id',
-        'gatewayId'      => 'gateway_id',
-        'createdGte'     => 'created_gte',
-        'createdGt'      => 'created_gt',
-        'createdLte'     => 'created_lte',
-        'createdLt'      => 'created_lt',
-        'authorizedGte'  => 'authorized_gte',
-        'authorizedGt'   => 'authorized_gt',
-        'authorizedLte'  => 'authorized_lte',
-        'authorizedLt'   => 'authorized_lt',
-        'status'         => 'status',
-        'nextPage'       => 'next_page',
+        'page'               => 'page',
+        'createdAtGte'       => 'created_at.gte',
+        'createdAtGt'        => 'created_at.gt',
+        'createdAtLte'       => 'created_at.lte',
+        'createdAtLt'        => 'created_at.lt',
+        'limit'              => 'limit',
+        'recipientGatewayId' => 'recipient.gateway_id',
+        'status'             => 'status',
     );
 
     /**
@@ -58,9 +54,7 @@ class PaymentsRequestSerializer
      */
     public function serialize(PaymentsRequestInterface $request)
     {
-        $result = array(
-            'account_id' => $request->getAccountId(),
-        );
+        $result = array();
         foreach (self::$propertyMap as $property => $name) {
             $value = $request->{$property};
             if (!empty($value)) {

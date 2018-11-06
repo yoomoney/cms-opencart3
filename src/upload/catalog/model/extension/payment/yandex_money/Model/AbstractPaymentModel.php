@@ -45,7 +45,7 @@ class AbstractPaymentModel
         return 'yandex_money_' . $this->paymentType . '_' . $key;
     }
 
-    protected function getConfigValue($key)
+    public function getConfigValue($key)
     {
         return $this->config->get($this->getConfigKey($key));
     }

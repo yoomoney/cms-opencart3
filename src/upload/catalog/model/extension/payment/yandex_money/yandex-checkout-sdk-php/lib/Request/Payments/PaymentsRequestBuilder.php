@@ -52,29 +52,92 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
-     * Устанавливает идентификатор платежа
-     * @param string|null $value Идентификатор платежа
+     * Устанавливает страница выдачи результатов
+     * @param string|null $value Страница выдачи результатов или null чтобы удалить значение
      * @return PaymentsRequestBuilder Инстанс текущего билдера
      *
-     * @throws InvalidPropertyValueException Выбрасывается если длина переданной строки не равна 36 символам
      * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
      */
-    public function setPaymentId($value)
+    public function setPage($value)
     {
-        $this->currentObject->setPaymentId($value);
+        $this->currentObject->setPage($value);
         return $this;
     }
 
     /**
-     * Устанавливает идентификатор магазина
-     * @param string|null $value Идентификатор магазина или null чтобы удалить значение
+     * Устанавливает дату создания от которой выбираются платежи
+     * @param \DateTime|string|int|null $value Время создания, от (не включая) или null чтобы удалить значение
      * @return PaymentsRequestBuilder Инстанс текущего билдера
      *
-     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
+     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
+     * строка или число, которые не удалось преобразовать в валидную дату)
+     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
+     * строка, не число и не значение типа \DateTime)
      */
-    public function setAccountId($value)
+    public function setCreatedAtGt($value)
     {
-        $this->currentObject->setAccountId($value);
+        $this->currentObject->setCreatedAtGt($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает дату создания от которой выбираются платежи
+     * @param \DateTime|string|int|null $value Время создания, от (включительно) или null чтобы удалить значение
+     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
+     * строка или число, которые не удалось преобразовать в валидную дату)
+     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
+     * строка, не число и не значение типа \DateTime)
+     */
+    public function setCreatedAtGte($value)
+    {
+        $this->currentObject->setCreatedAtGte($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает дату создания до которой выбираются платежи
+     * @param \DateTime|string|int|null $value Время создания, до (не включая) или null чтобы удалить значение
+     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
+     * строка или число, которые не удалось преобразовать в валидную дату)
+     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
+     * строка, не число и не значение типа \DateTime)
+     */
+    public function setCreatedAtLt($value)
+    {
+        $this->currentObject->setCreatedAtLt($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает дату создания до которой выбираются платежи
+     * @param \DateTime|string|int|null $value Время создания, до (включительно) или null чтобы удалить значение
+     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
+     * строка или число, которые не удалось преобразовать в валидную дату)
+     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
+     * строка, не число и не значение типа \DateTime)
+     */
+    public function setCreatedAtLte($value)
+    {
+        $this->currentObject->setCreatedAtLte($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает ограничение количества объектов платежа
+     * @param string $value Ограничение количества объектов платежа или null чтобы удалить значение
+     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод было передана не целое число
+     */
+    public function setLimit($value)
+    {
+        $this->currentObject->setLimit($value);
         return $this;
     }
 
@@ -85,9 +148,9 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
      *
      * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
      */
-    public function setGatewayId($value)
+    public function setRecipientGatewayId($value)
     {
-        $this->currentObject->setGatewayId($value);
+        $this->currentObject->setRecipientGatewayId($value);
         return $this;
     }
 
@@ -102,149 +165,6 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     public function setStatus($value)
     {
         $this->currentObject->setStatus($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает токен следующей страницы выборки
-     * @param string $value Токен следующей страницы выборки или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
-     */
-    public function setNextPage($value)
-    {
-        $this->currentObject->setNextPage($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату создания от которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время создания, от (не включая) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setCreatedGt($value)
-    {
-        $this->currentObject->setCreatedGt($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату создания от которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время создания, от (включительно) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setCreatedGte($value)
-    {
-        $this->currentObject->setCreatedGte($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату создания до которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время создания, до (не включая) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setCreatedLt($value)
-    {
-        $this->currentObject->setCreatedLt($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату создания до которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время создания, до (включительно) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setCreatedLte($value)
-    {
-        $this->currentObject->setCreatedLte($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату проведения от которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время проведения операции, от (не включая) или null чтобы удалить
-     * значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setAuthorizedGt($value)
-    {
-        $this->currentObject->setAuthorizedGt($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату проведения от которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время проведения операции, от (не включая) или null чтобы удалить
-     * значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setAuthorizedGte($value)
-    {
-        $this->currentObject->setAuthorizedGte($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату проведения до которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время проведения, до (не включая) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setAuthorizedLt($value)
-    {
-        $this->currentObject->setAuthorizedLt($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает дату проведения до которой выбираются платежи
-     * @param \DateTime|string|int|null $value Время проведения, до (включительно) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
-     * строка или число, которые не удалось преобразовать в валидную дату)
-     * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
-     * строка, не число и не значение типа \DateTime)
-     */
-    public function setAuthorizedLte($value)
-    {
-        $this->currentObject->setAuthorizedLte($value);
         return $this;
     }
 

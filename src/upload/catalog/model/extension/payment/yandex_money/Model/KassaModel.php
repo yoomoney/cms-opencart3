@@ -3,6 +3,8 @@
 namespace YandexMoneyModule\Model;
 
 use Config;
+use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataRate;
+use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentMethodType;
 
 class KassaModel extends AbstractPaymentModel
@@ -31,6 +33,10 @@ class KassaModel extends AbstractPaymentModel
     protected $holdOrderStatus;
     protected $orderCanceledStatus;
     protected $addInstallmentsBlock;
+    protected $b2bSberbankEnabled;
+    protected $b2bSberbankPaymentPurpose;
+    protected $b2bSberbankDefaultTaxRate;
+    protected $b2bTaxRates;
 
     public function __construct(Config $config)
     {
@@ -54,10 +60,12 @@ class KassaModel extends AbstractPaymentModel
 
         $this->paymentMethods = array();
         foreach (PaymentMethodType::getEnabledValues() as $value) {
-            $property = 'payment_method_'.$value;
-            $enabled  = (bool)$this->getConfigValue($property);
-            if (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods)) {
-                $this->paymentMethods[$value] = $enabled;
+            if ($value !== PaymentMethodType::B2B_SBERBANK) {
+                $property = 'payment_method_'.$value;
+                $enabled  = (bool)$this->getConfigValue($property);
+                if (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods)) {
+                    $this->paymentMethods[$value] = $enabled;
+                }
             }
         }
 
@@ -79,6 +87,11 @@ class KassaModel extends AbstractPaymentModel
         $this->clearCartAfterOrderCreation = $this->getConfigValue('clear_cart_before_redirect');
 
         $this->showInFooter = $this->getConfigValue('show_in_footer');
+
+        $this->b2bSberbankEnabled        = $this->getConfigValue('b2b_sberbank_enabled');
+        $this->b2bSberbankPaymentPurpose = $this->getConfigValue('b2b_sberbank_payment_purpose');
+        $this->b2bSberbankDefaultTaxRate = $this->getConfigValue('b2b_tax_rate_default');
+        $this->b2bTaxRates               = $this->getConfigValue('b2b_tax_rates');
     }
 
     public function isTestMode()
@@ -126,7 +139,8 @@ class KassaModel extends AbstractPaymentModel
         return $this->isPaymentMethodEnabled(PaymentMethodType::INSTALLMENTS);
     }
 
-    public function isInstallmentsOn(){
+    public function isInstallmentsOn()
+    {
         return $this->getEPL() ? $this->useInstallmentsButton() : $this->isEnabledInstallmentsMethod();
     }
 
@@ -160,6 +174,20 @@ class KassaModel extends AbstractPaymentModel
     public function getTaxRateList()
     {
         return array(1, 2, 3, 4, 5, 6);
+    }
+
+    public function getB2bTaxRateList()
+    {
+        return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18);
+    }
+
+    public function getB2bTaxRateId($shopTaxRateId)
+    {
+        if (isset($this->b2bTaxRates[$shopTaxRateId])) {
+            return $this->b2bTaxRates[$shopTaxRateId];
+        }
+
+        return $this->defaultTaxRate;
     }
 
     public function getDefaultTaxRate()
@@ -201,8 +229,7 @@ class KassaModel extends AbstractPaymentModel
     {
         $templateData['kassa']           = $this;
         $templateData['image_base_path'] = HTTPS_SERVER.'image/catalog/payment/yandex_money';
-        $prefix                          = version_compare(VERSION, '2.3.0') >= 0 ? 'extension/' : '';
-        $templateData['validate_url']    = $controller->url->link($prefix.'payment/yandex_money/create', '', true);
+        $templateData['validate_url']    = $controller->url->link('extension/payment/yandex_money/create', '', true);
 
         $templateData['amount']         = $orderInfo['total'];
         $templateData['comment']        = $orderInfo['comment'];
@@ -248,5 +275,37 @@ class KassaModel extends AbstractPaymentModel
     public function getOrderCanceledStatus()
     {
         return $this->orderCanceledStatus;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bSberbankEnabled()
+    {
+        return $this->b2bSberbankEnabled;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bSberbankPaymentPurpose()
+    {
+        return $this->b2bSberbankPaymentPurpose;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bSberbankDefaultTaxRate()
+    {
+        return $this->b2bSberbankDefaultTaxRate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getB2bTaxRates()
+    {
+        return $this->b2bTaxRates;
     }
 }

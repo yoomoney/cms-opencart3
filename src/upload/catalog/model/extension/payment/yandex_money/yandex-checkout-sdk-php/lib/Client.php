@@ -86,7 +86,7 @@ class Client
     /**
      * Текущая версия библиотеки
      */
-    const SDK_VERSION = '1.0.8';
+    const SDK_VERSION = '1.1.0';
 
     /**
      * Имя HTTP заголовка, используемого для передачи idempotence key
@@ -238,6 +238,14 @@ class Client
      * @param PaymentOptionsRequestInterface|array $paymentOptionsRequest
      *
      * @return PaymentOptionsResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
      */
     public function getPaymentOptions($paymentOptionsRequest = null)
     {
@@ -272,6 +280,14 @@ class Client
      * @param PaymentsRequestInterface|array|null $filter
      *
      * @return PaymentsResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
      */
     public function getPayments($filter = null)
     {
@@ -327,6 +343,15 @@ class Client
      * @param string $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
      *
      * @return CreatePaymentResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
+     * @throws \Exception
      */
     public function createPayment($payment, $idempotencyKey = null)
     {
@@ -368,6 +393,14 @@ class Client
      * @param string $paymentId
      *
      * @return PaymentInterface
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
      */
     public function getPaymentInfo($paymentId)
     {
@@ -410,6 +443,15 @@ class Client
      * @param $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
      *
      * @return CreateCaptureResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
+     * @throws \Exception
      */
     public function capturePayment($captureRequest, $paymentId, $idempotencyKey = null)
     {
@@ -463,6 +505,15 @@ class Client
      * @param $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
      *
      * @return CancelResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
+     * @throws \Exception
      */
     public function cancelPayment($paymentId, $idempotencyKey = null)
     {
@@ -501,6 +552,14 @@ class Client
      * @param RefundsRequestInterface|array|null $filter
      *
      * @return RefundsResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
      */
     public function getRefunds($filter = null)
     {
@@ -540,6 +599,15 @@ class Client
      * @param null $idempotencyKey {@link https://kassa.yandex.ru/docs/checkout-api/?php#idempotentnost}
      *
      * @return CreateRefundResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
+     * @throws \Exception
      */
     public function createRefund($request, $idempotencyKey = null)
     {
@@ -579,6 +647,14 @@ class Client
      * @param $refundId
      *
      * @return RefundResponse
+     * @throws ApiException
+     * @throws BadApiRequestException
+     * @throws ForbiddenException
+     * @throws InternalServerError
+     * @throws NotFoundException
+     * @throws ResponseProcessingException
+     * @throws TooManyRequestsException
+     * @throws UnauthorizedException
      */
     public function getRefundInfo($refundId)
     {
@@ -759,6 +835,7 @@ class Client
      * @param array $headers
      *
      * @return ResponseObject
+     * @throws Common\Exceptions\AuthorizeException
      */
     private function execute($path, $method, $queryParams, $httpBody = null, $headers = array())
     {

@@ -87,11 +87,11 @@ abstract class AbstractObject implements \ArrayAccess, \JsonSerializable
     {
         $method = 'set' . ucfirst($offset);
         if (method_exists($this, $method)) {
-            $this->{$method} ($value);
+            $this->{$method}($value);
         } else {
             $method = 'set' . self::matchPropertyName($offset);
             if (method_exists($this, $method)) {
-                return $this->{$method} ($value);
+                $this->{$method}($value);
             } else {
                 $this->unknownProperties[$offset] = $value;
             }
@@ -177,6 +177,9 @@ abstract class AbstractObject implements \ArrayAccess, \JsonSerializable
         foreach (get_class_methods($this) as $method) {
             if (strncmp('get', $method, 3) === 0) {
                 if ($method === 'getUnknownProperties') {
+                    continue;
+                }
+                if ($method === 'getIterator') {
                     continue;
                 }
                 $property = strtolower(preg_replace('/[A-Z]/', '_\0', lcfirst(substr($method, 3))));

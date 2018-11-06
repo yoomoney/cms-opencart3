@@ -66,6 +66,11 @@ class CurlClient implements ApiClientInterface
     private $connectionTimeout = 30;
 
     /**
+     * @var string
+     */
+    private $proxy;
+
+    /**
      * @var bool
      */
     private $keepAlive = true;
@@ -98,6 +103,15 @@ class CurlClient implements ApiClientInterface
 
     /**
      * @inheritdoc
+     * @param $path
+     * @param $method
+     * @param $queryParams
+     * @param null $httpBody
+     * @param array $headers
+     * @return ResponseObject
+     * @throws ApiConnectionException
+     * @throws ApiException
+     * @throws AuthorizeException
      */
     public function call($path, $method, $queryParams, $httpBody = null, $headers = array())
     {
@@ -137,6 +151,11 @@ class CurlClient implements ApiClientInterface
             throw new AuthorizeException('shopId or shopPassword not set');
         } else {
             $this->setCurlOption(CURLOPT_USERPWD, "{$this->shopId}:{$this->shopPassword}");
+        }
+
+        if ($this->proxy) {
+            $this->setCurlOption(CURLOPT_PROXY, $this->proxy);
+            $this->setCurlOption(CURLOPT_HTTPPROXYTUNNEL, true);
         }
 
         $this->setBody($method, $httpBody);
@@ -204,6 +223,7 @@ class CurlClient implements ApiClientInterface
 
     /**
      * @return array
+     * @throws ApiConnectionException
      */
     public function sendRequest()
     {
@@ -310,6 +330,24 @@ class CurlClient implements ApiClientInterface
     public function setConnectionTimeout($connectionTimeout)
     {
         $this->connectionTimeout = $connectionTimeout;
+    }
+
+    /**
+     * @return string
+     * @since 1.0.14
+     */
+    public function getProxy()
+    {
+        return $this->proxy;
+    }
+
+    /**
+     * @param string $proxy
+     * @since 1.0.14
+     */
+    public function setProxy($proxy)
+    {
+        $this->proxy = $proxy;
     }
 
     /**

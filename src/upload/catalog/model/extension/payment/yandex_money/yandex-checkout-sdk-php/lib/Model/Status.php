@@ -30,6 +30,9 @@ use YandexCheckout\Common\AbstractEnum;
 
 /**
  * Статус платежа
+ *
+ * @deprecated Класс будет удалён в одной из будущих версий, используйте класс \YandexCheckout\Model\PaymentStatus
+ *
  */
 class Status extends AbstractEnum
 {

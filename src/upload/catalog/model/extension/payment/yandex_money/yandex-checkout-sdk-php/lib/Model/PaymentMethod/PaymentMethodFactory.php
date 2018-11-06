@@ -37,11 +37,12 @@ class PaymentMethodFactory
         PaymentMethodType::CASH           => 'PaymentMethodCash',
         PaymentMethodType::MOBILE_BALANCE => 'PaymentMethodMobileBalance',
         PaymentMethodType::APPLE_PAY      => 'PaymentMethodApplePay',
-        PaymentMethodType::ANDROID_PAY    => 'PaymentMethodAndroidPay',
+        PaymentMethodType::GOOGLE_PAY     => 'PaymentMethodGooglePay',
         PaymentMethodType::QIWI           => 'PaymentMethodQiwi',
         PaymentMethodType::WEBMONEY       => 'PaymentMethodWebmoney',
         PaymentMethodType::ALFABANK       => 'PaymentMethodAlfaBank',
         PaymentMethodType::INSTALLMENTS   => 'PaymentMethodInstallments',
+        PaymentMethodType::B2B_SBERBANK   => 'PaymentMethodB2bSberbank',
     );
 
     private $optionsMap = array(

@@ -7,6 +7,7 @@ class UUID
 {
     /**
      * @return string
+     * @throws \Exception
      */
     public static function v4()
     {

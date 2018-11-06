@@ -70,7 +70,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         return null;
     }
 
-    protected function getClient()
+    public function getClient()
     {
         if ($this->client === null) {
             $this->client = new \YandexCheckout\Client();
@@ -149,7 +149,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.1.3',
+                        'module_version' => '1.2.0',
                     ));
 
             $confirmation = array(

@@ -56,6 +56,10 @@ use YandexCheckout\Model\PaymentMethod\AbstractPaymentMethod;
  * @property string $receiptRegistration Состояние регистрации фискального чека
  * @property string $receipt_registration Состояние регистрации фискального чека
  * @property Metadata $metadata Метаданные платежа указанные мерчантом
+ * @property CancellationDetailsInterface $cancellationDetails Комментарий к отмене платежа
+ * @property CancellationDetailsInterface $cancellation_details Комментарий к отмене платежа
+ * @property AuthorizationDetailsInterface $authorizationDetails Данные об авторизации платежа
+ * @property AuthorizationDetailsInterface $authorization_details Данные об авторизации платежа
  */
 class Payment extends AbstractObject implements PaymentInterface
 {
@@ -134,6 +138,21 @@ class Payment extends AbstractObject implements PaymentInterface
      * @since 1.0.2
      */
     private $_expiresAt;
+
+    /**
+     * Комментарий к статусу canceled: кто отменил платеж и по какой причине
+     * @var CancellationDetailsInterface
+     * @since 1.0.13
+     */
+    private $_cancellationDetails;
+
+    /**
+     * Данные об авторизации платежа
+     * @var AuthorizationDetailsInterface
+     * @since 1.0.18
+     */
+    private $_authorizationDetails;
+
 
     /**
      * Возвращает идентификатор платежа
@@ -499,5 +518,42 @@ class Payment extends AbstractObject implements PaymentInterface
         } else {
             throw new InvalidPropertyValueTypeException('Invalid expires_at value', 0, 'payment.expires_at', $value);
         }
+    }
+
+    /**
+     * Возвращает комментарий к статусу canceled: кто отменил платеж и по какой причине
+     * @return CancellationDetailsInterface|null Комментарий к статусу canceled
+     * @since 1.0.13
+     */
+    public function getCancellationDetails()
+    {
+        return $this->_cancellationDetails;
+    }
+
+    /**
+     * Устанавливает комментарий к статусу canceled: кто отменил платеж и по какой причине
+     * @param CancellationDetailsInterface $value Комментарий к статусу canceled
+     */
+    public function setCancellationDetails(CancellationDetailsInterface $value)
+    {
+        $this->_cancellationDetails = $value;
+    }
+    /**
+     * Возвращает данные об авторизации платежа
+     * @return AuthorizationDetailsInterface|null Данные об авторизации платежа
+     * @since 1.0.18
+     */
+    public function getAuthorizationDetails()
+    {
+        return $this->_authorizationDetails;
+    }
+
+    /**
+     * Устанавливает данные об авторизации платежа
+     * @param AuthorizationDetailsInterface $value Данные об авторизации платежа
+     */
+    public function setAuthorizationDetails(AuthorizationDetailsInterface $value)
+    {
+        $this->_authorizationDetails = $value;
     }
 }
