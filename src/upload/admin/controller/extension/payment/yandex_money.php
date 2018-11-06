@@ -1,4 +1,5 @@
 <?php
+use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentStatus;
 
 /**
@@ -9,7 +10,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.1.3';
+    const MODULE_VERSION = '1.2.0';
 
     /**
      * @var integer
@@ -73,6 +74,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
                 $this->model_setting_setting->editSetting('payment_'.self::MODULE_NAME, $newSettings);
 
+                $this->enableB2bSberbank();
+
                 if (empty($newSettings['yandex_money_metrika_number'])
                     || empty($newSettings['yandex_money_metrika_idapp'])
                     || empty($newSettings['yandex_money_metrika_pw'])
@@ -98,9 +101,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                         .'&client_secret='.$metrika_pw
                     );
                 }
-                $metrika_code   = $settings['yandex_money_metrika_code'];
+                $metrika_code = $settings['yandex_money_metrika_code'];
                 if (!empty($metrika_o2auth)
-                    && (empty($metrika_code) || !mb_strpos($settings['yandex_money_metrika_code'], $settings['yandex_money_metrika_number']))) {
+                    && (empty($metrika_code) || !mb_strpos($settings['yandex_money_metrika_code'],
+                            $settings['yandex_money_metrika_number']))
+                ) {
                     $this->updateCounterCode();
                 }
 
@@ -161,7 +166,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['footer']      = $this->load->controller('common/footer');
 
         $data['kassa'] = $this->getModel()->getKassaModel();
-        $name          = $data['kassa']->getDisplayName();
+
+        $name = $data['kassa']->getDisplayName();
         if (empty($name)) {
             $data['kassa']->setDisplayName($this->language->get('kassa_default_display_name'));
         }
@@ -222,28 +228,15 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['err_token'] = '';
         }
 
-        /*
+        /**
+         * Sbbol section
+         */
+        $data['b2bTaxRates'] = $this->getB2bTaxRates();
+
+        /**
          * Updater section
          */
-        $data['update_action']       = $this->url->link('extension/payment/'.self::MODULE_NAME.'/update',
-            'user_token='.$this->session->data['user_token'], true);
-        $data['backup_action']       = $this->url->link('extension/payment/'.self::MODULE_NAME.'/backups',
-            'user_token='.$this->session->data['user_token'], true);
-        $version_info                = $this->getModel()->checkModuleVersion(false);
-        $data['kassa_payments_link'] = $this->url->link('extension/payment/'.self::MODULE_NAME.'/payments',
-            'user_token='.$this->session->data['user_token'], true);
-        if (version_compare($version_info['version'], self::MODULE_VERSION) > 0) {
-            $data['new_version_available'] = true;
-            $data['changelog']             = $this->getModel()->getChangeLog(self::MODULE_VERSION,
-                $version_info['version']);
-            $data['new_version']           = $version_info['version'];
-        } else {
-            $data['new_version_available'] = false;
-            $data['changelog']             = '';
-            $data['new_version']           = self::MODULE_VERSION;
-        }
-        $data['new_version_info'] = $version_info;
-        $data['backups']          = $this->getModel()->getBackupList();
+        $data = $this->setUpdaterData($data);
 
         // kassa
         $arLang = array(
@@ -328,22 +321,26 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['market_status'] = array_merge($data['market_status'], $this->session->data['market_status']);
         }
 
-        $data['yandex_money_nps_prev_vote_time'] = $this->config->get('yandex_money_nps_prev_vote_time');
+        $data['yandex_money_nps_prev_vote_time']    = $this->config->get('yandex_money_nps_prev_vote_time');
         $data['yandex_money_nps_current_vote_time'] = time();
-        $data['callback_off_nps'] = $this->url->link('extension/payment/'.self::MODULE_NAME.'/vote_nps', 'user_token='.$this->session->data['user_token'], true);
-        $data['nps_block_text'] = sprintf($this->language->get('nps_text'), '<a href="#" onclick="return false;" class="yandex_money_nps_link">', '</a>');
-        $isTimeForVote = $data['yandex_money_nps_current_vote_time'] > (int)$data['yandex_money_nps_prev_vote_time']
-            + $this->npsRetryAfterDays * 86400;
-        $data['is_needed_show_nps'] = $isTimeForVote
-            && substr($this->getModel()->getKassaModel()->getPassword(), 0, 5) === 'live_'
-            && $data['nps_block_text'];
+        $data['callback_off_nps']                   = $this->url->link('extension/payment/'.self::MODULE_NAME.'/vote_nps',
+            'user_token='.$this->session->data['user_token'], true);
+        $data['nps_block_text']                     = sprintf($this->language->get('nps_text'),
+            '<a href="#" onclick="return false;" class="yandex_money_nps_link">', '</a>');
+        $isTimeForVote                              = $data['yandex_money_nps_current_vote_time'] > (int)$data['yandex_money_nps_prev_vote_time']
+                                                                                                    + $this->npsRetryAfterDays * 86400;
+        $data['is_needed_show_nps']                 = $isTimeForVote
+                                                      && substr($this->getModel()->getKassaModel()->getPassword(), 0,
+                5) === 'live_'
+                                                      && $data['nps_block_text'];
         $this->response->setOutput($this->load->view('extension/payment/yandex_money', $data));
     }
 
     /**
      * Экшен для сохранения времени голосования в NPS
      */
-    public function vote_nps() {
+    public function vote_nps()
+    {
         $this->load->model('setting/setting');
         $this->model_setting_setting->editSettingValue('yandex_money', 'yandex_money_nps_prev_vote_time', time());
     }
@@ -707,6 +704,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $value = isset($request->post['yandex_money_kassa_show_in_footer']) ? $request->post['yandex_money_kassa_show_in_footer'] : 'off';
         $kassa->setShowLinkInFooter($value === 'on');
         $request->post['yandex_money_kassa_show_in_footer'] = $kassa->getShowLinkInFooter();
+
+        $value = isset($request->post['yandex_money_kassa_b2b_sberbank_enabled']) ? $request->post['yandex_money_kassa_b2b_sberbank_enabled'] : 'off';
+        $kassa->setB2bSberbankEnabled($value === 'on');
+
+        $value = isset($request->post['yandex_money_kassa_b2b_tax_rate_default']) ? $request->post['yandex_money_kassa_b2b_tax_rate_default'] : VatDataType::UNTAXED;
+        $kassa->setB2bSberbankDefaultTaxRate($value);
+        $request->post['yandex_money_kassa_tax_rate_default'] = $kassa->getDefaultTaxRate();
+
+        $value = isset($request->post['yandex_money_kassa_b2b_tax_rates']) ? $request->post['yandex_money_kassa_b2b_tax_rates'] : array();
+        if (is_array($value)) {
+            $kassa->setB2bTaxRates($value);
+            $request->post['yandex_money_kassa_b2b_tax_rates'] = $kassa->getB2bTaxRates();
+        }
     }
 
     private function validateWallet(Request $request)
@@ -844,6 +854,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $result;
     }
 
+    private function getB2bTaxRates()
+    {
+        $result = array();
+        foreach ($this->getModel()->getKassaModel()->getB2bTaxRateList() as $taxRateId) {
+            $key                = 'b2b_tax_rate_'.$taxRateId.'_label';
+            $result[$taxRateId] = $this->language->get($key);
+        }
+
+        return $result;
+    }
+
     private function getAvailableGeoZones()
     {
         $this->load->model('localisation/geo_zone');
@@ -884,10 +905,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $data['yandex_money_market_lnk_yml'] = HTTP_CATALOG.'index.php?route=extension/payment/yandex_money/market';
         }
 
-        $data['yandex_money_metrika_callback']     = $this->url->link('extension/payment/yandex_money/checkOAuth',
+        $data['yandex_money_metrika_callback'] = $this->url->link('extension/payment/yandex_money/checkOAuth',
             'user_token='.$this->session->data['user_token'], true);
-        $data['yandex_money_metrika_o2auth']       = $this->config->get('yandex_money_metrika_o2auth');
-        $data['token_url']                         = 'https://oauth.yandex.ru/token?';
+        $data['yandex_money_metrika_o2auth']   = $this->config->get('yandex_money_metrika_o2auth');
+        $data['token_url']                     = 'https://oauth.yandex.ru/token?';
 
         return $data;
     }
@@ -904,8 +925,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $this->updateCounterCode();
     }
+
     /**
      * @param array $post
+     *
      * @return bool
      */
     private function isUpdatedCounterSettings($post)
@@ -917,7 +940,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'yandex_money_metrika_pw',
             'yandex_money_metrika_clickmap',
             'yandex_money_metrika_webvizor',
-            'yandex_money_metrika_hash'
+            'yandex_money_metrika_hash',
         );
         foreach ($counterParams as $param) {
             if (!isset($settings[$param])) {
@@ -985,6 +1008,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     /**
      * @param string $post
+     *
      * @return string
      */
     public function goCurl($post)
@@ -1014,7 +1038,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function initErrors()
     {
-        $data   = array();
+        $data                  = array();
         $data['market_status'] = array();
         foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
             $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
@@ -1168,7 +1192,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $orderId = isset($this->request->get['order_id']) ? (int)$this->request->get['order_id'] : 0;
 
         if (empty($orderId)) {
-            $this->response->redirect($this->url->link('sale/order', 'user_token='.$this->session->data['user_token'], true));
+            $this->response->redirect($this->url->link('sale/order', 'user_token='.$this->session->data['user_token'],
+                true));
         }
         $this->load->model('sale/order');
         $returnUrl  = $this->url->link('sale/order',
@@ -1558,5 +1583,49 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         $this->response->redirect($link);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return mixed
+     */
+    private function setUpdaterData($data)
+    {
+        $data['update_action']       = $this->url->link('extension/payment/'.self::MODULE_NAME.'/update',
+            'user_token='.$this->session->data['user_token'], true);
+        $data['backup_action']       = $this->url->link('extension/payment/'.self::MODULE_NAME.'/backups',
+            'user_token='.$this->session->data['user_token'], true);
+        $version_info                = $this->getModel()->checkModuleVersion(false);
+        $data['kassa_payments_link'] = $this->url->link('extension/payment/'.self::MODULE_NAME.'/payments',
+            'user_token='.$this->session->data['user_token'], true);
+        if (version_compare($version_info['version'], self::MODULE_VERSION) > 0) {
+            $data['new_version_available'] = true;
+            $data['changelog']             = $this->getModel()->getChangeLog(self::MODULE_VERSION,
+                $version_info['version']);
+            $data['new_version']           = $version_info['version'];
+        } else {
+            $data['new_version_available'] = false;
+            $data['changelog']             = '';
+            $data['new_version']           = self::MODULE_VERSION;
+        }
+        $data['new_version_info'] = $version_info;
+        $data['backups']          = $this->getModel()->getBackupList();
+
+        return $data;
+    }
+
+    private function enableB2bSberbank()
+    {
+        if ($this->request->post['payment_yandex_money_status'] && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on') {
+            $this->model_setting_setting->editSetting('payment_yandex_money_b2b_sberbank', array(
+                'payment_yandex_money_b2b_sberbank_status' => true,
+                'payment_yandex_money_sort_order'          => 0,
+            ));
+        } else {
+            $this->model_setting_setting->editSetting('payment_yandex_money_b2b_sberbank', array(
+                'payment_yandex_money_b2b_sberbank_status' => false,
+            ));
+        }
     }
 }

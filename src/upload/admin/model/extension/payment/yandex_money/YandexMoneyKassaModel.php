@@ -1,6 +1,6 @@
 <?php
 
-require_once DIR_CATALOG . 'model/extension/payment/yandex_money/autoload.php';
+require_once DIR_CATALOG.'model/extension/payment/yandex_money/autoload.php';
 
 class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 {
@@ -15,10 +15,10 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     {
         parent::__construct($config);
 
-        $this->invoiceEnable = (bool)$config->get('yandex_money_kassa_invoice');
+        $this->invoiceEnable  = (bool)$config->get('yandex_money_kassa_invoice');
         $this->invoiceSubject = $config->get('yandex_money_kassa_invoice_subject');
         $this->invoiceMessage = $config->get('yandex_money_kassa_invoice_message');
-        $this->invoiceLogo = (bool)$config->get('yandex_money_kassa_invoice_logo');
+        $this->invoiceLogo    = (bool)$config->get('yandex_money_kassa_invoice_logo');
     }
 
     /**
@@ -83,7 +83,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 
     public function setTaxRates($taxRates)
     {
-        $all = $this->getTaxRateList();
+        $all            = $this->getTaxRateList();
         $this->taxRates = array();
         foreach ($taxRates as $shopTaxRateId => $taxRate) {
             if (in_array($taxRate, $all)) {
@@ -212,6 +212,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
         } catch (Exception $e) {
             return false;
         }
+
         return true;
     }
 
@@ -221,5 +222,40 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     public function setShowLinkInFooter($value)
     {
         $this->showInFooter = $value ? true : false;
+    }
+
+
+    /**
+     * @param $value
+     */
+    public function setB2bSberbankEnabled($value)
+    {
+        $this->b2bSberbankEnabled = $value;
+    }
+
+    /**
+     * @param $value
+     */
+    public function setB2bSberbankPaymentPurpose($value)
+    {
+        $this->b2bSberbankPaymentPurpose = $value;
+    }
+
+
+    /**
+     * @param $value
+     */
+    public function setB2bSberbankDefaultTaxRate($value)
+    {
+        $this->b2bSberbankDefaultTaxRate = $value;
+    }
+
+
+    /**
+     * @param $value
+     */
+    public function setB2bTaxRates($value)
+    {
+        $this->b2bTaxRates = $value;
     }
 }

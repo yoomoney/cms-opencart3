@@ -54,10 +54,6 @@ class CreateRefundRequestSerializer
             $receipt = $request->getReceipt();
             $result['receipt'] = array();
             foreach ($receipt->getItems() as $item) {
-                $vatId = $item->getVatCode();
-                if ($vatId === null) {
-                    $vatId = $receipt->getTaxSystemCode();
-                }
                 $result['receipt']['items'][] = array(
                     'description' => $item->getDescription(),
                     'amount'      => array(
@@ -65,7 +61,7 @@ class CreateRefundRequestSerializer
                         'currency' => $item->getPrice()->getCurrency(),
                     ),
                     'quantity'    => $item->getQuantity(),
-                    'vat_code'    => $vatId,
+                    'vat_code'    => $item->getVatCode(),
                 );
             }
             $value = $receipt->getEmail();

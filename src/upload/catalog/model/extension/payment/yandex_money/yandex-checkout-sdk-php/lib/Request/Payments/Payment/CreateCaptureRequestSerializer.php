@@ -51,15 +51,11 @@ class CreateCaptureRequestSerializer
             if ($receipt->notEmpty()) {
                 $result['receipt'] = array();
                 foreach ($receipt->getItems() as $item) {
-                    $vatId = $item->getVatCode();
-                    if ($vatId === null) {
-                        $vatId = $receipt->getTaxSystemCode();
-                    }
                     $result['receipt']['items'][] = array(
                         'description' => $item->getDescription(),
                         'amount'      => $this->serializeAmount($item->getPrice()),
                         'quantity'    => $item->getQuantity(),
-                        'vat_code'    => $vatId,
+                        'vat_code'    => $item->getVatCode(),
                     );
                 }
                 $value = $receipt->getEmail();

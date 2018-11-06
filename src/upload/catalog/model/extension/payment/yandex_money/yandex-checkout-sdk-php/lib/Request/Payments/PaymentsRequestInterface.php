@@ -31,153 +31,100 @@ namespace YandexCheckout\Request\Payments;
  *
  * @package YandexCheckout\Request\Payments
  *
- * @property-read string|null $paymentId Идентификатор платежа
- * @property-read string|null $accountId Идентификатор магазина
- * @property-read string|null $gatewayId Идентификатор шлюза
- * @property-read \DateTime|null $createdGte Время создания, от (включительно)
- * @property-read \DateTime|null $createdGt Время создания, от (не включая)
- * @property-read \DateTime|null $createdLte Время создания, до (включительно)
- * @property-read \DateTime|null $createdLt Время создания, до (не включая)
- * @property-read \DateTime|null $authorizedGte Время проведения операции, от (включительно)
- * @property-read \DateTime|null $authorizedGt Время проведения операции, от (не включая)
- * @property-read \DateTime|null $authorizedLte Время проведения, до (включительно)
- * @property-read \DateTime|null $authorizedLt Время проведения, до (не включая)
+ * @property-read string|null $page Страница выдачи результатов, которую необходимо отобразить
+ * @property-read \DateTime|null $createdAtGte Время создания, от (включительно)
+ * @property-read \DateTime|null $createdAtGt Время создания, от (не включая)
+ * @property-read \DateTime|null $createdAtLte Время создания, до (включительно)
+ * @property-read \DateTime|null $createdAtLt Время создания, до (не включая)
+ * @property-read integer|null $limit Ограничение количества объектов платежа, отображаемых на одной странице выдачи
+ * @property-read string|null $recipientGatewayId Идентификатор шлюза.
  * @property-read string|null $status Статус платежа
- * @property-read string|null $nextPage Токен для получения следующей страницы выборки
  */
 interface PaymentsRequestInterface
 {
     /**
-     * Возвращает идентификатор платежа если он задан или null
-     * @return string|null Идентификатор платежа
+     * Возвращает страницу выдачи результатов или null если она до этого не была установлена
+     * @return string|null Страница выдачи результатов
      */
-    function getPaymentId();
+    function getPage();
 
     /**
-     * Проверяет, был ли задан идентификатор платежа
-     * @return bool True если идентификатор был задан, false если нет
+     * Проверяет была ли установлена страница выдачи результатов
+     * @return bool True если страница выдачи результатов была установлена, false если нет
      */
-    function hasPaymentId();
-
-    /**
-     * Возвращает идентификатор магазина, если он был задан
-     * @return string|null Идентификатор магазина
-     */
-    function getAccountId();
-
-    /**
-     * Проверяет, был ли установлен идентификатор магазина
-     * @return bool True если идентификатор магазина был установлен, false если нет
-     */
-    function hasAccountId();
-
-    /**
-     * Возвращает идентификатор шлюза
-     * @return string|null Идентификатор шлюза
-     */
-    function getGatewayId();
-
-    /**
-     * Проверяет был ли установлен идентификатор шлюза
-     * @return bool True если идентификатор шлюза был установлен, false если нет
-     */
-    function hasGatewayId();
+    function hasPage();
 
     /**
      * Возвращает дату создания от которой будут возвращены платежи или null если дата не была установлена
      * @return \DateTime|null Время создания, от (включительно)
      */
-    function getCreatedGte();
+    function getCreatedAtGte();
 
     /**
      * Проверяет была ли установлена дата создания от которой выбираются платежи
      * @return bool True если дата была установлена, false если нет
      */
-    function hasCreatedGte();
+    function hasCreatedAtGte();
 
     /**
      * Возвращает дату создания от которой будут возвращены платежи или null если дата не была установлена
      * @return \DateTime|null Время создания, от (не включая)
      */
-    function getCreatedGt();
+    function getCreatedAtGt();
 
     /**
      * Проверяет была ли установлена дата создания от которой выбираются платежи
      * @return bool True если дата была установлена, false если нет
      */
-    function hasCreatedGt();
+    function hasCreatedAtGt();
 
     /**
      * Возвращает дату создания до которой будут возвращены платежи или null если дата не была установлена
      * @return \DateTime|null Время создания, до (включительно)
      */
-    function getCreatedLte();
+    function getCreatedAtLte();
 
     /**
      * Проверяет была ли установлена дата создания до которой выбираются платежи
      * @return bool True если дата была установлена, false если нет
      */
-    function hasCreatedLte();
+    function hasCreatedAtLte();
 
     /**
      * Возвращает дату создания до которой будут возвращены платежи или null если дата не была установлена
      * @return \DateTime|null Время создания, до (не включая)
      */
-    function getCreatedLt();
+    function getCreatedAtLt();
 
     /**
      * Проверяет была ли установлена дата создания до которой выбираются платежи
      * @return bool True если дата была установлена, false если нет
      */
-    function hasCreatedLt();
+    function hasCreatedAtLt();
 
     /**
-     * Возвращает дату проведения от которой будут возвращены платежи или null если дата не была установлена
-     * @return \DateTime|null Время проведения операции, от (включительно)
+     * Возвращает ограничение количества объектов платежа или null если оно до этого не было установлено
+     * @return string|null Ограничение количества объектов платежа
      */
-    function getAuthorizedGte();
+    function getLimit();
 
     /**
-     * Проверяет была ли установлена дата проведения от которой выбираются платежи
-     * @return bool True если дата была установлена, false если нет
+     * Проверяет было ли установлено ограничение количества объектов платежа
+     * @return bool True если ограничение количества объектов платежа было установлено, false если нет
      */
-    function hasAuthorizedGte();
+    function hasLimit();
 
     /**
-     * Возвращает дату проведения от которой будут возвращены платежи или null если дата не была установлена
-     * @return \DateTime|null Время проведения операции, от (не включая)
+     * Возвращает идентификатор шлюза
+     * @return string|null Идентификатор шлюза
      */
-    function getAuthorizedGt();
+    function getRecipientGatewayId();
 
     /**
-     * Проверяет была ли установлена дата проведения от которой выбираются платежи
-     * @return bool True если дата была установлена, false если нет
+     * Проверяет был ли установлен идентификатор шлюза
+     * @return bool True если идентификатор шлюза был установлен, false если нет
      */
-    function hasAuthorizedGt();
-
-    /**
-     * Возвращает дату проведения до которой будут возвращены платежи или null если дата не была установлена
-     * @return \DateTime|null Время проведения, до (включительно)
-     */
-    function getAuthorizedLte();
-
-    /**
-     * Проверяет была ли установлена дата проведения до которой выбираются платежи
-     * @return bool True если дата была установлена, false если нет
-     */
-    function hasAuthorizedLte();
-
-    /**
-     * Возвращает дату проведения до которой будут возвращены платежи платежи или null если она не была установлена
-     * @return \DateTime|null Время проведения, до (не включая)
-     */
-    function getAuthorizedLt();
-
-    /**
-     * Проверяет была ли установлена дата проведения до которой выбираются
-     * @return bool True если дата была установлена, false если нет
-     */
-    function hasAuthorizedLt();
+    function hasRecipientGatewayId();
 
     /**
      * Возвращает статус выбираемых платежей или null если он до этого не был установлен
@@ -191,15 +138,4 @@ interface PaymentsRequestInterface
      */
     function hasStatus();
 
-    /**
-     * Возвращает токен для получения следующей страницы выборки
-     * @return string|null Токен для получения следующей страницы выборки
-     */
-    function getNextPage();
-
-    /**
-     * Проверяет был ли установлен токен следующей страницы
-     * @return bool True если токен был установлен, false если нет
-     */
-    function hasNextPage();
 }

@@ -26,13 +26,12 @@
 
 namespace YandexCheckout\Request\Refunds;
 
-use YandexCheckout\Common\AbstractRequest;
+use YandexCheckout\Common\AbstractPaymentRequest;
 use YandexCheckout\Common\Exceptions\EmptyPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 use YandexCheckout\Helpers\TypeCast;
 use YandexCheckout\Model\AmountInterface;
-use YandexCheckout\Model\MonetaryAmount;
 use YandexCheckout\Model\ReceiptInterface;
 
 /**
@@ -43,7 +42,7 @@ use YandexCheckout\Model\ReceiptInterface;
  * @property string $comment Комментарий к операции возврата, основание для возврата средств покупателю.
  * @property ReceiptInterface|null $receipt Инстанс чека или null
  */
-class CreateRefundRequest extends AbstractRequest implements CreateRefundRequestInterface
+class CreateRefundRequest extends AbstractPaymentRequest implements CreateRefundRequestInterface
 {
     /**
      * @var string Айди платежа для которого создаётся возврат
@@ -51,19 +50,9 @@ class CreateRefundRequest extends AbstractRequest implements CreateRefundRequest
     private $_paymentId;
 
     /**
-     * @var MonetaryAmount Сумма возврата
-     */
-    private $_amount;
-
-    /**
      * @var string Комментарий к операции возврата, основание для возврата средств покупателю.
      */
     private $_comment;
-
-    /**
-     * @var ReceiptInterface|null Чек для печати информации о возврате
-     */
-    private $_receipt;
 
     /**
      * Возвращает айди платежа для которого создаётся возврат средств
@@ -102,24 +91,6 @@ class CreateRefundRequest extends AbstractRequest implements CreateRefundRequest
                 'Invalid payment id value type in CreateRefundRequest', 0, 'CreateRefundRequest.paymentId', $value
             );
         }
-    }
-
-    /**
-     * Возвращает сумму возвращаемых средств
-     * @return AmountInterface Сумма возврата
-     */
-    public function getAmount()
-    {
-        return $this->_amount;
-    }
-
-    /**
-     * Устанавливает сумму возвращаемых средств
-     * @param AmountInterface $value Сумма возврата
-     */
-    public function setAmount(AmountInterface $value)
-    {
-        $this->_amount = $value;
     }
 
     /**
@@ -167,70 +138,18 @@ class CreateRefundRequest extends AbstractRequest implements CreateRefundRequest
     }
 
     /**
-     * Возвращает инстанс чека или null если чек не задан
-     * @return ReceiptInterface|null Инстанс чека или null
-     */
-    public function getReceipt()
-    {
-        return $this->_receipt;
-    }
-
-    /**
-     * Проверяет задан ли чек
-     * @return bool True если чек есть, false если нет
-     */
-    public function hasReceipt()
-    {
-        return $this->_receipt !== null && $this->_receipt->notEmpty();
-    }
-
-    /**
-     * Устанавливает чек для печати
-     * @param ReceiptInterface|null $value Инстанс чека или null для удаления информации о чеке
-     * @throws InvalidPropertyValueTypeException Выбрасывается если передан не инстанс класса чека и не null
-     */
-    public function setReceipt($value)
-    {
-        if ($value === null || $value instanceof ReceiptInterface) {
-            $this->_receipt = $value;
-        } else {
-            throw new InvalidPropertyValueTypeException('Invalid receipt in Refund', 0, 'Refund.receipt', $value);
-        }
-    }
-
-    /**
      * Валидирует текущий объект запроса
      * @return bool True если текущий объект запроса валиден, false если нет
      */
     public function validate()
     {
+        if (!parent::validate()) {
+            return false;
+        }
+
         if (empty($this->_paymentId)) {
             $this->setValidationError('Payment id not specified');
             return false;
-        }
-        if (empty($this->_amount)) {
-            $this->setValidationError('Amount not specified');
-            return false;
-        }
-        if ($this->_amount->getValue() <= 0.0) {
-            $this->setValidationError('Invalid amount value: ' . $this->_amount->getValue());
-            return false;
-        }
-        if ($this->_receipt !== null && $this->_receipt->notEmpty()) {
-            $email = $this->_receipt->getEmail();
-            $phone = $this->_receipt->getPhone();
-            if (empty($email) && empty($phone)) {
-                $this->setValidationError('Both email and phone values are empty in receipt');
-                return false;
-            }
-            if ($this->_receipt->getTaxSystemCode() === null) {
-                foreach ($this->_receipt->getItems() as $item) {
-                    if ($item->getVatCode() === null) {
-                        $this->setValidationError('Item vat_id and receipt tax_system_id not specified');
-                        return false;
-                    }
-                }
-            }
         }
         return true;
     }
