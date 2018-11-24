@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
