@@ -2,6 +2,7 @@
 
 
 use YandexCheckout\Model\Payment;
+use YandexCheckout\Model\PaymentMethodType;
 
 require_once __DIR__.DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'autoload.php';
 
@@ -149,7 +150,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.2.0',
+                        'module_version' => '1.2.1',
                     ));
 
             $confirmation = array(
@@ -298,12 +299,35 @@ class ModelExtensionPaymentYandexMoney extends Model
      */
     public function confirmOrderPayment($orderId, $payment, $statusId)
     {
+        $message     = '';
+        if ($payment->getPaymentMethod()->getType() == PaymentMethodType::B2B_SBERBANK) {
+            $payerBankDetails = $payment->getPaymentMethod()->getPayerBankDetails();
+
+            $fields = array(
+                'fullName'   => 'Полное наименование организации',
+                'shortName'  => 'Сокращенное наименование организации',
+                'adress'     => 'Адрес организации',
+                'inn'        => 'ИНН организации',
+                'kpp'        => 'КПП организации',
+                'bankName'   => 'Наименование банка организации',
+                'bankBranch' => 'Отделение банка организации',
+                'bankBik'    => 'БИК банка организации',
+                'account'    => 'Номер счета организации',
+            );
+
+            foreach ($fields as $field => $caption) {
+                if (isset($requestData[$field])) {
+                    $message .= $caption.': '.$payerBankDetails->offsetGet($field).'\n';
+                }
+            }
+        }
+
         $this->log('info', 'Confirm captured payment '.$payment->getId().' with status '.$statusId);
         $this->load->model('checkout/order');
         $this->model_checkout_order->addOrderHistory(
             $orderId,
             $statusId,
-            'Платёж номер "'.$payment->getId().'" подтверждён'
+            'Платёж номер "'.$payment->getId().'" подтверждён' . $message
         );
         $sql = 'UPDATE `'.DB_PREFIX.'order_history` SET `comment` = \'Платёж подтверждён\' WHERE `order_id` = '
                .(int)$orderId.' AND `order_status_id` <= 1';
