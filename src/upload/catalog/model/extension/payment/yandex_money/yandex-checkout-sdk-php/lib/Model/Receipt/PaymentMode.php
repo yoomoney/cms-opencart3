@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The MIT License
  *
@@ -24,29 +23,28 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Model\PaymentMethod;
+namespace YandexCheckout\Model\Receipt;
+
 
 use YandexCheckout\Common\AbstractEnum;
 
-class PaymentMethodCardType extends AbstractEnum
+class PaymentMode extends AbstractEnum
 {
-    const MASTER_CARD = 'MasterCard';
-    const VISA = 'Visa';
-    const MIR = 'MIR';
-    const UNION_PAY = 'UnionPay';
-    const JCB = 'JCB';
-    const AMERICAN_EXPRESS = 'AmericanExpress';
-    const UNKNOWN = 'Unknown';
-    const DINERS_CLUB = 'DinersClub';
+    const FULL_PREPAYMENT = 'full_prepayment';
+    const PARTIAL_PREPAYMENT = 'partial_prepayment';
+    const ADVANCE = 'advance';
+    const FULL_PAYMENT = 'full_payment';
+    const PARTIAL_PAYMENT = 'partial_payment';
+    const CREDIT = 'credit';
+    const CREDIT_PAYMENT = 'credit_payment';
 
     protected static $validValues = array(
-        self::MASTER_CARD      => true,
-        self::VISA             => true,
-        self::MIR              => true,
-        self::UNION_PAY        => true,
-        self::JCB              => true,
-        self::AMERICAN_EXPRESS => true,
-        self::UNKNOWN          => true,
-        self::DINERS_CLUB      => true,
+        self::FULL_PREPAYMENT    => true,
+        self::PARTIAL_PREPAYMENT => true,
+        self::ADVANCE            => true,
+        self::FULL_PAYMENT       => true,
+        self::PARTIAL_PAYMENT    => true,
+        self::CREDIT             => true,
+        self::CREDIT_PAYMENT     => true,
     );
 }

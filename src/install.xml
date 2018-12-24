@@ -2,11 +2,11 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
-        <operation>
+        <operation error="skip">
             <search><![CDATA[// History]]></search>
             <add position="before"><![CDATA[
             $this->language->load('extension/payment/yandex_money');
@@ -17,7 +17,7 @@
         </operation>
     </file>
     <file path="catalog/view/theme/*/template/account/order_info.twig">
-        <operation>
+        <operation error="skip">
             <search><![CDATA[</tfoot>]]></search>
             <add position="before"><![CDATA[
             {% if yandex_money is defined and yandex_money %}
@@ -30,11 +30,11 @@
     </file>
     <!-- загружаем вместе с заказами код способа оплаты -->
     <file path="admin/model/sale/order.php">
-        <operation>
+        <operation error="skip">
             <search regex="true"><![CDATA[~o.date_added, o.date_modified FROM~]]></search>
             <add><![CDATA[o.date_added, o.date_modified, o.payment_code, o.email, o.order_status_id FROM]]></add>
         </operation>
-        <operation>
+        <operation error="skip">
             <search regex="true"><![CDATA[/\$query\s=\s\$this->db->query\(\$sql\);\s+return\s\$query->rows;/]]></search>
             <add><![CDATA[
         $query = $this->db->query($sql);
@@ -69,7 +69,7 @@
         </operation>
     </file>
     <file path="admin/language/{english,russian,en-gb,ru-ru}/sale/order.php">
-        <operation>
+        <operation error="skip">
             <search regex="true"><![CDATA[~(\$_\[\'text_add\'\])~]]></search>
             <add><![CDATA[
                 $_['button_invoice_kassa'] = 'Выставление счета';
@@ -78,14 +78,14 @@
         </operation>
     </file>
     <file path="system/library/mail.php">
-        <operation>
+        <operation error="skip">
             <search><![CDATA[basename(urlencode($attachment))]]></search>
             <add><![CDATA[urlencode(basename($attachment))]]></add>
         </operation>
     </file>
     <!-- -->
     <file path="admin/controller/sale/order.php">
-        <operation>
+        <operation error="skip">
             <search><![CDATA['shipping_code' => $result['shipping_code'],]]></search>
             <add position="after"><![CDATA[
                 'payment_code'   => (isset($result['payment_code']) && $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_invoice') && $result['order_status_id'] == 1) ? $result['payment_code'] : '',
@@ -96,7 +96,7 @@
                 'capture_url'    => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link('extension/payment/yandex_money/capture', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
             ]]></add>
         </operation>
-        <operation>
+        <operation error="skip">
             <search><![CDATA[$data['user_token'] = $this->session->data['user_token'];]]></search>
             <add position="after"><![CDATA[
         if ($this->config->get('yandex_money_kassa_enabled')) {
@@ -107,8 +107,9 @@
         </operation>
     </file>
     <file path="admin/view/template/sale/order_list.twig">
-        <operation>
-            <search><![CDATA[<li><a href="{{ order.edit }}"><i class="fa fa-pencil"></i> {{ button_edit }}</a></li>]]></search>
+        <operation error="skip">
+            <search>
+                <![CDATA[<li><a href="{{ order.edit }}"><i class="fa fa-pencil"></i> {{ button_edit }}</a></li>]]></search>
             <add position="after"><![CDATA[
                 {% if order.payment_code is defined and order.payment_code == 'yandex_money' %}
                     <li><a href="javascript://" class="invoice-button" data-order_id="{{ order.order_id }}" data-customer="{{ order.customer }}" data-email="{{ order.email }}"><i class="fa fa-envelope"></i> Выставить счёт</a></li>
@@ -121,7 +122,7 @@
                 {% endif %}
             ]]></add>
         </operation>
-        <operation>
+        <operation error="skip">
             <search><![CDATA[$('input[name^=\'selected\']:first').trigger('change');]]></search>
             <add position="after"><![CDATA[//
             jQuery('.invoice-button').click(function(e) {
@@ -290,7 +291,8 @@
             ]]></add>
         </operation>
         <operation>
-            <search trim="true"><![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+            <search trim="true">
+                <![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
             <add position="after"><![CDATA[
                 $data['cost'] = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
             ]]></add>
@@ -334,6 +336,95 @@
                         }]}}});
                     });
                 </script>
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/catalog/product_form.twig" error="skip">
+        <operation error="skip" info="Add Product Properties">
+            <search position="after"><![CDATA[<input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />]]></search>
+            <add><![CDATA[
+                    <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                 </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-ym_payment_mode"><span data-toggle="tooltip" title="">Признак способа расчета</span></label>
+                <div class="col-sm-10">
+                  <select name="ym_payment_mode" id="ym_payment_mode" class="form-control">
+
+                    {% for pmValue,pmTitle in paymentModeEnum %}
+
+                    <option value="{{ pmValue }}" {{ product_ym_payment_mode == pmValue ? ' selected' : '' }}>{{ pmTitle }}</option>
+
+                    {% endfor %}
+
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="ym_payment_subject"><span data-toggle="tooltip" title="">Признак предмета расчета</span></label>
+                <div class="col-sm-10">
+                  <select name="ym_payment_subject" id="ym_payment_subject" class="form-control">
+
+                    {% for psValue,psTitle in paymentSubjectEnum %}
+
+                    <option value="{{ psValue }}" {{ product_ym_payment_subject == psValue ? ' selected' : '' }}>{{ psTitle }}</option>
+
+                    {% endfor %}
+
+                  </select>
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/controller/catalog/product.php" error="skip">
+        <operation error="skip" info="Add Capture Link">
+            <search position="after"><![CDATA[$data['layouts'] = $this->model_design_layout->getLayouts();]]></search>
+            <add><![CDATA[
+                $data['layouts'] = $this->model_design_layout->getLayouts();
+                $res = $this->db->query('SELECT * FROM `'.DB_PREFIX.'ya_money_product_properties` WHERE product_id='.$this->request->get['product_id']);
+                $productProp = $res->row;
+                $data['product_ym_payment_mode'] = !empty($productProp['payment_mode']) ? $productProp['payment_mode'] : '';
+                $data['product_ym_payment_subject'] = !empty($productProp['payment_subject']) ? $productProp['payment_subject'] : '';
+
+                $data['paymentModeEnum'] = array(
+                    'full_prepayment'    => 'Полная предоплата (\'full_prepayment\')',
+                    'partial_prepayment' => 'Частичная предоплата (\'partial_prepayment\')',
+                    'advance'            => 'Аванс (\'advance\')',
+                    'full_payment'       => 'Полный расчет (\'full_payment\')',
+                    'partial_payment'    => 'Частичный расчет и кредит (\'partial_payment\')',
+                    'credit'             => 'Кредит (\'credit\')',
+                    'credit_payment'     => 'Выплата по кредиту (\'credit_payment\')',
+                );
+                $data['paymentSubjectEnum'] = array(
+                    'commodity'             => 'Товар (\'commodity\')',
+                    'excise'                => 'Подакцизный товар (\'excise\')',
+                    'job'                   => 'Работа (\'job\')',
+                    'service'               => 'Услуга (\'service\')',
+                    'gambling_bet'          => 'Ставка в азартной игре (\'gambling_bet\')',
+                    'gambling_prize'        => 'Выигрыш в азартной игре (\'gambling_prize\')',
+                    'lottery'               => 'Лотерейный билет (\'lottery\')',
+                    'lottery_prize'         => 'Выигрыш в лотерею (\'lottery_prize\')',
+                    'intellectual_activity' => 'Результаты интеллектуальной деятельности (\'intellectual_activity\')',
+                    'payment'               => 'Платеж (\'payment\')',
+                    'agent_commission'      => 'Агентское вознаграждение (\'agent_commission\')',
+                    'composite'             => 'Несколько вариантов (\'composite\')',
+                    'another'               => 'Другое (\'another\')',
+                );
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/controller/catalog/product.php" error="skip">
+        <operation error="skip" info="Add Capture Link">
+            <search position="after"><![CDATA[$this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);]]></search>
+            <add><![CDATA[
+                $this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);
+                if(!empty($this->request->post['ym_payment_mode']) && !empty($this->request->post['ym_payment_subject'])) {
+                    $res = $this->db->query('INSERT INTO `'.DB_PREFIX.'ya_money_product_properties` (product_id, payment_mode, payment_subject)
+                        VALUES('.$this->request->get['product_id'].', "'.$this->request->post['ym_payment_mode'].'", "'.$this->request->post['ym_payment_subject'].'")
+                        ON DUPLICATE KEY UPDATE  payment_mode="'.$this->request->post['ym_payment_mode'].'", payment_subject="'.$this->request->post['ym_payment_subject'].'"'
+                    );
+                }
             ]]></add>
         </operation>
     </file>

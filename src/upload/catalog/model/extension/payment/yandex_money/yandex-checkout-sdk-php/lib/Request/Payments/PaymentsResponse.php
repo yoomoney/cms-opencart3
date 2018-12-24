@@ -58,6 +58,7 @@ class PaymentsResponse
 
     /**
      * Конструктор, устанавливает свойства объекта из пришедшего из API ассоциативного массива
+     *
      * @param array $options Массив настроек, пришедший от API
      */
     public function __construct($options)
@@ -114,14 +115,16 @@ class PaymentsResponse
                 $payment->setMetadata($metadata);
             }
             if (!empty($paymentInfo['cancellation_details'])) {
-                $payment->setCancellationDetails(new CancellationDetails(
-                    $paymentInfo['cancellation_details']['party'], $paymentInfo['cancellation_details']['reason']
-                ));
+                $cancellationDetails = $paymentInfo['cancellation_details'];
+                $party               = isset($cancellationDetails['party']) ? $cancellationDetails['party'] : null;
+                $reason              = isset($cancellationDetails['reason']) ? $cancellationDetails['reason'] : null;
+                $payment->setCancellationDetails(new CancellationDetails($party, $reason));
             }
             if (!empty($paymentInfo['authorization_details'])) {
-                $payment->setAuthorizationDetails(new AuthorizationDetails(
-                    $paymentInfo['authorization_details']['rrn'], $paymentInfo['authorization_details']['auth_code']
-                ));
+                $authorizationDetails = $paymentInfo['authorization_details'];
+                $rrn                  = isset($authorizationDetails['rrn']) ? $authorizationDetails['rrn'] : null;
+                $authCode             = isset($authorizationDetails['auth_code']) ? $authorizationDetails['auth_code'] : null;
+                $payment->setAuthorizationDetails(new AuthorizationDetails($rrn, $authCode));
             }
             $this->items[] = $payment;
         }
@@ -159,12 +162,15 @@ class PaymentsResponse
 
     /**
      * Фабричный метод для создания объектов методов оплаты
+     *
      * @param array $options Массив настроек метода оплаты
+     *
      * @return AbstractPaymentMethod Используемый способ оплаты
      */
     private function factoryPaymentMethod($options)
     {
         $factory = new PaymentMethodFactory();
+
         return $factory->factoryFromArray($options);
     }
 }
