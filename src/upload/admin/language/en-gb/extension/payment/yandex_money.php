@@ -389,3 +389,9 @@ $_['b2b_tax_rate_7_label']           = '7%';
 $_['b2b_tax_rate_10_label']          = '10%';
 $_['b2b_tax_rate_18_label']          = '18%';
 $_['b2b_sberbank_tax_message']       = 'There is a restriction for payments via Sberbank Business Online: one receipt can only contain products with the same VAT rate. If the client wants to pay for products with different VAT rates at the same time, we will show him the message explaining that it\'s not possible.';
+
+$_['kassa_payment_mode_default_label']          = 'Признак способа расчета';
+$_['kassa_payment_subject_default_label']       = 'Признак предмета расчета';
+$_['kassa_payment_subject_default_description'] = 'Признаки предмета расчёта и способа расчёта берутся из атрибутов товара payment_mode и payment_subject . Их значения можно задать отдельно в карточке товара, если это потребуется. <a href="https://kassa.yandex.ru/docs/guides/#perehod-na-ffd-1-05">Подробнее.</a>
+
+Для товаров, у которых значения этих атрибутов не заданы, будем применять значения по умолчанию:';

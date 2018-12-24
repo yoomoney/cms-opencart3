@@ -38,6 +38,7 @@ use YandexCheckout\Model\PaymentData\PaymentDataGooglePay;
 use YandexCheckout\Model\PaymentData\PaymentDataSberbank;
 use YandexCheckout\Model\PaymentData\PaymentDataYandexWallet;
 use YandexCheckout\Model\PaymentMethodType;
+use YandexCheckout\Model\ReceiptItem;
 
 /**
  * Класс сериалайзера объекта запроса к API на проведение платежа
@@ -80,13 +81,27 @@ class CreatePaymentRequestSerializer
             $receipt = $request->getReceipt();
             if ($receipt->notEmpty()) {
                 $result['receipt'] = array();
+                /** @var ReceiptItem $item */
                 foreach ($receipt->getItems() as $item) {
-                    $result['receipt']['items'][] = array(
-                        'description' => $item->getDescription(),
-                        'amount'      => $this->serializeAmount($item->getPrice()),
-                        'quantity'    => $item->getQuantity(),
-                        'vat_code'    => $item->getVatCode(),
+                    $itemArray = array(
+                        'description'     => $item->getDescription(),
+                        'amount'          => array(
+                            'value'    => $item->getPrice()->getValue(),
+                            'currency' => $item->getPrice()->getCurrency(),
+                        ),
+                        'quantity'        => $item->getQuantity(),
+                        'vat_code'        => $item->getVatCode(),
                     );
+
+                    if ($item->getPaymentSubject()) {
+                        $itemArray['payment_subject'] = $item->getPaymentSubject();
+                    }
+
+                    if ($item->getPaymentMode()) {
+                        $itemArray['payment_mode'] = $item->getPaymentMode();
+                    }
+
+                    $result['receipt']['items'][] = $itemArray;
                 }
                 $value = $receipt->getEmail();
                 if (!empty($value)) {
@@ -264,6 +279,7 @@ class CreatePaymentRequestSerializer
 
     /**
      * @param PaymentDataGooglePay $paymentData
+     *
      * @return array
      */
     private function serializePaymentDataGooglePay(PaymentDataGooglePay $paymentData)
@@ -279,6 +295,7 @@ class CreatePaymentRequestSerializer
 
     /**
      * @param PaymentDataB2bSberbank $paymentData
+     *
      * @return array
      */
     private function serializePaymentDataB2BSberbank(PaymentDataB2bSberbank $paymentData)

@@ -48,6 +48,16 @@ class ModelExtensionPaymentYandexMoney extends Model
                 CONSTRAINT `'.DB_PREFIX.'ya_money_refunds_pk` PRIMARY KEY (`refund_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=UTF8 COLLATE=utf8_general_ci;
         ');
+
+        $this->db->query('
+            CREATE TABLE IF NOT EXISTS `'.DB_PREFIX.'ya_money_product_properties` (
+                `product_id`        INTEGER  NOT NULL,
+                `payment_subject`   VARCHAR(256),
+                `payment_mode`      VARCHAR(256),
+                                
+                CONSTRAINT `'.DB_PREFIX.'ya_money_payment_pk` PRIMARY KEY (`product_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=UTF8 COLLATE=utf8_general_ci;
+        ');
     }
 
     public function uninstall()

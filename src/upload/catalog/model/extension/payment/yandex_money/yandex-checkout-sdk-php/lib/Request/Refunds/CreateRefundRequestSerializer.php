@@ -26,6 +26,8 @@
 
 namespace YandexCheckout\Request\Refunds;
 
+use YandexCheckout\Model\ReceiptItem;
+
 /**
  * Класс сериалайзера запросов к API на создание нового возврата средств
  *
@@ -35,14 +37,16 @@ class CreateRefundRequestSerializer
 {
     /**
      * Сериализует переданный объект запроса к API в массив
+     *
      * @param CreateRefundRequestInterface $request Сериализуемый объект запроса
+     *
      * @return array Ассоциативный массив для передачи в API
      */
     public function serialize(CreateRefundRequestInterface $request)
     {
         $result = array(
             'payment_id' => $request->getPaymentId(),
-            'amount' => array(
+            'amount'     => array(
                 'value'    => $request->getAmount()->getValue(),
                 'currency' => $request->getAmount()->getCurrency(),
             ),
@@ -51,18 +55,29 @@ class CreateRefundRequestSerializer
             $result['comment'] = $request->getComment();
         }
         if ($request->hasReceipt()) {
-            $receipt = $request->getReceipt();
+            $receipt           = $request->getReceipt();
             $result['receipt'] = array();
+            /** @var ReceiptItem $item */
             foreach ($receipt->getItems() as $item) {
-                $result['receipt']['items'][] = array(
-                    'description' => $item->getDescription(),
-                    'amount'      => array(
+                $itemArray = array(
+                    'description'     => $item->getDescription(),
+                    'amount'          => array(
                         'value'    => $item->getPrice()->getValue(),
                         'currency' => $item->getPrice()->getCurrency(),
                     ),
-                    'quantity'    => $item->getQuantity(),
-                    'vat_code'    => $item->getVatCode(),
+                    'quantity'        => $item->getQuantity(),
+                    'vat_code'        => $item->getVatCode(),
                 );
+
+                if ($item->getPaymentSubject()) {
+                    $itemArray['payment_subject'] = $item->getPaymentSubject();
+                }
+
+                if ($item->getPaymentMode()) {
+                    $itemArray['payment_mode'] = $item->getPaymentMode();
+                }
+
+                $result['receipt']['items'][] = $itemArray;
             }
             $value = $receipt->getEmail();
             if (!empty($value)) {
@@ -77,6 +92,7 @@ class CreateRefundRequestSerializer
                 $result['receipt']['tax_system_code'] = $value;
             }
         }
+
         return $result;
     }
 }

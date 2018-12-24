@@ -150,7 +150,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.2.1',
+                        'module_version' => '1.2.2',
                     ));
 
             $confirmation = array(
@@ -500,22 +500,31 @@ class ModelExtensionPaymentYandexMoney extends Model
         }
         $taxRates = $this->config->get('yandex_money_kassa_tax_rates');
         $defaultVatCode = $this->config->get('yandex_money_kassa_tax_rate_default');
-
+        $defaultPaymentSubject = $this->config->get('yandex_money_kassa_payment_subject_default');
+        $defaultPaymentMode    = $this->config->get('yandex_money_kassa_payment_mode_default');
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
+            $properties  = $this->getPaymentProperties($prod['product_id']);
+            if (!empty($properties)) {
+                $paymentMode    = !empty($properties['payment_mode']) ? $properties['payment_mode'] : $defaultPaymentMode;
+                $paymentSubject = !empty($properties['payment_subject']) ? $properties['payment_subject'] : $defaultPaymentSubject;
+            } else {
+                $paymentMode    = $defaultPaymentMode;
+                $paymentSubject = $defaultPaymentSubject;
+            }
             $productInfo = $this->model_catalog_product->getProduct($prod['product_id']);
             $price       = $this->currency->format($prod['price'], 'RUB', '', false);
             $vatCode     = isset($taxRates[$productInfo['tax_class_id']])
                 ? $taxRates[$productInfo['tax_class_id']]
                 : $defaultVatCode;
-            $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $vatCode);
+            $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $vatCode, $paymentMode, $paymentSubject);
         }
 
         $order_totals = $this->model_account_order->getOrderTotals($orderInfo['order_id']);
         foreach ($order_totals as $total) {
             if (isset($total['code']) && $total['code'] === 'shipping') {
                 $price = $this->currency->format($total['value'], 'RUB', '', false);
-                $builder->addReceiptShipping($total['title'], $price, $defaultVatCode);
+                $builder->addReceiptShipping($total['title'], $price, $defaultVatCode, $defaultPaymentMode, $defaultPaymentSubject);
             }
         }
     }
@@ -650,5 +659,13 @@ class ModelExtensionPaymentYandexMoney extends Model
         $description = (string)mb_substr($description, 0, Payment::MAX_LENGTH_DESCRIPTION);
 
         return $description;
+    }
+
+    public function getPaymentProperties($productId)
+    {
+        $res         = $this->db->query('SELECT * FROM `'.DB_PREFIX.'ya_money_product_properties` WHERE product_id='.$productId);
+        $productProp = $res->row;
+
+        return $productProp;
     }
 }

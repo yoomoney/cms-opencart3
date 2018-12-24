@@ -41,6 +41,10 @@ use YandexCheckout\Helpers\TypeCast;
  * @property AmountInterface $price Цена товара
  * @property int $vatCode Ставка НДС, число 1-6
  * @property int $vat_code Ставка НДС, число 1-6
+ * @property string paymentSubject
+ * @property string payment_subject
+ * @property string paymentMode
+ * @property string payment_mode
  * @property-write bool $isShipping Флаг доставки
  */
 class ReceiptItem extends AbstractObject implements ReceiptItemInterface
@@ -66,6 +70,16 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
     private $_vatCode;
 
     /**
+     * @var string Признак предмета расчета.
+     */
+    private $_paymentSubject;
+
+    /**
+     * @var string Признак способа расчета.
+     */
+    private $_paymentMode;
+
+    /**
      * @var bool True если текущий айтем доставка, false если нет
      */
     private $_shipping = false;
@@ -81,6 +95,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Устанавливает наименование товара
+     *
      * @param string $value Наименование товара
      *
      * @throws EmptyPropertyValueException Выбрасывается если было передано пустое значение
@@ -118,6 +133,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Устанавливает количество покупаемого товара
+     *
      * @param int $value Количество
      *
      * @throws EmptyPropertyValueException Выбрасывается если было передано пустое значение
@@ -162,6 +178,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Устанавливает цену товара
+     *
      * @param AmountInterface $value Цена товара
      */
     public function setPrice(AmountInterface $value)
@@ -180,6 +197,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Устанавливает ставку НДС
+     *
      * @param int $value Ставка НДС, число 1-6
      *
      * @throws InvalidPropertyValueException Выбрасывается если в качестве аргумента было передано число меньше одного
@@ -204,7 +222,48 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
     }
 
     /**
+     * @return string
+     */
+    public function getPaymentSubject()
+    {
+        return $this->_paymentSubject;
+    }
+
+    /**
+     * @param string $paymentSubject
+     */
+    public function setPaymentSubject($paymentSubject)
+    {
+        if ($paymentSubject === null || $paymentSubject === '') {
+            $this->_paymentSubject = null;
+        } else {
+            $this->_paymentSubject = $paymentSubject;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentMode()
+    {
+        return $this->_paymentMode;
+    }
+
+    /**
+     * @param string $paymentMode
+     */
+    public function setPaymentMode($paymentMode)
+    {
+        if ($paymentMode === null || $paymentMode === '') {
+            $this->_paymentMode = null;
+        } else {
+            $this->_paymentMode = $paymentMode;
+        }
+    }
+
+    /**
      * Устанавливает флаг доставки для текущего объекта айтема в чеке
+     *
      * @param bool $value True если айтем является доставкой, false если нет
      *
      * @throws InvalidPropertyValueException Генерируется если передано значение невалидного типа
@@ -233,6 +292,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Применяет для товара скидку
+     *
      * @param float $coefficient Множитель скидки
      */
     public function applyDiscountCoefficient($coefficient)
@@ -242,6 +302,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Увеличивает цену товара на указанную величину
+     *
      * @param float $value Сумма на которую цену товара увеличиваем
      */
     public function increasePrice($value)
@@ -251,7 +312,9 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
     /**
      * Уменьшает количество покупаемого товара на указанное, возвращает объект позиции в чеке с уменьшаемым количеством
+     *
      * @param float $count Количество на которое уменьшаем позицию в чеке
+     *
      * @return ReceiptItem Новый инстанс позиции в чеке
      *
      * @throws EmptyPropertyValueException Выбрасывается если было передано пустое значение
@@ -274,15 +337,16 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
                 'Invalid quantity value in ReceiptItem in fetchItem method', 0, 'ReceiptItem.quantity', $count
             );
         }
-        $result = new ReceiptItem();
+        $result               = new ReceiptItem();
         $result->_description = $this->_description;
-        $result->_quantity = $count;
-        $result->_vatCode = $this->_vatCode;
-        $result->_amount = new MonetaryAmount(
+        $result->_quantity    = $count;
+        $result->_vatCode     = $this->_vatCode;
+        $result->_amount      = new MonetaryAmount(
             $this->_amount->getValue(),
             $this->_amount->getCurrency()
         );
-        $this->_quantity -= $count;
+        $this->_quantity      -= $count;
+
         return $result;
     }
 }

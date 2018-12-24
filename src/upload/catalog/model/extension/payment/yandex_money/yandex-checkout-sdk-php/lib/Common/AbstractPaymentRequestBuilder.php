@@ -67,7 +67,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает сумму
+     *
      * @param AmountInterface|array|string $value Сумма оплаты
+     *
      * @return self Инстанс билдера запросов
      */
     public function setAmount($value)
@@ -88,7 +90,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает валюту в которой будет происходить подтверждение оплаты заказа
+     *
      * @param string $value Валюта в которой подтверждается оплата
+     *
      * @return self Инстанс билдера запросов
      */
     public function setCurrency($value)
@@ -103,7 +107,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает чек
+     *
      * @param ReceiptInterface|array $value Инстанс чека или ассоциативный массив с данными чека
+     *
      * @return self
      *
      * @throws InvalidPropertyValueTypeException Генерируется если было передано значение невалидного типа
@@ -123,7 +129,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавлвиает список товаров для создания чека
+     *
      * @param array $value Массив товаров в заказе
+     *
      * @return self Инстанс билдера запросов
      *
      * @throws InvalidPropertyValueException Выбрасывается если хотя бы один из товаров имеет неверную структуру
@@ -169,19 +177,29 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Добавляет в чек товар
+     *
      * @param string $title Название или описание товара
      * @param string $price Цена товара в валюте, заданной в заказе
      * @param float $quantity Количество товара
      * @param int $vatCode Ставка НДС
+     *
+     * @param null|string $paymentSubject значение перечисления PaymentSubject
+     * @see \YandexCheckout\Model\Receipt\PaymentSubject::class
+     *
+     * @param null|string $paymentMode значение перечисления PaymentMode
+     * @see \YandexCheckout\Model\Receipt\PaymentMode::class
+     *
      * @return self Инстанс билдера запросов
      */
-    public function addReceiptItem($title, $price, $quantity, $vatCode)
+    public function addReceiptItem($title, $price, $quantity, $vatCode, $paymentMode = null, $paymentSubject = null)
     {
         $item = new ReceiptItem();
         $item->setDescription($title);
         $item->setQuantity($quantity);
         $item->setVatCode($vatCode);
         $item->setPrice(new MonetaryAmount($price, $this->amount->getCurrency()));
+        $item->setPaymentSubject($paymentSubject);
+        $item->setPaymentMode($paymentMode);
         $this->receipt->addItem($item);
 
         return $this;
@@ -189,12 +207,20 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Добавляет в чек доставку товара
+     *
      * @param string $title Название доставки в чеке
      * @param string $price Стоимость доставки
      * @param int $vatCode Ставка НДС
+     *
+     * @param null|string $paymentSubject значение перечисления PaymentSubject
+     * @see \YandexCheckout\Model\Receipt\PaymentSubject::class
+     *
+     * @param null|string $paymentMode значение перечисления PaymentMode
+     * @see \YandexCheckout\Model\Receipt\PaymentMode::class
+     *
      * @return self Инстанс билдера запросов
      */
-    public function addReceiptShipping($title, $price, $vatCode)
+    public function addReceiptShipping($title, $price, $vatCode, $paymentMode = null, $paymentSubject = null)
     {
         $item = new ReceiptItem();
         $item->setDescription($title);
@@ -202,6 +228,8 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
         $item->setVatCode($vatCode);
         $item->setIsShipping(true);
         $item->setPrice(new MonetaryAmount($price, $this->amount->getCurrency()));
+        $item->setPaymentMode($paymentMode);
+        $item->setPaymentSubject($paymentSubject);
         $this->receipt->addItem($item);
 
         return $this;
@@ -209,7 +237,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает адрес электронной почты получателя чека
+     *
      * @param string $value Email получателя чека
+     *
      * @return self Инстанс билдера запросов
      */
     public function setReceiptEmail($value)
@@ -221,7 +251,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает телефон получателя чека
+     *
      * @param string $value Телефон получателя чека
+     *
      * @return self Инстанс билдера запросов
      */
     public function setReceiptPhone($value)
@@ -233,7 +265,9 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает код системы налогообложения.
+     *
      * @param int $value Код системы налогообложения. Число 1-6.
+     *
      * @return self Инстанс билдера запросов
      */
     public function setTaxSystemCode($value)
