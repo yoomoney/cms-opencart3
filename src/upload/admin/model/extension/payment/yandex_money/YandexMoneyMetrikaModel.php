@@ -51,7 +51,8 @@ class YandexMoneyMetrikaModel
      */
     private function SendResponse($to, $token, $headers, $params, $type)
     {
-        return $this->post(self::URL.$to.'?oauth_token='.$token, $headers, $params, $type);
+        $headers[] = 'Authorization: OAuth '.$token;
+        return $this->post(self::URL.$to, $headers, $params, $type);
     }
 
     /**
@@ -83,11 +84,12 @@ class YandexMoneyMetrikaModel
                 $headers[] = 'Content-Type: application/json';
                 $headers[] = 'Content-Length: '.strlen($json);
 
-                $curlOpt[CURLOPT_HTTPHEADER]     = $headers;
                 $curlOpt[CURLOPT_CUSTOMREQUEST]  = 'PUT';
                 $curlOpt[CURLOPT_POSTFIELDS]     = $json;
                 break;
         }
+
+        $curlOpt[CURLOPT_HTTPHEADER]     = $headers;
         $curl = curl_init($url);
         curl_setopt_array($curl, $curlOpt);
         $response = curl_exec($curl);
