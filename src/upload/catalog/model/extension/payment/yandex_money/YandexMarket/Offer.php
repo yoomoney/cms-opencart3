@@ -8,7 +8,7 @@ namespace YandexMoneyModule\YandexMarket;
  * @property-read int $categoryId
  *
  */
-class Offer extends Object
+class Offer extends MarketObject
 {
     /**
      * @var ShopInfo

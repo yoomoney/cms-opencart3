@@ -385,7 +385,8 @@
                     $res = $this->db->query('SELECT * FROM `'.DB_PREFIX.'ya_money_product_properties` WHERE product_id='.$this->request->get['product_id']);
                     $productProp = $res->row;
                 }
-                $data['product_ym_payment_mode']    = !empty($productProp['payment_mode'])    ? $productProp['payment_mode'] : '';
+
+                $data['product_ym_payment_mode'] = !empty($productProp['payment_mode']) ? $productProp['payment_mode'] : '';
                 $data['product_ym_payment_subject'] = !empty($productProp['payment_subject']) ? $productProp['payment_subject'] : '';
 
                 $data['paymentModeEnum'] = array(
