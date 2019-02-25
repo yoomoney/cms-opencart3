@@ -41,6 +41,7 @@ $_['kassa_payment_method_webmoney']     = 'Webmoney';
 $_['kassa_payment_method_yandex_money'] = 'Яндекс.Деньги';
 $_['kassa_payment_method_mobile']       = 'Баланс мобильного';
 $_['kassa_payment_method_installments'] = 'Заплатить по частям';
+$_['kassa_payment_method_tinkoff_bank'] = 'Интернет-банк Тинькофф';
 
 $_['kassa_payment_method_error_required'] = 'Пожалуйста, выберите хотя бы один способ из списка';
 

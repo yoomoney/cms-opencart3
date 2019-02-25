@@ -123,7 +123,7 @@ class CurlClient implements ApiClientInterface
             if (!empty($httpBody)) {
                 $message .= ' with body: ' . $httpBody;
             }
-            if (!empty($httpBody)) {
+            if (!empty($headers)) {
                 $message .= ' with headers: ' . json_encode($headers);
             }
             $this->logger->info($message);

@@ -153,6 +153,13 @@ class Payment extends AbstractObject implements PaymentInterface
      */
     private $_authorizationDetails;
 
+    /**
+     * Признак тестовой операции.
+     * @var boolean
+     * @since 1.1.3
+     */
+    private $_test;
+
 
     /**
      * Возвращает идентификатор платежа
@@ -555,5 +562,29 @@ class Payment extends AbstractObject implements PaymentInterface
     public function setAuthorizationDetails(AuthorizationDetailsInterface $value)
     {
         $this->_authorizationDetails = $value;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getTest()
+    {
+        return $this->_test;
+    }
+
+    /**
+     * @param bool $test
+     */
+    public function setTest($test)
+    {
+        if ($test === null || $test === '') {
+            throw new EmptyPropertyValueException('Empty payment test flag value', 0, 'Payment.test');
+        } elseif (TypeCast::canCastToBoolean($test)) {
+            $this->_test = (bool)$test;
+        } else {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid payment test flag value type', 0, 'Payment.test', $test
+            );
+        }
     }
 }
