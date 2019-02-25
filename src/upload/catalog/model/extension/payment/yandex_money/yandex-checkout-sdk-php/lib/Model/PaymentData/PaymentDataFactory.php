@@ -43,10 +43,12 @@ class PaymentDataFactory
         PaymentMethodType::ALFABANK       => 'PaymentDataAlfabank',
         PaymentMethodType::INSTALLMENTS   => 'PaymentDataInstallments',
         PaymentMethodType::B2B_SBERBANK   => 'PaymentDataB2bSberbank',
+        PaymentMethodType::TINKOFF_BANK   => 'PaymentDataTinkoffBank',
     );
 
     /**
      * @param string $type
+     *
      * @return AbstractPaymentData
      */
     public function factory($type)
@@ -57,13 +59,15 @@ class PaymentDataFactory
         if (!array_key_exists($type, $this->typeClassMap)) {
             throw new \InvalidArgumentException('Invalid payment data type "'.$type.'"');
         }
-        $className = __NAMESPACE__ . '\\' . $this->typeClassMap[$type];
+        $className = __NAMESPACE__.'\\'.$this->typeClassMap[$type];
+
         return new $className();
     }
 
     /**
      * @param array $data
      * @param string|null $type
+     *
      * @return AbstractPaymentData
      */
     public function factoryFromArray(array $data, $type = null)
@@ -84,6 +88,7 @@ class PaymentDataFactory
                 $paymentData->offsetSet($key, $value);
             }
         }
+
         return $paymentData;
     }
 }

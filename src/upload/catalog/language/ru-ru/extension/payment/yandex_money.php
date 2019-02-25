@@ -13,6 +13,7 @@ $_['text_method_webmoney'] = 'Webmoney';
 $_['text_method_alfabank'] = 'Альфа-Клик';
 $_['text_method_sberbank'] = 'Сбербанк Онлайн';
 $_['text_method_qiwi'] = 'QIWI Wallet';
+$_['text_method_tinkoff_bank'] = 'Интернет-банк Тинькофф';
 $_['text_method_installments'] = 'Заплатить по частям';
 $_['text_method_installments_amount'] = ' (%s ₽ в месяц)';
 
