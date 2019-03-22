@@ -133,10 +133,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->url->link('extension/payment/yandex_money/confirm', 'order_id='.$orderId, true)
         );
 
-        $amount = $orderInfo['total'];
-        if ($orderInfo['currency_code'] !== 'RUB') {
-            $amount = $this->currency->convert($amount, $orderInfo['currency_code'], 'RUB');
-        }
+        $amount = $this->currency->format($orderInfo['total'], 'RUB', '', false);
 
         try {
             $builder      = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
@@ -150,7 +147,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.2.5',
+                        'module_version' => '1.2.6',
                     ));
 
             $confirmation = array(
@@ -208,10 +205,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $returnUrl = $this->url->link('account/order/info', 'order_id='.$order['order_id'], true);
         }
 
-        $amount = $order['total'];
-        if ($order['currency_code'] !== 'RUB') {
-            $amount = $this->currency->convert($amount, $order['currency_code'], 'RUB');
-        }
+        $amount = $this->currency->format($order['total'], 'RUB', '', false);
 
         try {
             $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();

@@ -303,12 +303,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         $type = $_GET['payment_type'];
-        if ($type !== 'wallet' && $type !== 'card') {
-            $this->jsonError('Invalid payment type');
-        }
-
         $paymentModel = $this->getModel()->getPaymentModel();
+
         if ($paymentModel instanceof \YandexMoneyModule\Model\WalletModel) {
+            if ($type !== 'AC' && $type !== 'PC') {
+                $this->jsonError('Invalid payment type');
+            }
+
             if ($paymentModel->getCreateOrderBeforeRedirect()) {
                 $this->load->model('checkout/order');
                 $url     = $this->url->link('extension/payment/yandex_money/repay',
@@ -320,11 +321,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $this->cart->clear();
             }
         } else {
-            $this->load->model('checkout/order');
-            $url     = $this->url->link('extension/payment/yandex_money/repay',
-                'order_id='.$this->session->data['order_id'], true);
-            $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
+            $this->jsonError('Invalid payment type');
         }
     }
 
