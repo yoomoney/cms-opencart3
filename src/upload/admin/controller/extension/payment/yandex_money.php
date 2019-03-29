@@ -10,7 +10,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.2.6';
+    const MODULE_VERSION = '1.2.7';
 
     /**
      * @var integer
@@ -1618,7 +1618,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     private function enableB2bSberbank()
     {
-        if ($this->request->post['payment_yandex_money_status'] && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on') {
+        if ($this->request->post['payment_yandex_money_status']
+            && isset($this->request->post['yandex_money_kassa_b2b_sberbank_enabled'])
+            && $this->request->post['yandex_money_kassa_b2b_sberbank_enabled'] == 'on'
+        ) {
             $this->model_setting_setting->editSetting('payment_yandex_money_b2b_sberbank', array(
                 'payment_yandex_money_b2b_sberbank_status' => true,
                 'payment_yandex_money_sort_order'          => 0,

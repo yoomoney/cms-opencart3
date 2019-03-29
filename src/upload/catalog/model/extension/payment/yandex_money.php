@@ -147,7 +147,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.2.6',
+                        'module_version' => '1.2.7',
                     ));
 
             $confirmation = array(
@@ -283,7 +283,8 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->load->model('checkout/order');
         $url     = $this->url->link('extension/payment/yandex_money/repay', 'order_id='.$orderId, true);
         $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-        $this->model_checkout_order->addOrderHistory($orderId, 1, $comment);
+        $orderStatusId = $this->config->get('config_order_status_id');
+        $this->model_checkout_order->addOrderHistory($orderId, $orderStatusId, $comment);
     }
 
     /**
@@ -487,10 +488,10 @@ class ModelExtensionPaymentYandexMoney extends Model
         $this->load->model('account/order');
         $this->load->model('catalog/product');
 
-        if (isset($orderInfo['email'])) {
+        if (!empty($orderInfo['email']) && filter_var($orderInfo['email'], FILTER_VALIDATE_EMAIL)) {
             $builder->setReceiptEmail($orderInfo['email']);
-        } elseif (isset($orderInfo['phone'])) {
-            $builder->setReceiptPhone($orderInfo['phone']);
+        } elseif (!empty($orderInfo['telephone'])) {
+            $builder->setReceiptPhone($orderInfo['telephone']);
         }
         $taxRates = $this->config->get('yandex_money_kassa_tax_rates');
         $defaultVatCode = $this->config->get('yandex_money_kassa_tax_rate_default');
