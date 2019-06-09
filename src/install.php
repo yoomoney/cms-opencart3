@@ -10,6 +10,6 @@ if (isset($old_mod['modification_id'])) {
 if (version_compare(VERSION, '3.0') < 0) {
     throw new Exception('
         Архив создавался не для этой версии Opencart. Загрузите правильную версию по адресу '
-        . 'https://github.com/yandex-money/yandex-money-cms-opencart2'
+        . 'https://github.com/yandex-money/yandex-money-ycms-opencart3'
     );
 }
