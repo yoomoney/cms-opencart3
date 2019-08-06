@@ -76,7 +76,7 @@
                                             </div>
                                         </td>
                                         <td valign="top">
-                                            <font color="#000000" face="Arial" size="3">{{ product['quantity'] }}&nbsp;x&nbsp;{{ number_format(product.price, 2, '.', '') }}&nbsp;руб.</font>
+                                            <font color="#000000" face="Arial" size="3">{{ product['quantity'] }}&nbsp;x&nbsp;{{ product['price'] | number_format(2, '.', '') }}&nbsp;руб.</font>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -133,7 +133,7 @@
                                                     <td align="center">
                                                         <div>
                                                             <a href="{{ link }}">
-                                                                <img width="176" height="81" src="cid:yandex_buttons.png" border="0" alt="Заплатить через Яндекс">
+                                                                <img width="176" height="81" src="{{ yandex_button }}" border="0" alt="Заплатить через Яндекс">
                                                             </a>
                                                         </div>
                                                     </td>
