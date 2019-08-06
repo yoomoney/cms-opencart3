@@ -10,7 +10,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.2.8';
+    const MODULE_VERSION = '1.2.9';
 
     /**
      * @var integer
@@ -1144,7 +1144,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             'order_id'      => $order_id,
             'sum'           => $amount,
             'link'          => $url,
-            'yandex_button' => $link_img.'image/cache/yandex_buttons.png',
+            'yandex_button' => $link_img . 'image/catalog/payment/yandex_money/yandex_buttons.png',
             'total'         => $order_info['total'],
             'shipping'      => $order_info['shipping_method'],
             'products'      => $products,
@@ -1168,7 +1168,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $mail->setFrom($this->config->get('config_email'));
             $mail->setSender($this->config->get('config_email'));
             $mail->setSubject($subject);
-            $mail->addAttachment(DIR_CATALOG.'view/theme/default/image/yandex_buttons.png');
             if ($logo != '') {
                 $mail->addAttachment($logo);
             }
