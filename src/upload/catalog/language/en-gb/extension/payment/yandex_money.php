@@ -33,3 +33,5 @@ $_['kassa_default_payment_description'] = 'Payment for order No. %order_id%';
 
 $_['yandex_money_b2b_sberbank'] = 'Sberbank Business Online';
 $_['b2b_tax_rates_error'] = 'Your cart contains products with different VAT rates, and you won\'t be able to pay for them at the same time. You can divide the purchase into a few steps: first, pay for products with one VAT rate, then pay for the products with the other.';
+
+$_['error_minimum'] = 'Order less than minimum amount';

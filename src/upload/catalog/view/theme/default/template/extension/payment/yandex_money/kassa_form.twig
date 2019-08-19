@@ -65,7 +65,9 @@
                 {% endif %}
                 {% if kassa.useYandexButton() %}
                     <div class="yamoney-pay-button {% if not kassa.useInstallmentsButton() %} yamoney-pay-button_type_fly{% endif %}">
-                        <button id="continue-button">{{ language.get('yamoney_pay_button_text') }}</button>
+                        <button id="continue-button" data-loading-text="{{ language.get('text_loading') }}">
+                            {{ language.get('yamoney_pay_button_text') }}
+                        </button>
                     </div>
                 {% endif %}
             </div>
@@ -99,8 +101,9 @@
         {% if not kassa.getEPL() or (kassa.getEPL() and not kassa.useYandexButton()) %}
             <div class="buttons">
                 <div class="pull-right">
-                    <button class="btn btn-primary" id="continue-button"
-                            type="button">{{ language.get('text_continue') }}</button>
+                    <button class="btn btn-primary" id="continue-button" data-loading-text="{{ language.get('text_loading') }}" type="button">
+                        {{ language.get('text_continue') }}
+                    </button>
                 </div>
             </div>
         {% endif %}
@@ -114,7 +117,8 @@
                 jQuery(id).css('display', 'block');
             });
 
-            jQuery('#continue-button').bind('click', function (event) {
+            var continueButton = jQuery('#continue-button');
+            continueButton.bind('click', function (event) {
                 event.preventDefault();
                 var form = jQuery("#yandex-money-payment-form")[0];
                 jQuery.ajax({
@@ -125,6 +129,9 @@
                         paymentType: form.kassa_payment_method.value,
                         qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
                         alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
+                    },
+                    beforeSend: function() {
+                        continueButton.button('loading');
                     },
                     success: function (data) {
                         if (data.success) {
