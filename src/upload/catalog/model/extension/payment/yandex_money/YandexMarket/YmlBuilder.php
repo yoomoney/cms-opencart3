@@ -201,8 +201,8 @@ class YmlBuilder
 
         if ($offer->hasParameters()) {
             foreach ($offer->getParameters() as $param) {
-                $unit   = $param->hasUnit() ? ' unit="'.$param->getUnit().'"' : '';
-                $result .= '<param name="'.$param->getName().'" '.$unit.'>'.$param->getValue().'</param>'.PHP_EOL;
+                $unit   = $param->hasUnit() ? ' unit="'.$this->prepareValue($param->getUnit()).'"' : '';
+                $result .= '<param name="' . $this->prepareValue($param->getName()) . '" '.$unit.'>' . $this->prepareValue($param->getValue()) . '</param>'.PHP_EOL;
             }
         }
 
