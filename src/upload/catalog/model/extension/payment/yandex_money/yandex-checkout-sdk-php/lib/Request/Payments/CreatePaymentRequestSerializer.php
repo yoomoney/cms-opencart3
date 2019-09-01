@@ -135,7 +135,7 @@ class CreatePaymentRequestSerializer
                 if ($confirmation->getEnforce()) {
                     $result['confirmation']['enforce'] = $confirmation->getEnforce();
                 }
-                $result['confirmation']['return_url'] = $confirmation->getReturnUrl();
+                $result['confirmation']['return_url'] = html_entity_decode($confirmation->getReturnUrl());
             }
         }
         if ($request->hasMetadata()) {
