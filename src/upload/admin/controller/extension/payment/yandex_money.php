@@ -10,7 +10,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.2.10';
+    const MODULE_VERSION = '1.2.11';
 
     /**
      * @var integer
@@ -63,6 +63,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if ($this->validate($this->request)) {
                 $isUpdatedCounterSettings = $this->isUpdatedCounterSettings($this->request->post);
                 $settings                 = $this->model_setting_setting->getSetting(self::MODULE_NAME);
+                $cache                    = new Cache('file');
                 $newSettings              = array_merge(array(
                     'yandex_money_metrika_o2auth' => isset($settings['yandex_money_metrika_o2auth'])
                         ? $settings['yandex_money_metrika_o2auth']
@@ -74,6 +75,10 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
                 $this->model_setting_setting->editSetting('payment_'.self::MODULE_NAME, $newSettings);
+
+                if ($cache->get("ym_market_xml")) {
+                    $cache->delete("ym_market_xml");
+                }
 
                 $this->enableB2bSberbank();
 
