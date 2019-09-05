@@ -13,6 +13,10 @@ class YmlBuilder
         if (!in_array($outputCharset, array('utf-8', 'windows-1251'))) {
             throw new \InvalidArgumentException('Invalid character set value: ' . $outputCharset);
         }
+
+        ignore_user_abort(true);
+        set_time_limit(600);
+
         $this->charset = $outputCharset;
         $this->sourceCharset = $sourceCharset;
     }
