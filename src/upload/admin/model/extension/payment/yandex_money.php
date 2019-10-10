@@ -2,6 +2,12 @@
 
 class ModelExtensionPaymentYandexMoney extends Model
 {
+    /**
+     * string
+     */
+    const MODULE_VERSION = '1.3.0';
+    const YCMS_EVENT_SECOND_RECEIPT_CODE = 'ycms_second_receipt_trigger';
+
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -62,6 +68,11 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     public function uninstall()
     {
+        if ($this->hasEvent(self::YCMS_EVENT_CODE)) {
+            $this->load->model('setting/event');
+            $this->model_setting_event->deleteEventByCode(self::YCMS_EVENT_CODE);
+        }
+
         $this->log('info', 'uninstall yandex_money module');
     }
 
@@ -91,6 +102,21 @@ class ModelExtensionPaymentYandexMoney extends Model
                 );
             }
         }
+    }
+
+    /**
+     * устанавливает event для отправки второго чека
+     */
+    public function installEventForSecondReceipt()
+    {
+        $this->load->model('setting/event');
+
+        $this->model_setting_event->deleteEventByCode(self::YCMS_EVENT_SECOND_RECEIPT_CODE);
+        $this->model_setting_event->addEvent(
+            self::YCMS_EVENT_SECOND_RECEIPT_CODE,
+            "catalog/model/checkout/order/addOrderHistory/after",
+            "extension/payment/yandex_money/hookOrderStatusChange"
+        );
     }
 
     /**
@@ -455,6 +481,9 @@ class ModelExtensionPaymentYandexMoney extends Model
                 $this->getKassaModel()->getPassword()
             );
             $this->client->setLogger($this);
+            $userAgent = $this->client->getApiClient()->getUserAgent();
+            $userAgent->setCms('OpenCart', VERSION);
+            $userAgent->setModule('Y.CMS',self::MODULE_VERSION);
         }
 
         return $this->client;

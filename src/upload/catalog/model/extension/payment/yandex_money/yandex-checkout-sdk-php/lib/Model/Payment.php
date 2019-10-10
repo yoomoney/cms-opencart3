@@ -53,6 +53,7 @@ use YandexCheckout\Model\PaymentMethod\AbstractPaymentMethod;
  * @property AmountInterface $refundedAmount Сумма возвращенных средств платежа
  * @property AmountInterface $refunded_amount Сумма возвращенных средств платежа
  * @property bool $paid Признак оплаты заказа
+ * @property bool $refundable Возможность провести возврат по API
  * @property string $receiptRegistration Состояние регистрации фискального чека
  * @property string $receipt_registration Состояние регистрации фискального чека
  * @property Metadata $metadata Метаданные платежа указанные мерчантом
@@ -119,6 +120,11 @@ class Payment extends AbstractObject implements PaymentInterface
      * @var bool Признак оплаты заказа
      */
     private $_paid;
+
+    /**
+     * @var bool Возможность провести возврат по API
+     */
+    private $_refundable;
 
     /**
      * @var string Состояние регистрации фискального чека
@@ -434,6 +440,35 @@ class Payment extends AbstractObject implements PaymentInterface
         } else {
             throw new InvalidPropertyValueTypeException(
                 'Invalid payment paid flag value type', 0, 'Payment.paid', $value
+            );
+        }
+    }
+
+    /**
+     * Проверяет возможность провести возврат по API
+     * @return bool Возможность провести возврат по API, true если есть, false если нет
+     */
+    public function getRefundable()
+    {
+        return $this->_refundable;
+    }
+
+    /**
+     * Устанавливает возможность провести возврат по API
+     * @param bool $value Возможность провести возврат по API
+     *
+     * @throws EmptyPropertyValueException Выбрасывается если переданный аргумент пуст
+     * @throws InvalidPropertyValueTypeException Выбрасывается если переданный аргумент не кастится в булево значение
+     */
+    public function setRefundable($value)
+    {
+        if ($value === null || $value === '') {
+            throw new EmptyPropertyValueException('Empty payment refundable flag value', 0, 'Payment.refundable');
+        } elseif (TypeCast::canCastToBoolean($value)) {
+            $this->_refundable = (bool)$value;
+        } else {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid payment refundable flag value type', 0, 'Payment.refundable', $value
             );
         }
     }

@@ -44,6 +44,8 @@ class PaymentMethodFactory
         PaymentMethodType::INSTALLMENTS   => 'PaymentMethodInstallments',
         PaymentMethodType::B2B_SBERBANK   => 'PaymentMethodB2bSberbank',
         PaymentMethodType::TINKOFF_BANK   => 'PaymentMethodTinkoffBank',
+        PaymentMethodType::PSB            => 'PaymentMethodPsb',
+        PaymentMethodType::WECHAT         => 'PaymentMethodWechat',
     );
 
     private $optionsMap = array(

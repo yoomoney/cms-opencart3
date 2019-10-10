@@ -40,15 +40,15 @@ class BadApiRequestException extends ApiException
         $message   = '';
 
         if (isset($errorData['description'])) {
-            $message .= $errorData['description'].'.';
+            $message .= $errorData['description'] . '. ';
         }
 
         if (isset($errorData['code'])) {
-            $message .= sprintf('Error code: %s.', $errorData['code']);
+            $message .= sprintf('Error code: %s. ', $errorData['code']);
         }
 
         if (isset($errorData['parameter'])) {
-            $message .= sprintf('Parameter name: %s.', $errorData['parameter']);
+            $message .= sprintf('Parameter name: %s. ', $errorData['parameter']);
         }
 
         if (isset($errorData['retry_after'])) {
@@ -59,6 +59,6 @@ class BadApiRequestException extends ApiException
             $this->type = $errorData['type'];
         }
 
-        parent::__construct($message, self::HTTP_CODE, $responseHeaders, $responseBody);
+        parent::__construct(trim($message), self::HTTP_CODE, $responseHeaders, $responseBody);
     }
 }

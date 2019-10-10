@@ -24,7 +24,9 @@ class KassaModel extends AbstractPaymentModel
     protected $useYandexButton;
     protected $useInstallmentsButton;
     protected $paymentMethods;
-    protected $sendReceipt;
+    protected $isSendReceipt;
+    protected $isSecondReceipt;
+    protected $secondReceiptStatusId;
     protected $defaultTaxRate;
     protected $taxRates;
     protected $log;
@@ -73,9 +75,11 @@ class KassaModel extends AbstractPaymentModel
             }
         }
 
-        $this->sendReceipt    = (bool)$this->getConfigValue('send_receipt');
-        $this->defaultTaxRate = (int)$this->getConfigValue('tax_rate_default');
-        $this->log            = (bool)$this->getConfigValue('debug_log');
+        $this->isSendReceipt         = (bool)$this->getConfigValue('send_receipt');
+        $this->isSecondReceipt       = (bool)$this->getConfigValue('second_receipt_enable');
+        $this->secondReceiptStatusId = (int)$this->getConfigValue('second_receipt_status');
+        $this->defaultTaxRate        = (int)$this->getConfigValue('tax_rate_default');
+        $this->log                   = (bool)$this->getConfigValue('debug_log');
 
         $this->taxRates = array();
         $tmp            = $this->getConfigValue('tax_rates');
@@ -172,9 +176,19 @@ class KassaModel extends AbstractPaymentModel
         return isset($this->paymentMethods[$paymentMethod]) && $this->paymentMethods[$paymentMethod];
     }
 
-    public function sendReceipt()
+    public function isSendReceipt()
     {
-        return $this->sendReceipt;
+        return $this->isSendReceipt;
+    }
+
+    public function isSecondReceipt()
+    {
+        return $this->isSecondReceipt;
+    }
+
+    public function getSecondReceiptStatus()
+    {
+        return $this->secondReceiptStatusId;
     }
 
     public function getTaxRateList()

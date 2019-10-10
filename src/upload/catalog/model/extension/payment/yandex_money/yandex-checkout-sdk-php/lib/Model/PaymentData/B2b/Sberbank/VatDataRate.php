@@ -35,17 +35,20 @@ use YandexCheckout\Common\AbstractEnum;
  * |7|7%|
  * |10|10%|
  * |18|18%|
+ * |20|20%|
  */
 class VatDataRate extends AbstractEnum
 {
     const RATE_7  = '7';
     const RATE_10 = '10';
     const RATE_18 = '18';
+    const RATE_20 = '20';
 
     protected static $validValues = array(
         self::RATE_7  => true,
         self::RATE_10 => true,
         self::RATE_18 => true,
+        self::RATE_20 => true,
     );
 
 }

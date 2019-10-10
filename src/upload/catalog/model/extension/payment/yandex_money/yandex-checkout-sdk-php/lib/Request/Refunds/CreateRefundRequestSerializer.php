@@ -79,13 +79,14 @@ class CreateRefundRequestSerializer
 
                 $result['receipt']['items'][] = $itemArray;
             }
+
             $value = $receipt->getEmail();
             if (!empty($value)) {
-                $result['receipt']['email'] = $value;
+                $result['receipt']['customer']['email'] = $value;
             }
             $value = $receipt->getPhone();
             if (!empty($value)) {
-                $result['receipt']['phone'] = $value;
+                $result['receipt']['customer']['phone'] = $value;
             }
             $value = $receipt->getTaxSystemCode();
             if (!empty($value)) {

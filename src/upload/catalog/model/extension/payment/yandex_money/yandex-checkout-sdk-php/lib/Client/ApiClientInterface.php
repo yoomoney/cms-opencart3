@@ -48,4 +48,9 @@ interface ApiClientInterface
      * @param LoggerInterface|null $logger
      */
     public function setLogger($logger);
+
+    /**
+     * @return UserAgent
+     */
+    public function getUserAgent();
 }

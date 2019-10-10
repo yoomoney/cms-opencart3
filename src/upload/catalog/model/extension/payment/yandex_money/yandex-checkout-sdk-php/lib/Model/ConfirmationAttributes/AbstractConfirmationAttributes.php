@@ -46,6 +46,11 @@ abstract class AbstractConfirmationAttributes extends AbstractObject
     private $_type;
 
     /**
+     * @var string
+     */
+    private $_locale;
+
+    /**
      * @return string
      */
     public function getType()
@@ -74,6 +79,34 @@ abstract class AbstractConfirmationAttributes extends AbstractObject
             throw new InvalidPropertyValueTypeException(
                 'Invalid value type for "type" parameter in ConfirmationAttributes', 0, 'confirmationAttributes.type', $value
             );
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocale()
+    {
+        return $this->_locale;
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setLocale($value)
+    {
+        if ($value === null || $value === '') {
+            $this->_locale = null;
+        } elseif (!TypeCast::canCastToString($value)) {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid value type for "locale" parameter in ConfirmationAttributes', 0, 'confirmationAttributes.locale', $value
+            );
+        } elseif (!preg_match('/^[a-z]{2}_[A-Z]{2}$/', (string)$value)) {
+            throw new InvalidPropertyValueException(
+                'Invalid value type for "locale" parameter in ConfirmationAttributes', 0, 'confirmationAttributes.locale', $value
+            );
+        } else {
+            $this->_locale = (string)$value;
         }
     }
 }

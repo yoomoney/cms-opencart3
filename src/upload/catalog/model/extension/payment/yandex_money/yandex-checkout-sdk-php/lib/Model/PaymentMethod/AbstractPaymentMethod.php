@@ -139,7 +139,7 @@ abstract class AbstractPaymentMethod extends AbstractObject
     }
 
     /**
-     * @return string Название метода оплаты
+     * @return string|null Название метода оплаты
      */
     public function getTitle()
     {

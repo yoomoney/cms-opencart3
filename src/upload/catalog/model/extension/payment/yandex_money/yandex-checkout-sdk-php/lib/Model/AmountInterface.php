@@ -40,23 +40,28 @@ interface AmountInterface
      * Возвращает значение суммы
      * @return string Сумма
      */
-    function getValue();
+    public function getValue();
+
+    /**
+     * @param $value
+     */
+    public function setValue($value);
 
     /**
      * Возвращает сумму в копейках в виде целого числа
      * @return int Сумма в копейках/центах
      */
-    function getIntegerValue();
+    public function getIntegerValue();
 
     /**
      * Возвращает валюту
      * @return string Код валюты
      */
-    function getCurrency();
+    public function getCurrency();
 
     /**
      * Устанавливает код валюты
      * @param string $value Код валюты
      */
-    function setCurrency($value);
+    public function setCurrency($value);
 }

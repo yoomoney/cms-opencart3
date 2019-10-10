@@ -44,6 +44,7 @@ class PaymentDataFactory
         PaymentMethodType::INSTALLMENTS   => 'PaymentDataInstallments',
         PaymentMethodType::B2B_SBERBANK   => 'PaymentDataB2bSberbank',
         PaymentMethodType::TINKOFF_BANK   => 'PaymentDataTinkoffBank',
+        PaymentMethodType::WECHAT         => 'PaymentDataWechat',
     );
 
     /**

@@ -241,16 +241,20 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         $payment = $this->getModel()->createPayment($orderId, $paymentMethod);
+
         if ($payment === null) {
             $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
         } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
             $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
         }
-        $result       = array(
+
+        $result = array(
             'success'  => true,
             'redirect' => $this->url->link('checkout/success', '', true),
         );
+
         $confirmation = $payment->getConfirmation();
+
         if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
             $result['redirect'] = $confirmation->getConfirmationUrl();
         }
@@ -533,6 +537,17 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         return $marketXml;
+    }
+
+    /**
+     * @param $route
+     * @param $args
+     */
+    public function hookOrderStatusChange(&$route, &$args)
+    {
+        $orderId  = (int)$args[0];
+        $statusId = (int)$args[1];
+        $this->getModel()->hookOrderStatusChange($orderId, $statusId);
     }
 
     /**
