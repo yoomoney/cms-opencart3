@@ -70,7 +70,7 @@ class VatData extends AbstractObject implements VatDataInterface
         if ($rate !== null) {
             $this->setRate($rate);
         }
-        if ($rate !== null) {
+        if ($amount !== null) {
             $this->setAmount($amount);
         }
     }

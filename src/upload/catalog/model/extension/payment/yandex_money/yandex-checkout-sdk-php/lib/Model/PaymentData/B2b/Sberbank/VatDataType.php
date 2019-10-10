@@ -33,15 +33,18 @@ use YandexCheckout\Common\AbstractEnum;
  * |Код|Описание|
  * --- | ---
  * |calculated|Сумма НДС включена в сумму платежа|
+ * |mixed|Разные ставки НДС для разных товаров|
  * |untaxed|Сумма платежа НДС не облагается|
  */
 class VatDataType extends AbstractEnum
 {
     const CALCULATED = 'calculated';
+    const MIXED      = 'mixed';
     const UNTAXED    = 'untaxed';
 
     protected static $validValues = array(
         self::CALCULATED => true,
+        self::MIXED      => true,
         self::UNTAXED    => true,
     );
 

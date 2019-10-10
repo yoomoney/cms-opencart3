@@ -41,6 +41,11 @@ class PaymentSubject extends AbstractEnum
     const INTELLECTUAL_ACTIVITY = 'intellectual_activity';
     const PAYMENT = 'payment';
     const AGENT_COMMISSION = 'agent_commission';
+    const PROPERTY_RIGHT = 'property_right';
+    const NON_OPERATING_GAIN = 'non_operating_gain';
+    const INSURANCE_PREMIUM = 'insurance_premium';
+    const SALES_TAX = 'sales_tax';
+    const RESORT_FEE = 'resort_fee';
     const COMPOSITE = 'composite';
     const ANOTHER = 'another';
 
@@ -56,6 +61,11 @@ class PaymentSubject extends AbstractEnum
         self::INTELLECTUAL_ACTIVITY => true,
         self::PAYMENT               => true,
         self::AGENT_COMMISSION      => true,
+        self::PROPERTY_RIGHT        => true,
+        self::NON_OPERATING_GAIN    => true,
+        self::INSURANCE_PREMIUM     => true,
+        self::SALES_TAX             => true,
+        self::RESORT_FEE            => true,
         self::COMPOSITE             => true,
         self::ANOTHER               => true,
     );

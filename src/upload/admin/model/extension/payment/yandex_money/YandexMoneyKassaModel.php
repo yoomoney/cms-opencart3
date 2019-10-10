@@ -70,7 +70,7 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
 
     public function setSendReceipt($value)
     {
-        $this->sendReceipt = $value ? true : false;
+        $this->isSendReceipt = $value ? true : false;
     }
 
     public function setDefaultTaxRate($value)

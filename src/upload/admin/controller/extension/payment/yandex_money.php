@@ -10,7 +10,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.2.11';
+    const MODULE_VERSION = '1.3.0';
 
     /**
      * @var integer
@@ -72,6 +72,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                         ? $settings['yandex_money_metrika_code']
                         : '',
                 ), $this->request->post);
+
+                $this->getModel()->installEventForSecondReceipt();
 
                 $this->model_setting_setting->editSetting(self::MODULE_NAME, $newSettings);
                 $this->model_setting_setting->editSetting('payment_'.self::MODULE_NAME, $newSettings);

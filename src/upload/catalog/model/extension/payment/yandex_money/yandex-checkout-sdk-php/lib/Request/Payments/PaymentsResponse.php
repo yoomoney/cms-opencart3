@@ -78,6 +78,7 @@ class PaymentsResponse
             $payment->setCreatedAt(strtotime($paymentInfo['created_at']));
             $payment->setPaymentMethod($this->factoryPaymentMethod($paymentInfo['payment_method']));
             $payment->setPaid($paymentInfo['paid']);
+            $payment->setRefundable($paymentInfo['refundable']);
 
             if (!empty($paymentInfo['recipient'])) {
                 $recipient = new Recipient();

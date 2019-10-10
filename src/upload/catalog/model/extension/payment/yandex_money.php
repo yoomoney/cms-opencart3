@@ -14,6 +14,10 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'aut
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
+    /**
+     * string
+     */
+    const MODULE_VERSION = '1.3.0';
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -80,6 +84,9 @@ class ModelExtensionPaymentYandexMoney extends Model
                 $this->getKassaModel()->getPassword()
             );
             $this->client->setLogger($this);
+            $userAgent = $this->client->getApiClient()->getUserAgent();
+            $userAgent->setCms('OpenCart', VERSION);
+            $userAgent->setModule('Y.CMS',self::MODULE_VERSION);
         }
 
         return $this->client;
@@ -147,7 +154,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart',
-                        'module_version' => '1.2.11',
+                        'module_version' => self::MODULE_VERSION,
                     ));
 
             $confirmation = array(
@@ -155,6 +162,7 @@ class ModelExtensionPaymentYandexMoney extends Model
                 'returnUrl' => $returnUrl,
             );
             if (!$this->getKassaModel()->getEPL()) {
+
                 if ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
                     $data         = array(
                         'type'  => $paymentMethod,
@@ -169,17 +177,22 @@ class ModelExtensionPaymentYandexMoney extends Model
                 } else {
                     $data = $paymentMethod;
                 }
+
                 $builder->setPaymentMethodData($data);
             }
+
             $builder->setConfirmation($confirmation);
 
-            if ($this->getKassaModel()->sendReceipt()) {
+            if ($this->getKassaModel()->isSendReceipt()) {
                 $this->addReceipt($builder, $orderInfo);
             }
+
             $request = $builder->build();
-            if ($this->getKassaModel()->sendReceipt() && $request->getReceipt() !== null) {
+
+            if ($this->getKassaModel()->isSendReceipt() && $request->getReceipt() !== null) {
                 $request->getReceipt()->normalize($request->getAmount());
             }
+
         } catch (InvalidArgumentException $e) {
             $this->log('error', 'Failed to create create payment request: '.$e->getMessage());
 
@@ -192,6 +205,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->log('error', 'Failed to create payment: '.$e->getMessage());
             $payment = null;
         }
+
         if ($payment !== null) {
             $this->insertPayment($payment, $orderId);
         }
@@ -237,11 +251,11 @@ class ModelExtensionPaymentYandexMoney extends Model
             }
             $builder->setConfirmation($confirmation);
 
-            if ($this->getKassaModel()->sendReceipt()) {
+            if ($this->getKassaModel()->isSendReceipt()) {
                 $this->addReceipt($builder, $order);
             }
             $request = $builder->build();
-            if ($this->getKassaModel()->sendReceipt() && $request->getReceipt() !== null) {
+            if ($this->getKassaModel()->isSendReceipt() && $request->getReceipt() !== null) {
                 $request->getReceipt()->normalize($request->getAmount());
             }
         } catch (InvalidArgumentException $e) {
@@ -392,6 +406,33 @@ class ModelExtensionPaymentYandexMoney extends Model
 
         return $payment;
     }
+
+    /**
+     * @param $orderId
+     * @param $newStatusId
+     */
+    public function hookOrderStatusChange($orderId, $newStatusId)
+    {
+        if ($newStatusId < 1) {
+            return;
+        }
+
+        $this->load->model('checkout/order');
+        $this->load->language('extension/payment/yandex_money');
+
+        $paymentId   = $this->findPaymentIdByOrderId($orderId);
+        $orderInfo   = $this->model_checkout_order->getOrder($orderId);
+        $paymentInfo = $this->fetchPaymentInfo($paymentId);
+
+        $secondReceipt = new \YandexMoneyModule\Model\KassaSecondReceiptModel($this->config, $this->session, $orderId, $paymentInfo, $orderInfo);
+
+        if ($secondReceipt->sendSecondReceipt($newStatusId)) {
+            $settlementsSum = $secondReceipt->getSettlementsSum();
+            $comment = sprintf($this->language->get('second_receipt_history'), $settlementsSum);
+            $this->model_checkout_order->addOrderHistory($orderId, $newStatusId, $comment);
+        }
+    }
+
 
     /**
      * @param int $orderId

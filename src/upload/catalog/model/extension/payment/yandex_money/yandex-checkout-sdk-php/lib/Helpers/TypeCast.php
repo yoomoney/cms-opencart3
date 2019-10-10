@@ -26,6 +26,9 @@
 
 namespace YandexCheckout\Helpers;
 
+use DateTime;
+use Exception;
+
 /**
  * Класс хэлпер для преобразования типов значений
  *
@@ -70,7 +73,7 @@ class TypeCast
      */
     public static function canCastToDateTime($value)
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof DateTime) {
             return true;
         } elseif (is_numeric($value)) {
             $value = (float)$value;
@@ -85,16 +88,17 @@ class TypeCast
 
     /**
      * Преобразует переданне значение в объект типа \DateTime
-     * @param string|int|\DateTime $value Преобразуемое значение
-     * @return \DateTime|null Объект типа \DateTime или null если при парсинг даты не удался
+     * @param string|int|DateTime $value Преобразуемое значение
+     * @return DateTime|null Объект типа \DateTime или null если при парсинг даты не удался
+     * @throws Exception
      */
     public static function castToDateTime($value)
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof DateTime) {
             return clone $value;
         }
         if (is_numeric($value)) {
-            $date = new \DateTime();
+            $date = new DateTime();
             $date->setTimestamp((int)$value);
         } elseif (is_string($value) || (is_object($value) && method_exists($value, '__toString'))) {
             $date = date_create((string)$value);

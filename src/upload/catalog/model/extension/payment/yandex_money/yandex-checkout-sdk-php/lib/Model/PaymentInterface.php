@@ -47,6 +47,7 @@ use YandexCheckout\Model\PaymentMethod\AbstractPaymentMethod;
  * @property-read AmountInterface $refundedAmount Сумма возвращенных средств платежа
  * @property-read AmountInterface $refunded_amount Сумма возвращенных средств платежа
  * @property-read bool $paid Признак оплаты заказа
+ * @property-read bool $refundable Возможность провести возврат по API
  * @property-read string $receiptRegistration Состояние регистрации фискального чека
  * @property-read string $receipt_registration Состояние регистрации фискального чека
  * @property-read Metadata $metadata Метаданные платежа указанные мерчантом
@@ -112,6 +113,12 @@ interface PaymentInterface
      * @return bool Признак оплаты заказа, true если заказ оплачен, false если нет
      */
     public function getPaid();
+
+    /**
+     * Возможность провести возврат по API
+     * @return bool Возможность провести возврат по API
+     */
+    public function getRefundable();
 
     /**
      * Возвращает состояние регистрации фискального чека

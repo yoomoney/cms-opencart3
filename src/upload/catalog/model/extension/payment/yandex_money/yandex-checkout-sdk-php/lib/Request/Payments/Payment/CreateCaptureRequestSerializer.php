@@ -65,26 +65,36 @@ class CreateCaptureRequestSerializer
                         'vat_code'        => $item->getVatCode(),
                     );
 
-                    if ($item->getPaymentSubject()) {
-                        $itemArray['payment_subject'] = $item->getPaymentSubject();
+                    if ($value = $item->getPaymentSubject()) {
+                        $itemArray['payment_subject'] = $value;
                     }
 
-                    if ($item->getPaymentMode()) {
-                        $itemArray['payment_mode'] = $item->getPaymentMode();
+                    if ($value = $item->getPaymentMode()) {
+                        $itemArray['payment_mode'] = $value;
                     }
 
                     $result['receipt']['items'][] = $itemArray;
                 }
-                $value = $receipt->getEmail();
-                if (!empty($value)) {
-                    $result['receipt']['email'] = $value;
+
+                if ($customer = $receipt->getCustomer()) {
+                    $customerArray = array();
+
+                    if ($value = $customer->getEmail()) {
+                        $customerArray['email'] = $value;
+                    }
+                    if ($value = $customer->getPhone()) {
+                        $customerArray['phone'] = $value;
+                    }
+                    if ($value = $customer->getFullName()) {
+                        $customerArray['full_name'] = $value;
+                    }
+                    if ($value = $customer->getInn()) {
+                        $customerArray['inn'] = $value;
+                    }
+                    $result['receipt']['customer'] = $customerArray;
                 }
-                $value = $receipt->getPhone();
-                if (!empty($value)) {
-                    $result['receipt']['phone'] = $value;
-                }
-                $value = $receipt->getTaxSystemCode();
-                if (!empty($value)) {
+
+                if ($value = $receipt->getTaxSystemCode()) {
                     $result['receipt']['tax_system_code'] = $value;
                 }
             }
