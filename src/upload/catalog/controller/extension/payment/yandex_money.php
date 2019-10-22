@@ -688,23 +688,32 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         return $this;
     }
 
+    /**
+     * @return array
+     */
     private function getConditionIds()
     {
         $additionalConditionEnabled = (array)$this->config->get('yandex_money_market_additional_condition_enabled');
-
+        $additionalConditionIds     = array();
         foreach ($additionalConditionEnabled as $id => $value) {
             if ($value === 'on') {
                 $additionalConditionIds[] = $id;
             }
         }
+
+        return $additionalConditionIds;
     }
 
     /**
      * @param $additionalConditionIds
      * @param $allCategoryIds
+     *
+     * @return array
      */
     private function getConditionMap($additionalConditionIds, $allCategoryIds)
     {
+        $additionalConditionMap = array();
+
         foreach ($additionalConditionIds as $conditionId) {
             $additionalConditionCategoryIds
                 = $this->getConfig('additional_condition_for_all_cat', $conditionId) === 'on'
@@ -714,6 +723,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 $additionalConditionMap[$categoryId][] = $conditionId;
             }
         }
+
+        return $additionalConditionMap;
     }
 
     /**
