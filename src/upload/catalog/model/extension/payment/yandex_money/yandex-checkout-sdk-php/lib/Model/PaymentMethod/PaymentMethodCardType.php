@@ -28,6 +28,9 @@ namespace YandexCheckout\Model\PaymentMethod;
 
 use YandexCheckout\Common\AbstractEnum;
 
+/**
+ * @deprecated Класс будет удалён в одной из будущих версий.
+ */
 class PaymentMethodCardType extends AbstractEnum
 {
     const MASTER_CARD = 'MasterCard';

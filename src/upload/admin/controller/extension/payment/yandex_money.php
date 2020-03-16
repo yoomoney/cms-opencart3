@@ -10,7 +10,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.3.1';
+    const MODULE_VERSION = '1.3.2';
 
     /**
      * @var integer

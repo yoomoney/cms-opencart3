@@ -1,7 +1,11 @@
 <?php
 
+use YandexCheckout\Model\ConfirmationType;
 use YandexCheckout\Model\Notification\NotificationSucceeded;
 use YandexCheckout\Model\Notification\NotificationWaitingForCapture;
+use YandexCheckout\Model\PaymentMethodType;
+use YandexCheckout\Model\PaymentStatus;
+use YandexMoneyModule\Model\KassaModel;
 use YandexMoneyModule\YandexMarket\Currency;
 use YandexMoneyModule\YandexMarket\Offer;
 use YandexMoneyModule\YandexMarket\YandexMarket;
@@ -44,6 +48,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('heading_title'));
 
+        if (isset($this->session->data['confirmation_token'])) {
+            $this->session->data['confirmation_token'] = null;
+        }
         $model = $this->getModel()->getPaymentModel();
         if ($model === null) {
             $this->failure('Yandex.Kassa module disabled');
@@ -164,11 +171,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $payment = $this->getModel()->createOrderPayment($order, false);
         if ($payment === null) {
             $this->failure('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
-        } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
+        } elseif ($payment->getStatus() === PaymentStatus::CANCELED) {
             $this->failure('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
         }
         $confirmation = $payment->getConfirmation();
-        if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
+        if ($confirmation !== null && $confirmation->getType() === ConfirmationType::REDIRECT) {
             $this->response->redirect($confirmation->getConfirmationUrl());
         }
         $this->session->data['error'] = 'Не удалось инициализировать платёж';
@@ -222,18 +229,30 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->jsonError('Payment method not specified');
         }
         $paymentMethod = $this->request->get['paymentType'];
+        $successUrl = $this->url->link('checkout/success', '', true);
+
+        if ($paymentMethod === KassaModel::CUSTOM_PAYMENT_METHOD_WIDGET
+            && !empty($this->session->data['confirmation_token'])) {
+            echo json_encode(array(
+                'success' => true,
+                'redirect' => $successUrl,
+                'token' => $this->session->data['confirmation_token'],
+            ));
+            exit();
+        }
+
         if ($kassa->getEPL()) {
             if (!empty($paymentMethod)) {
                 $this->jsonError('Invalid payment method');
             }
         } elseif (!$kassa->isPaymentMethodEnabled($paymentMethod)) {
             $this->jsonError('Invalid payment method');
-        } elseif ($paymentMethod == \YandexCheckout\Model\PaymentMethodType::QIWI) {
+        } elseif ($paymentMethod == PaymentMethodType::QIWI) {
             $phone = isset($_GET['qiwiPhone']) ? preg_replace('/[^\d]/', '', $_GET['qiwiPhone']) : '';
             if (empty($phone)) {
                 $this->jsonError('Не был указан телефон');
             }
-        } elseif ($paymentMethod == \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
+        } elseif ($paymentMethod == PaymentMethodType::ALFABANK) {
             $login = isset($this->request->get['alphaLogin']) ? trim($this->request->get['alphaLogin']) : '';
             if (empty($login)) {
                 $this->jsonError('Не указан логин в Альфа-клике');
@@ -244,19 +263,24 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         if ($payment === null) {
             $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
-        } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
+        } elseif ($payment->getStatus() === PaymentStatus::CANCELED) {
             $this->jsonError('Платеж не прошел. Попробуйте еще или выберите другой способ оплаты');
         }
 
         $result = array(
             'success'  => true,
-            'redirect' => $this->url->link('checkout/success', '', true),
+            'redirect' => $successUrl,
         );
 
         $confirmation = $payment->getConfirmation();
 
-        if ($confirmation !== null && $confirmation->getType() === \YandexCheckout\Model\ConfirmationType::REDIRECT) {
-            $result['redirect'] = $confirmation->getConfirmationUrl();
+        if ($confirmation !== null) {
+            if ($confirmation->getType() === ConfirmationType::REDIRECT) {
+                $result['redirect'] = $confirmation->getConfirmationUrl();
+            } elseif ($confirmation->getType() === ConfirmationType::EMBEDDED) {
+                $result['token'] = $confirmation->getConfirmationToken();
+                $this->session->data['confirmation_token'] = $result['token'];
+            }
         }
 
         if ($kassa->getCreateOrderBeforeRedirect()) {
@@ -303,12 +327,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $this->failure('Не найден платёж '.$paymentId.' для заказа №'.$orderId);
         } elseif (!$payment->getPaid()) {
             $this->failure('Платёж не был проведён');
-        } elseif ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::CANCELED) {
+        } elseif ($payment->getStatus() === PaymentStatus::CANCELED) {
             $this->failure('Статус платежа '.$paymentId.' заказа №'.$orderId.' - canceled');
-        } elseif ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
+        } elseif ($payment->getStatus() !== PaymentStatus::SUCCEEDED) {
             $this->getModel()->log('info', 'Confirm order#'.$orderId.' with payment '.$payment->getId());
         }
-        if ($payment->getStatus() === \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
+        if ($payment->getStatus() === PaymentStatus::SUCCEEDED) {
             $this->getModel()->confirmOrderPayment(
                 $orderId, $payment, $this->getModel()->getKassaModel()->getSuccessOrderStatusId()
             );
@@ -344,6 +368,19 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         } else {
             $this->jsonError('Invalid payment type');
         }
+    }
+
+    public function resetToken()
+    {
+        $success = false;
+        if (isset($this->session->data['confirmation_token'])) {
+            $this->session->data['confirmation_token'] = null;
+            $success = true;
+        }
+
+        echo json_encode(array(
+            'success' => $success,
+        ));
     }
 
     /**
@@ -412,13 +449,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if ($payment === null) {
                 header('HTTP/1.1 400 Payment capture error');
                 $this->getModel()->log('error', 'Payment not captured: capture result is null');
-            } elseif ($payment->getStatus() !== \YandexCheckout\Model\PaymentStatus::WAITING_FOR_CAPTURE) {
+            } elseif ($payment->getStatus() !== PaymentStatus::WAITING_FOR_CAPTURE) {
                 header('HTTP/1.1 400 Invalid payment status');
                 $this->getModel()->log('error',
                     'Payment not captured: invalid payment status "'.$payment->getStatus().'"');
             } else {
                 $payment = $notification->getObject();
-                if ($payment->getPaymentMethod()->getType() == \YandexCheckout\Model\PaymentMethodType::BANK_CARD) {
+                if ($payment->getPaymentMethod()->getType() == PaymentMethodType::BANK_CARD) {
                     $this->getModel()->confirmOrder($orderId);
                     $kassa = $this->getModel()->getKassaModel();
                     $this->model_checkout_order->addOrderHistory(
@@ -439,7 +476,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             if ($result === null) {
                 header('HTTP/1.1 400 Payment capture error');
                 $this->getModel()->log('error', 'Payment not captured: capture result is null');
-            } elseif ($result->getStatus() !== \YandexCheckout\Model\PaymentStatus::SUCCEEDED) {
+            } elseif ($result->getStatus() !== PaymentStatus::SUCCEEDED) {
                 header('HTTP/1.1 400 Invalid payment status');
                 $this->getModel()->log('error',
                     'Payment not captured: invalid payment status "'.$result->getStatus().'"');

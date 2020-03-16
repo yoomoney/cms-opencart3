@@ -11,11 +11,21 @@ use YandexCheckout\Model\Receipt\PaymentSubject;
 
 class KassaModel extends AbstractPaymentModel
 {
+    const CUSTOM_PAYMENT_METHOD_WIDGET = 'widget';
+
     const MIN_INSTALLMENTS_AMOUNT = 3000;
 
     private static $_enabledTestMethods = array(
         PaymentMethodType::YANDEX_MONEY => true,
         PaymentMethodType::BANK_CARD    => true,
+    );
+
+    /**
+     * @var array
+     */
+    private static $_disabledPaymentMethods = array(
+        PaymentMethodType::B2B_SBERBANK,
+        PaymentMethodType::WECHAT,
     );
 
     protected $shopId;
@@ -64,9 +74,14 @@ class KassaModel extends AbstractPaymentModel
             $this->testMode = true;
         }
 
+        $enabledPaymentMethods = array_merge(
+            array(self::CUSTOM_PAYMENT_METHOD_WIDGET),
+            PaymentMethodType::getEnabledValues()
+        );
+
         $this->paymentMethods = array();
-        foreach (PaymentMethodType::getEnabledValues() as $value) {
-            if ($value !== PaymentMethodType::B2B_SBERBANK) {
+        foreach ($enabledPaymentMethods as $value) {
+            if (!in_array($value, self::$_disabledPaymentMethods)) {
                 $property = 'payment_method_'.$value;
                 $enabled  = (bool)$this->getConfigValue($property);
                 if (!$this->testMode || array_key_exists($value, self::$_enabledTestMethods)) {
@@ -250,6 +265,7 @@ class KassaModel extends AbstractPaymentModel
         $templateData['kassa']           = $this;
         $templateData['image_base_path'] = HTTPS_SERVER.'image/catalog/payment/yandex_money';
         $templateData['validate_url']    = $controller->url->link('extension/payment/yandex_money/create', '', true);
+        $templateData['reset_token_url'] = $controller->url->link('extension/payment/yandex_money/resetToken', '', true);
 
         $templateData['amount']         = $orderInfo['total'];
         $templateData['comment']        = $orderInfo['comment'];

@@ -1,8 +1,10 @@
 <?php
 
 
+use YandexCheckout\Model\ConfirmationType;
 use YandexCheckout\Model\Payment;
 use YandexCheckout\Model\PaymentMethodType;
+use YandexMoneyModule\Model\KassaModel;
 
 require_once __DIR__.DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'autoload.php';
 
@@ -17,19 +19,19 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.3.1';
+    const MODULE_VERSION = '1.3.2';
     private $kassaModel;
     private $walletModel;
     private $billingModel;
     private $client;
 
     /**
-     * @return \YandexMoneyModule\Model\KassaModel
+     * @return KassaModel
      */
     public function getKassaModel()
     {
         if ($this->kassaModel === null) {
-            $this->kassaModel = new \YandexMoneyModule\Model\KassaModel($this->config);
+            $this->kassaModel = new KassaModel($this->config);
         }
 
         return $this->kassaModel;
@@ -158,27 +160,31 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ));
 
             $confirmation = array(
-                'type'      => \YandexCheckout\Model\ConfirmationType::REDIRECT,
+                'type'      => ConfirmationType::REDIRECT,
                 'returnUrl' => $returnUrl,
             );
             if (!$this->getKassaModel()->getEPL()) {
 
-                if ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
+                if ($paymentMethod === PaymentMethodType::ALFABANK) {
                     $data         = array(
                         'type'  => $paymentMethod,
                         'login' => trim($_GET['alphaLogin']),
                     );
-                    $confirmation = \YandexCheckout\Model\ConfirmationType::EXTERNAL;
-                } elseif ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::QIWI) {
+                    $confirmation = ConfirmationType::EXTERNAL;
+                } elseif ($paymentMethod === PaymentMethodType::QIWI) {
                     $data = array(
                         'type'  => $paymentMethod,
                         'phone' => preg_replace('/[^\d]/', '', $_GET['qiwiPhone']),
                     );
+                } elseif ($paymentMethod === KassaModel::CUSTOM_PAYMENT_METHOD_WIDGET) {
+                    $confirmation = ConfirmationType::EMBEDDED;
                 } else {
                     $data = $paymentMethod;
                 }
 
-                $builder->setPaymentMethodData($data);
+                if (isset($data)) {
+                    $builder->setPaymentMethodData($data);
+                }
             }
 
             $builder->setConfirmation($confirmation);
@@ -229,17 +235,17 @@ class ModelExtensionPaymentYandexMoney extends Model
                     ->setCapture(true);
 
             $confirmation = array(
-                'type'      => \YandexCheckout\Model\ConfirmationType::REDIRECT,
+                'type'      => ConfirmationType::REDIRECT,
                 'returnUrl' => $returnUrl,
             );
             if (!$this->getKassaModel()->getEPL() && !empty($paymentMethod)) {
-                if ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::ALFABANK) {
+                if ($paymentMethod === PaymentMethodType::ALFABANK) {
                     $data         = array(
                         'type'  => $paymentMethod,
                         'login' => trim($_GET['alphaLogin']),
                     );
-                    $confirmation = \YandexCheckout\Model\ConfirmationType::EXTERNAL;
-                } elseif ($paymentMethod === \YandexCheckout\Model\PaymentMethodType::QIWI) {
+                    $confirmation = ConfirmationType::EXTERNAL;
+                } elseif ($paymentMethod === PaymentMethodType::QIWI) {
                     $data = array(
                         'type'  => $paymentMethod,
                         'phone' => preg_replace('/[^\d]/', '', $_GET['qiwiPhone']),

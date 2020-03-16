@@ -16,6 +16,7 @@ $_['text_method_qiwi'] = 'QIWI Wallet';
 $_['text_method_tinkoff_bank'] = 'Интернет-банк Тинькофф';
 $_['text_method_installments'] = 'Заплатить по частям';
 $_['text_method_installments_amount'] = ' (%s ₽ в месяц)';
+$_['text_method_widget'] = 'Платёжный виджет Кассы (карты, Apple Pay и Google Pay)';
 
 $_['text_payment_method_qiwi_phone'] = 'Телефон, который привязан к Qiwi Wallet';
 $_['text_payment_method_alfa_login'] = 'Укажите логин, и мы выставим счет в Альфа-Клике. После этого останется подтвердить платеж на сайте интернет-банка.';

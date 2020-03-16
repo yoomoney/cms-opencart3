@@ -228,14 +228,7 @@ class PaymentMethodBankCard extends AbstractPaymentMethod
         if ($value === null || $value === '') {
             throw new EmptyPropertyValueException('Empty cardType value', 0, 'PaymentMethodBankCard.cardType');
         } elseif (TypeCast::canCastToString($value)) {
-            $castedValue = (string)$value;
-            if (PaymentMethodCardType::valueExists($castedValue)) {
-                $this->_cardType = $castedValue;
-            } else {
-                throw new InvalidPropertyValueException(
-                    'Invalid cardType value', 0, 'PaymentMethodBankCard.cardType', $value
-                );
-            }
+            $this->_cardType = (string)$value;
         } else {
             throw new InvalidPropertyValueTypeException(
                 'Invalid cardType value type', 0, 'PaymentMethodBankCard.cardType', $value
