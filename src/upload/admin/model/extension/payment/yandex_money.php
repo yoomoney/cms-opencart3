@@ -5,7 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.3.1';
+    const MODULE_VERSION = '1.3.2';
     const YCMS_EVENT_SECOND_RECEIPT_CODE = 'ycms_second_receipt_trigger';
 
     private $kassaModel;
