@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.2.6</version>
+    <version>1.3.3</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -170,19 +170,19 @@
                                                 data: 'order_status_id=1&notify=0&override=0&append=0&comment='+json_main['success'],
                                                 dataType: 'json',
                                                 error: function(xhr, ajaxOptions, thrownError) {
-                                                    alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                                                    alert(thrownError + " " + xhr.statusText + " " + xhr.responseText);
                                                 }
                                             });
                                         }
                                     },
                                     error: function(xhr, ajaxOptions, thrownError) {
-                                        alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                                        alert(thrownError + " " + xhr.statusText + " " + xhr.responseText);
                                     }
                                 });
                             }
                         },
                         error: function(xhr, ajaxOptions, thrownError) {
-                            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                            alert(thrownError + " " + xhr.statusText + " " + xhr.responseText);
                         }
                     });
                 }
