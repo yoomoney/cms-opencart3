@@ -147,13 +147,14 @@
                             } else {
                                 document.location = data.redirect;
                             }
-                            continueButton.button('reset');
                         } else {
                             onValidateError(data.error);
+                            continueButton.button('reset');
                         }
                     },
                     failure: function () {
                         onValidateError('Failed to create payment');
+                        continueButton.button('reset');
                     }
                 });
             }

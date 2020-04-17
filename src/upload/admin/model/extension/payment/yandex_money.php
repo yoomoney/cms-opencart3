@@ -5,7 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.3.3';
+    const MODULE_VERSION = '1.4.0';
     const YCMS_EVENT_SECOND_RECEIPT_CODE = 'ycms_second_receipt_trigger';
 
     private $kassaModel;
@@ -85,7 +85,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             if (!empty($context)) {
                 foreach ($context as $key => $value) {
                     $search[]  = '{'.$key.'}';
-                    $replace[] = $value;
+                    $replace[] = (is_array($value)||is_object($value)) ? json_encode($value, JSON_PRETTY_PRINT) : $value;
                 }
             }
             $sessionId = $this->session->getId();

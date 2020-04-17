@@ -117,6 +117,30 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- Currency Start-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="yandex-money-kassa-currency">{{ language.get('kassa_currency') }}</label>
+            <div class="col-sm-5">
+                <select id="yandex-money-kassa-currency" name="yandex_money_kassa_currency" class="form-control">
+                    {% for code, data in kassa_currencies %}
+                        <option value="{{ code }}"{{ kassa.getCurrency() == code ? ' selected' : '' }}>{{ data.code }} ({{ data.title }})</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('kassa_currency_help') }}</p>
+            </div>
+            <div class="col-sm-5">
+                <label class="form-check-label">
+                    <input type="checkbox" name="yandex_money_kassa_currency_convert" value="on"
+                           id="currency_convert="
+                           class="form-check-input"{{ kassa.getCurrencyConvert() ? ' checked' : '' }} />
+                    {{ language.get('kassa_currency_convert') }}
+                </label>
+                <p class="help-block">{{ language.get('kassa_currency_convert_help') }}</p>
+            </div>
+        </div>
+
         <!-- Sbbol Start-->
 
         <div class="form-group">
@@ -208,16 +232,14 @@
                 <div class="col-sm-10 col-sm-offset-2">
                     <div class="statuses-wrapper">
 
-                        <div class="col-sm-2 control-label" for="kassa-statuses-label">
-                        </div>
-                        <div id="kassa-statuses-label" class="col-sm-10">
+                        <div id="kassa-statuses-label" class="col-sm-offset-6 col-sm-6">
                             <label> {{ language.get('kassa_statuses_description_label') }} </label>
                         </div>
 
-                        <label class="col-sm-2 control-label" for="kassa-hold-order-status">
+                        <label class="col-sm-6 control-label" for="kassa-hold-order-status">
                             {{ language.get('kassa_hold_order_status_label') }}
                         </label>
-                        <div class="col-sm-10" style="margin-bottom: 10px;">
+                        <div class="col-sm-6" style="margin-bottom: 10px;">
                             <select id="kassa-hold-order-status" name="yandex_money_kassa_hold_order_status"
                                     class="form-control">
                                 {% for id, name in orderStatuses %}
@@ -226,11 +248,11 @@
                             </select>
                         </div>
 
-                        <label class="col-sm-2 control-label" for="kassa-cancel-order-status">
+                        <label class="col-sm-6 control-label" for="kassa-cancel-order-status">
                             {{ language.get('kassa_cancel_order_status_label') }}
                         </label>
 
-                        <div class="col-sm-10">
+                        <div class="col-sm-6">
                             <select id="kassa-cancel-order-status" name="yandex_money_kassa_cancel_order_status"
                                     class="form-control">
 
