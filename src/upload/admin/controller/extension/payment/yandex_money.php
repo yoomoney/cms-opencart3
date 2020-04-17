@@ -1,4 +1,6 @@
 <?php
+
+use YandexCheckout\Model\CurrencyCode;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentStatus;
 
@@ -10,7 +12,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.3.3';
+    const MODULE_VERSION = '1.4.0';
 
     /**
      * @var integer
@@ -39,6 +41,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->language('extension/payment/'.self::MODULE_NAME);
         $this->document->setTitle($this->language->get('heading_title'));
         $this->load->model('setting/setting');
+        $this->load->model('localisation/currency');
 
         if ($this->getModel()->getKassaModel()->isEnabled()) {
             $tab = 'tab-kassa';
@@ -173,7 +176,8 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer']      = $this->load->controller('common/footer');
 
-        $data['kassa'] = $this->getModel()->getKassaModel();
+        $data['kassa']            = $this->getModel()->getKassaModel();
+        $data['kassa_currencies'] = $this->createKassaCurrencyList();
 
         $name = $data['kassa']->getDisplayName();
         if (empty($name)) {
@@ -226,6 +230,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->load->model('setting/setting');
         $this->load->model('catalog/option');
         $this->load->model('localisation/order_status');
+
         $data['metrika_status'] = '';
         $data['market_status']  = '';
         $array_init             = array_merge($this->fields_metrika, $this->getModel()->getMarket()->getFields());
@@ -303,7 +308,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             $categories = array();
         }
 
-        $this->load->model('localisation/currency');
+
 
         $data = array_merge($data, $this->initForm($array_init));
         $data = array_merge($data, $this->initErrors());
@@ -509,7 +514,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $this->getModel()->uninstall();
     }
 
-    private function getModel()
+    public function getModel()
     {
         if ($this->_model === null) {
             $this->load->model('extension/payment/'.self::MODULE_NAME);
@@ -1637,5 +1642,29 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 'payment_yandex_money_b2b_sberbank_status' => false,
             ));
         }
+    }
+
+    /**
+     * @return array
+     */
+    private function createKassaCurrencyList()
+    {
+        $all_currencies = $this->model_localisation_currency->getCurrencies();
+        $kassa_currencies = CurrencyCode::getEnabledValues();
+
+        $available_currencies = array_filter($all_currencies, function ($item, $key) use ($kassa_currencies) {
+            return in_array($key, $kassa_currencies) && $item['status'] == 1;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return array_merge(array(
+            'RUB' => array(
+                'title' => 'Российский рубль',
+                'code' => CurrencyCode::RUB,
+                'symbol_left' => '',
+                'symbol_right' => '₽',
+                'decimal_place' => '2',
+                'status' => '1',
+            )
+        ), $available_currencies);
     }
 }

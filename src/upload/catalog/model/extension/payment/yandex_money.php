@@ -2,8 +2,12 @@
 
 
 use YandexCheckout\Model\ConfirmationType;
+use YandexCheckout\Model\CurrencyCode;
 use YandexCheckout\Model\Payment;
+use YandexCheckout\Model\PaymentInterface;
 use YandexCheckout\Model\PaymentMethodType;
+use YandexCheckout\Request\Payments\CreatePaymentRequest;
+use YandexMoneyModule\Model\CBRAgent;
 use YandexMoneyModule\Model\KassaModel;
 
 require_once __DIR__.DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'autoload.php';
@@ -19,7 +23,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.3.3';
+    const MODULE_VERSION = '1.4.0';
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -128,7 +132,7 @@ class ModelExtensionPaymentYandexMoney extends Model
      * @param int $orderId
      * @param string $paymentMethod
      *
-     * @return \YandexCheckout\Model\PaymentInterface
+     * @return PaymentInterface
      */
     public function createPayment($orderId, $paymentMethod)
     {
@@ -142,20 +146,36 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->url->link('extension/payment/yandex_money/confirm', 'order_id='.$orderId, true)
         );
 
-        $amount = $this->currency->format($orderInfo['total'], 'RUB', '', false);
+        $kassaCurrency = $this->getKassaModel()->getCurrency();
+        $this->log('debug', "AMOUNT CALC \n{data}", array(
+            'data' => json_encode(array(
+            'order_total' => $orderInfo['total'],
+            'kassa_currency' => $kassaCurrency,
+            'has_currency' => $this->currency->has($kassaCurrency) ? 'true' : 'false',
+        ), JSON_PRETTY_PRINT)));
+
+        if ($this->currency->has($kassaCurrency)) {
+            $amount = $this->currency->format($orderInfo['total'], $kassaCurrency, '', false);
+        } else {
+            if ($this->getKassaModel()->getCurrencyConvert()) {
+                $amount = $this->convertFromCbrf($orderInfo, $kassaCurrency);
+            } else {
+                $amount = $orderInfo['total'];
+            }
+        }
 
         try {
-            $builder      = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $builder      = CreatePaymentRequest::builder();
             $description  = $this->generatePaymentDescription($orderInfo);
             $captureValue = $this->getKassaModel()->getCaptureValue($paymentMethod);
             $builder->setAmount($amount)
-                    ->setCurrency('RUB')
+                    ->setCurrency($kassaCurrency)
                     ->setDescription($description)
                     ->setClientIp($_SERVER['REMOTE_ADDR'])
                     ->setCapture($captureValue)
                     ->setMetadata(array(
                         'order_id'       => $orderId,
-                        'cms_name'       => 'ya_api_ycms_opencart',
+                        'cms_name'       => 'ya_api_ycms_opencart3',
                         'module_version' => self::MODULE_VERSION,
                     ));
 
@@ -228,7 +248,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         $amount = $this->currency->format($order['total'], 'RUB', '', false);
 
         try {
-            $builder = \YandexCheckout\Request\Payments\CreatePaymentRequest::builder();
+            $builder = CreatePaymentRequest::builder();
             $builder->setAmount($amount)
                     ->setCurrency('RUB')
                     ->setClientIp($_SERVER['REMOTE_ADDR'])
@@ -351,11 +371,11 @@ class ModelExtensionPaymentYandexMoney extends Model
 
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      * @param bool $fetchPaymentInfo
      * @param $amount
      *
-     * @return \YandexCheckout\Model\PaymentInterface
+     * @return PaymentInterface
      */
     public function capturePayment($payment, $fetchPaymentInfo = true, $amount = null)
     {
@@ -457,7 +477,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      *
      * @return int
      */
@@ -487,7 +507,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             if (!empty($context)) {
                 foreach ($context as $key => $value) {
                     $search[]  = '{'.$key.'}';
-                    $replace[] = $value;
+                    $replace[] = (is_array($value)||is_object($value)) ? json_encode($value, JSON_PRETTY_PRINT) : $value;
                 }
             }
             $sessionId = $this->session->getId();
@@ -574,7 +594,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * @param string $paymentId
      *
-     * @return \YandexCheckout\Model\PaymentInterface|null
+     * @return PaymentInterface|null
      */
     public function fetchPaymentInfo($paymentId)
     {
@@ -630,7 +650,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      * @param int $orderId
      */
     private function insertPayment($payment, $orderId)
@@ -661,7 +681,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     }
 
     /**
-     * @param \YandexCheckout\Model\PaymentInterface $payment
+     * @param PaymentInterface $payment
      */
     private function updatePaymentInDatabase($payment)
     {
@@ -709,5 +729,37 @@ class ModelExtensionPaymentYandexMoney extends Model
         $productProp = $res->row;
 
         return $productProp;
+    }
+
+    public function getCbrfCourses()
+    {
+        $courses = $this->cache->get('cbrf_courses');
+        if (!$courses) {
+            $cbrf = new CBRAgent();
+            $courses = $cbrf->getList();
+            $this->cache->set('cbrf_courses', $courses);
+            $this->log('debug', "Get CBRF courses \n{courses}", array('courses' => $courses));
+        }
+        return $courses;
+    }
+
+    private function convertFromCbrf($order, $currency)
+    {
+        $config_currency = $this->config->get('config_currency');
+
+        if ($config_currency == $currency) {
+            return $order['total'];
+        }
+
+        $courses = $this->getCbrfCourses();
+        if ((!empty($courses[$currency]) || $currency === CurrencyCode::RUB)
+            && (!empty($courses[$config_currency]) || $config_currency === CurrencyCode::RUB)) {
+            $input  = $config_currency != CurrencyCode::RUB ? $courses[$config_currency] : 1.0;
+            $output = $currency != CurrencyCode::RUB ? $courses[$currency] : 1.0;
+
+            return number_format($order['total'] * $input / $output, 2, '.', '');
+        }
+
+        return $order['total'];
     }
 }

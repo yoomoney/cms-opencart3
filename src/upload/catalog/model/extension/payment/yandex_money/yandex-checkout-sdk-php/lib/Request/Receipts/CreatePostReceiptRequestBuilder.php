@@ -186,13 +186,13 @@ class CreatePostReceiptRequestBuilder extends AbstractRequestBuilder
     {
         if (!empty($options)) {
             $this->setOptions($options);
-        }
 
-        if ($options['type'] === ReceiptType::PAYMENT && !empty($options['payment_id'])) {
-            $this->setObjectId($options['payment_id']);
-        }
-        if ($options['type'] === ReceiptType::REFUND && !empty($options['refund_id'])) {
-            $this->setObjectId($options['refund_id']);
+            if ($options['type'] === ReceiptType::PAYMENT && !empty($options['payment_id'])) {
+                $this->setObjectId($options['payment_id']);
+            }
+            if ($options['type'] === ReceiptType::REFUND && !empty($options['refund_id'])) {
+                $this->setObjectId($options['refund_id']);
+            }
         }
 
         return parent::build($options);

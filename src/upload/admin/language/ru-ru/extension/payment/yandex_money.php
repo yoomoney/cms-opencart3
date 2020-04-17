@@ -50,6 +50,11 @@ $_['kassa_display_name_label']       = 'Название платежного с
 $_['kassa_display_name_description'] = 'Это название увидит пользователь';
 $_['kassa_default_display_name']     = 'Яндекс.Касса (банковские карты, электронные деньги и другое)';
 
+$_['kassa_currency']                     = 'Валюта платежа в Яндекс.Кассе';
+$_['kassa_currency_convert']             = 'Конвертировать сумму из текущей валюты магазина';
+$_['kassa_currency_help']                = 'Валюты в Яндекс.Кассе и в магазине должны совпадать';
+$_['kassa_currency_convert_help']        = 'Используется значение из списка валют магазина. Если валюты нет в списке – курс ЦБ РФ.';
+
 $_['kassa_send_receipt_label']           = 'Отправлять в Яндекс.Кассу данные для чеков (54-ФЗ)';
 $_['kassa_send_receipt_tax_rate_title']  = 'НДС';
 $_['kassa_second_receipt_header']        = 'Второй чек';

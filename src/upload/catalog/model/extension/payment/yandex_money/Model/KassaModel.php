@@ -3,6 +3,7 @@
 namespace YandexMoneyModule\Model;
 
 use Config;
+use YandexCheckout\Model\CurrencyCode;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataRate;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentMethodType;
@@ -53,6 +54,8 @@ class KassaModel extends AbstractPaymentModel
     protected $b2bTaxRates;
     protected $defaultPaymentMode;
     protected $defaultPaymentSubject;
+    protected $currency;
+    protected $currency_convert;
 
     public function __construct(Config $config)
     {
@@ -117,6 +120,9 @@ class KassaModel extends AbstractPaymentModel
         $this->b2bTaxRates               = $this->getConfigValue('b2b_tax_rates');
         $this->defaultPaymentMode        = $this->getConfigValue('payment_mode_default');
         $this->defaultPaymentSubject     = $this->getConfigValue('payment_subject_default');
+
+        $this->currency                  = $this->getConfigValue('currency');
+        $this->currency_convert          = $this->getConfigValue('currency_convert');
     }
 
     public function isTestMode()
@@ -397,5 +403,21 @@ class KassaModel extends AbstractPaymentModel
             PaymentSubject::COMPOSITE             => 'Несколько вариантов ('.PaymentSubject::COMPOSITE.')',
             PaymentSubject::ANOTHER               => 'Другое ('.PaymentSubject::ANOTHER.')',
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrency()
+    {
+        return $this->currency ?: CurrencyCode::RUB;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCurrencyConvert()
+    {
+        return $this->currency_convert == 'on';
     }
 }

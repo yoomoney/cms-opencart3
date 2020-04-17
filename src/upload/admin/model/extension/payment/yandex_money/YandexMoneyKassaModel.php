@@ -258,4 +258,5 @@ class YandexMoneyKassaModel extends \YandexMoneyModule\Model\KassaModel
     {
         $this->b2bTaxRates = $value;
     }
+
 }
