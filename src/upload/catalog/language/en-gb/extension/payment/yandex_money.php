@@ -16,7 +16,7 @@ $_['text_method_qiwi'] = 'QIWI Wallet';
 $_['text_method_tinkoff_bank'] = 'Tinkoff online banking';
 $_['text_method_installments'] = 'Installments';
 $_['text_method_installments_amount'] = ' (%s ₽ per month)';
-$_['text_method_widget'] = 'Payment widget from Yandex.Checkout (cards, Apple Pay and Google Play)';
+$_['text_method_widget'] = 'Bank cards, Apple Pay, Google Play';
 
 $_['text_payment_method_qiwi_phone'] = 'Телефон, который привязан к Qiwi Wallet';
 $_['text_payment_method_alfa_login'] = 'Укажите логин, и мы выставим счет в Альфа-Клике. После этого останется подтвердить платеж на сайте интернет-банка.';
