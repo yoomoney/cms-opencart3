@@ -128,7 +128,7 @@ class YmlBuilder
 
         $result .= '        <categoryId>' . $offer->getCategoryId() . '</categoryId>' . PHP_EOL;
         if ($offer->hasName()) {
-            $result .= '        <name>'.$offer->getName().'</name>'.PHP_EOL;
+            $result .= '        <name>' . htmlspecialchars($offer->getName(), ENT_NOQUOTES) . '</name>'.PHP_EOL;
         }
         if ($offer->hasUrl()) {
             $result .= '        <url>' . $this->prepareValue($offer->getUrl()) . '</url>' . PHP_EOL;
@@ -161,7 +161,9 @@ class YmlBuilder
             $result .= $this->generateOutlets($offer);
         }
         if ($offer->hasDescription()) {
-            $result .= '        <description><![CDATA[' . $this->prepareValue($offer->getDescription()) . ']]></description>' . PHP_EOL;
+            $result .= '        <description><![CDATA[' . PHP_EOL;
+            $result .= '        ' . htmlspecialchars_decode($offer->getDescription()) . PHP_EOL;
+            $result .= '        ]]></description>' . PHP_EOL;
         }
         if ($offer->hasSalesNotes()) {
             $result .= '        <sales_notes>'. $this->prepareValue($offer->getSalesNotes()) . '</sales_notes>' . PHP_EOL;
@@ -191,7 +193,10 @@ class YmlBuilder
             $result .= '        <model>'. $this->prepareValue($offer->getModel()) . '</model>' . PHP_EOL;
         }
         if ($offer->hasPictures()) {
-            foreach ($offer->getPictures() as $picture) {
+            foreach ($offer->getPictures() as $i => $picture) {
+                if ($i >= 10) {
+                    break;
+                }
                 $result .= '        <picture>' . $this->prepareValue($picture) . '</picture>' . PHP_EOL;
             }
         }
