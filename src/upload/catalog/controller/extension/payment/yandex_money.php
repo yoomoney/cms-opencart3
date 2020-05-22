@@ -284,11 +284,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         if ($kassa->getCreateOrderBeforeRedirect()) {
-            $this->getModel()->log('debug', 'Confirm order#'.$orderId.' after payment creation');
+            $this->getModel()->log('info', 'Confirm order#'.$orderId.' after payment creation');
             $this->getModel()->confirmOrder($orderId, $payment);
         }
         if ($kassa->getClearCartBeforeRedirect()) {
-            $this->getModel()->log('debug', 'Clear order#'.$orderId.' cart after payment creation');
+            $this->getModel()->log('info', 'Clear order#'.$orderId.' cart after payment creation');
             $this->cart->clear();
         }
 
