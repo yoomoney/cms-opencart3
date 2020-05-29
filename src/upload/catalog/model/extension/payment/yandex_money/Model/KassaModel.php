@@ -142,7 +142,7 @@ class KassaModel extends AbstractPaymentModel
 
     public function getEPL()
     {
-        return !$this->testMode && $this->epl;
+        return $this->epl;
     }
 
     public function useYandexButton()

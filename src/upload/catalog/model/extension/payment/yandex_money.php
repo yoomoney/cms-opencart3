@@ -23,7 +23,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.4.5';
+    const MODULE_VERSION = '1.4.6';
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -205,6 +205,8 @@ class ModelExtensionPaymentYandexMoney extends Model
                 if (isset($data)) {
                     $builder->setPaymentMethodData($data);
                 }
+            } elseif ($paymentMethod === PaymentMethodType::INSTALLMENTS) {
+                $builder->setPaymentMethodData($paymentMethod);
             }
 
             $builder->setConfirmation($confirmation);
@@ -749,7 +751,7 @@ class ModelExtensionPaymentYandexMoney extends Model
         return $courses;
     }
 
-    private function convertFromCbrf($order, $currency)
+    public function convertFromCbrf($order, $currency)
     {
         $config_currency = $this->config->get('config_currency');
 
