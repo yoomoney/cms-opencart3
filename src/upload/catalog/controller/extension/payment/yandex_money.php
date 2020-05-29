@@ -65,6 +65,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $orderInfo = $this->model_checkout_order->getOrder($this->session->data['order_id']);
         $template  = $model->applyTemplateVariables($this, $data, $orderInfo);
 
+        if ($this->currency->has('RUB')) {
+            $data['amount'] = sprintf('%.2f', $this->currency->format($orderInfo['total'], 'RUB', '', false));
+        } else {
+            $data['amount'] = $this->getModel()->convertFromCbrf($orderInfo, 'RUB');
+        }
+
         $data['language'] = $this->language;
         $data['fullView'] = false;
 
@@ -242,7 +248,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         }
 
         if ($kassa->getEPL()) {
-            if (!empty($paymentMethod)) {
+            if (!empty($paymentMethod) && $paymentMethod !== PaymentMethodType::INSTALLMENTS) {
                 $this->jsonError('Invalid payment method');
             }
         } elseif (!$kassa->isPaymentMethodEnabled($paymentMethod)) {
@@ -285,7 +291,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         if ($kassa->getCreateOrderBeforeRedirect()) {
             $this->getModel()->log('info', 'Confirm order#'.$orderId.' after payment creation');
-            $this->getModel()->confirmOrder($orderId, $payment);
+            $this->getModel()->confirmOrder($orderId);
         }
         if ($kassa->getClearCartBeforeRedirect()) {
             $this->getModel()->log('info', 'Clear order#'.$orderId.' cart after payment creation');

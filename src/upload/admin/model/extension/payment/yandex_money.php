@@ -5,7 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.4.5';
+    const MODULE_VERSION = '1.4.6';
     const YCMS_EVENT_SECOND_RECEIPT_CODE = 'ycms_second_receipt_trigger';
 
     private $kassaModel;
@@ -416,6 +416,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $this->load->model('localisation/stock_status');
             $this->load->model('localisation/tax_class');
             $this->load->model('catalog/category');
+            $this->load->model('catalog/option');
             $this->load->language('catalog/product');
             $this->market = new YandexMoneyMarketModel($this->config, $this->db, $this->language,
                 $this->model_localisation_stock_status,

@@ -122,7 +122,7 @@
             var continueButton = jQuery('#continue-button');
             continueButton.off('click').on('click', function (event) {
                 event.preventDefault();
-                createPayment()
+                createPayment();
             });
 
             function createPayment() {
@@ -199,9 +199,12 @@
                     });
                     const checkoutCreditButton = checkoutCreditUI({
                         type: 'button',
+                        tag: 'button',
                         domSelector: '.ya_kassa_installments_button_container'
                     });
-                    checkoutCreditButton.on('click', function () {
+                    jQuery('.ya_kassa_installments_button_container button').off('click').on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         jQuery.ajax({
                             url: "{{ validate_url }}",
                             dataType: "json",

@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.4.5</version>
+    <version>1.4.6</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -10,6 +10,7 @@
             <search><![CDATA[// History]]></search>
             <add position="before"><![CDATA[
             $this->language->load('extension/payment/yandex_money');
+            $data['heading_title'] = $this->language->get('text_order');
             if ($order_info['payment_method'] == $this->language->get('kassa_title') || $order_info['payment_method'] == $this->language->get('p2p_title')) {
                $this->session->data['order_id'] = $this->request->get['order_id'];
                $data['yandex_money'] = $this->load->controller('extension/payment/yandex_money');
@@ -265,12 +266,24 @@
             ]]></add>
         </operation>
     </file>
+    <!-- Проброс конфига в шаблон header -->
+    <file path="catalog/controller/common/header.php" error="skip">
+        <operation>
+            <search><![CDATA[$data['menu'] = $this->load->controller('common/menu');]]></search>
+            <add position="after"><![CDATA[
+                $data['config'] = $this->config;
+            ]]></add>
+        </operation>
+    </file>
     <!-- Вставка скрипта кнопки "Заплатить по частям" -->
     <file path="catalog/view/theme/*/template/common/header.twig" error="skip">
         <operation>
-            <search><![CDATA[</head]]></search>
-            <add position="before">
-                <![CDATA[<script src="https://static.yandex.net/kassa/pay-in-parts/ui/v1/"></script>]]></add>
+            <search><![CDATA[</head>]]></search>
+            <add position="before"><![CDATA[
+                {% if config is defined and config.get('yandex_money_kassa_enabled') and (config.get('yandex_money_kassa_use_installments_button') or config.get('yandex_money_kassa_add_installments_block')) %}
+                <script src="https://static.yandex.net/kassa/pay-in-parts/ui/v1/"></script>
+                {% endif %}
+            ]]></add>
         </operation>
     </file>
     <!-- Получение данных для виджета "Заплатить по частям" -->
@@ -278,11 +291,7 @@
         <operation>
             <search trim="true"><![CDATA[if ($product_info) {]]></search>
             <add position="after"><![CDATA[
-                $enableCreditInEpl = $this->config->get('yandex_money_kassa_payment_mode') === 'kassa'
-                    && $this->config->get('yandex_money_kassa_use_installments_button');
-                $enableCreditInShopSide = $this->config->get('yandex_money_kassa_payment_mode') === 'shop'
-                    && $this->config->get('yandex_money_kassa_payment_method_installments');
-                $showInstallmentsBlock = $this->config->get('yandex_money_kassa_enabled') && ($enableCreditInEpl || $enableCreditInShopSide)
+                $showInstallmentsBlock = $this->config->get('yandex_money_kassa_enabled')
                     && $this->config->get('yandex_money_kassa_add_installments_block');
 
                 $data['yamoney_showInstallmentsBlock'] = $showInstallmentsBlock;

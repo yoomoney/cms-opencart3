@@ -102,7 +102,7 @@ class ControllerExtensionPaymentYandexMoneyB2bSberbank extends ControllerExtensi
 
         if ($kassa->getCreateOrderBeforeRedirect()) {
             $this->getModel()->log('info', 'Confirm order#'.$orderId.' after payment creation');
-            $this->getModel()->confirmOrder($orderId, $payment);
+            $this->getModel()->confirmOrder($orderId);
         }
         if ($kassa->getClearCartBeforeRedirect()) {
             $this->getModel()->log('info', 'Clear order#'.$orderId.' cart after payment creation');
