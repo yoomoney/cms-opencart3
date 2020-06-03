@@ -118,8 +118,21 @@ interface ReceiptItemInterface
     function getExcise();
 
     /**
+     * Возвращает информацию о поставщике товара или услуги.
+     *
+     * @return SupplierInterface
+     */
+    function getSupplier();
+
+    /**
+     * @return string
+     */
+    function getAgentType();
+
+    /**
      * Проверяет, является ли текущий элемент чека доставкой
      * @return bool True если доставка, false если обычный товар
      */
     function isShipping();
+
 }

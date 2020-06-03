@@ -152,4 +152,21 @@ interface PaymentInterface
      * @since 1.0.18
      */
     public function getAuthorizationDetails();
+
+    /**
+     * Возвращает данные о распределении платежа между магазинами
+     * @return TransferInterface[]
+     */
+    public function getTransfers();
+
+    /**
+     * Возвращает сумму перечисляемая магазину за вычетом комиссий платежной системы.(только для успешных платежей)
+     * @return MonetaryAmount|null
+     */
+    public function getIncomeAmount();
+
+    /**
+     * @return RequestorInterface
+     */
+    public function getRequestor();
 }

@@ -31,6 +31,7 @@ use YandexCheckout\Common\Exceptions\EmptyPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 use YandexCheckout\Helpers\TypeCast;
+use YandexCheckout\Model\Receipt\AgentType;
 use YandexCheckout\Model\Receipt\ReceiptItemAmount;
 
 /**
@@ -40,6 +41,7 @@ use YandexCheckout\Model\Receipt\ReceiptItemAmount;
  * @property float $quantity Количество
  * @property-read float $amount Суммарная стоимость покупаемого товара в копейках/центах
  * @property AmountInterface $price Цена товара
+ * @property Supplier $supplier Информация о поставщике товара или услуги
  * @property int $vatCode Ставка НДС, число 1-6
  * @property int $vat_code Ставка НДС, число 1-6
  * @property string $paymentSubject Признак предмета расчета
@@ -108,6 +110,16 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
     private $_excise;
 
     /**
+     * @var SupplierInterface Информация о поставщике товара или услуги
+     */
+    private $_supplier;
+
+    /**
+     * @var string Тип посредника, реализующего товар или услугу
+     */
+    private $_agentType;
+
+    /**
      * @var bool True если текущий айтем доставка, false если нет
      */
     private $_shipping = false;
@@ -153,7 +165,7 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
                     'Empty description value in ReceiptItem', 0, 'ReceiptItem.description'
                 );
             }
-            $this->_description = $castedValue;
+            $this->_description = mb_substr($castedValue, 0, 128);
         } else {
             throw new InvalidPropertyValueTypeException(
                 'Empty description value in ReceiptItem', 0, 'ReceiptItem.description', $value
@@ -478,6 +490,74 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
     }
 
     /**
+     * Возвращает информацию о поставщике товара или услуги.
+     *
+     * @return SupplierInterface
+     */
+    public function getSupplier()
+    {
+        return $this->_supplier;
+    }
+
+    /**
+     * Устанавливает информацию о поставщике товара или услуги.
+     *
+     * @param SupplierInterface|array $value
+     */
+    public function setSupplier($value)
+    {
+        if ($value === null || $value === '') {
+            throw new EmptyPropertyValueException(
+                'Empty supplier value in receipt', 0, 'Receipt.supplier'
+            );
+        }
+
+        if (is_array($value)) {
+            $value = new Supplier($value);
+        }
+
+        if (!($value instanceof SupplierInterface)) {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid supplier value type in receipt', 0, 'Receipt.supplier', $value
+            );
+        }
+
+        $this->_supplier = $value;
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setAgentType($value)
+    {
+        if ($value === null || $value === '') {
+            $this->_paymentMode = null;
+        } elseif (!TypeCast::canCastToEnumString($value)) {
+            throw new InvalidPropertyValueException(
+                'Invalid value for "agentType" parameter in Receipt.item.agentType',
+                0,
+                'Receipt.item.agentType',
+                $value
+            );
+        } elseif (!AgentType::valueExists($value)) {
+            throw new InvalidPropertyValueException(
+                'Invalid value for "agentType" parameter in Receipt.item.agentType',
+                0,
+                'Receipt.item.agentType',
+                $value
+            );
+        }
+
+        $this->_agentType = $value;
+    }
+
+    public function getAgentType()
+    {
+        return $this->_agentType;
+    }
+
+
+    /**
      * Проверяет, является ли текущий элемент чека доствкой
      * @return bool True если доставка, false если обычный товар
      */
@@ -531,15 +611,11 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
                 'Invalid quantity value in ReceiptItem in fetchItem method', 0, 'ReceiptItem.quantity', $count
             );
         }
-        $result               = new ReceiptItem();
-        $result->_description = $this->_description;
-        $result->_quantity    = $count;
-        $result->_vatCode     = $this->_vatCode;
-        $result->_amount      = new ReceiptItemAmount(
-            $this->_amount->getValue(),
-            $this->_amount->getCurrency()
-        );
-        $this->_quantity      -= $count;
+
+        $result = clone $this;
+        $result->setPrice(clone $this->getPrice());
+        $result->setQuantity($count);
+        $this->_quantity -= $count;
 
         return $result;
     }
@@ -595,6 +671,14 @@ class ReceiptItem extends AbstractObject implements ReceiptItemInterface
 
         if ($this->getExcise()) {
             $result['excise'] = $this->getExcise();
+        }
+
+        if ($this->getSupplier()) {
+            $result['supplier'] = $this->getSupplier()->jsonSerialize();
+        }
+
+        if ($this->getAgentType()) {
+            $result['agent_type'] = $this->getAgentType();
         }
 
         return $result;

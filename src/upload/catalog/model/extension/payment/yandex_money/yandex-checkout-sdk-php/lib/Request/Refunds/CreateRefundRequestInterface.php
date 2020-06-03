@@ -28,6 +28,8 @@ namespace YandexCheckout\Request\Refunds;
 
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ReceiptInterface;
+use YandexCheckout\Model\SourceInterface;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Интерфейс объекта запроса на возврат
@@ -76,4 +78,14 @@ interface CreateRefundRequestInterface
      * @return bool True если чек есть, false если нет
      */
     function hasReceipt();
+
+    /**
+     * @return SourceInterface[]
+     */
+    function getSources();
+
+    /**
+     * @return bool
+     */
+    function hasSources();
 }

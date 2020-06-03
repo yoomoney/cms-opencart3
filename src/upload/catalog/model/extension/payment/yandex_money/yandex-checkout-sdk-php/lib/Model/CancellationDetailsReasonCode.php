@@ -46,6 +46,7 @@ class CancellationDetailsReasonCode extends AbstractEnum
     const ISSUER_UNAVAILABLE = 'issuer_unavailable';
     const PAYMENT_METHOD_LIMIT_EXCEEDED = 'payment_method_limit_exceeded';
     const PAYMENT_METHOD_RESTRICTED = 'payment_method_restricted';
+    const PERMISSION_REVOKED = 'permission_revoked';
 
     protected static $validValues = array(
         self::THREE_D_SECURE_FAILED         => true,
@@ -61,5 +62,6 @@ class CancellationDetailsReasonCode extends AbstractEnum
         self::ISSUER_UNAVAILABLE            => true,
         self::PAYMENT_METHOD_LIMIT_EXCEEDED => true,
         self::PAYMENT_METHOD_RESTRICTED     => true,
+        self::PERMISSION_REVOKED            => true,
     );
 }

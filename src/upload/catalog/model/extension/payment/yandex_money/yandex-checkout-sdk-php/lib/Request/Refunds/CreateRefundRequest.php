@@ -33,6 +33,8 @@ use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 use YandexCheckout\Helpers\TypeCast;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ReceiptInterface;
+use YandexCheckout\Model\Source;
+use YandexCheckout\Model\SourceInterface;
 
 /**
  * Класс объекта запроса для создания возврата
@@ -53,6 +55,11 @@ class CreateRefundRequest extends AbstractPaymentRequest implements CreateRefund
      * @var string Комментарий к операции возврата, основание для возврата средств покупателю.
      */
     private $_comment;
+
+    /**
+     * @var SourceInterface[]
+     */
+    private $_sources;
 
     /**
      * Возвращает айди платежа для которого создаётся возврат средств
@@ -135,6 +142,49 @@ class CreateRefundRequest extends AbstractPaymentRequest implements CreateRefund
                 'Invalid commend value type in CreateRefundRequest', 0, 'CreateRefundRequest.comment', $value
             );
         }
+    }
+
+    /**
+     * Устанавливает transfers (массив распределения денег между магазинами)
+     * @param SourceInterface[]|array $value
+     */
+    public function setSources($value)
+    {
+        if (!is_array($value)) {
+            $message = 'Sources must be an array of SourceInterface';
+            throw new InvalidPropertyValueTypeException($message, 0, 'CreateRefundRequest.sources', $value);
+        }
+
+        $sources = array();
+        foreach ($value as $item) {
+            if (is_array($item)) {
+                $item = new Source($item);
+            }
+
+            if (!($item instanceof SourceInterface)) {
+                $message = 'Source must be instance of SourceInterface';
+                throw new InvalidPropertyValueTypeException($message, 0, 'CreateRefundRequest.sources', $value);
+            }
+            $sources[] = $item;
+        }
+        
+        $this->_sources = $sources;
+    }
+
+    /**
+     * @return SourceInterface[]
+     */
+    public function getSources()
+    {
+        return $this->_sources;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSources()
+    {
+        return !empty($this->_sources);
     }
 
     /**

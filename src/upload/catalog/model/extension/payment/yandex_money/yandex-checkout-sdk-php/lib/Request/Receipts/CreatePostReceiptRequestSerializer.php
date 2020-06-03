@@ -29,6 +29,7 @@ namespace YandexCheckout\Request\Receipts;
 use YandexCheckout\Model\ReceiptItem;
 use YandexCheckout\Model\ReceiptType;
 use YandexCheckout\Model\Settlement;
+use YandexCheckout\Model\Supplier;
 
 /**
  * Класс сериалайзера объекта запроса к API создание чека
@@ -66,6 +67,11 @@ class CreatePostReceiptRequestSerializer
         $value = $request->getTaxSystemCode();
         if (!empty($value)) {
             $result['tax_system_code'] = $value;
+        }
+
+        $onBehalfOf = $request->getOnBehalfOf();
+        if (!empty($onBehalfOf)) {
+            $result['on_behalf_of'] = $onBehalfOf;
         }
 
         return $result;

@@ -52,7 +52,7 @@ class ModelExtensionPaymentYandexMoneyB2bSberbank extends Model
             'code'       => 'yandex_money_b2b_sberbank',
             'title'      => $this->language->get('yandex_money_b2b_sberbank'),
             'terms'      => '',
-            'sort_order' => $this->config->get('yandex_money_sort_order'),
+            'sort_order' => $model->getSortOrder(),
         );
 
         return $result;

@@ -42,6 +42,7 @@ use YandexCheckout\Model\PaymentData\PaymentDataYandexWallet;
 use YandexCheckout\Model\PaymentMethodType;
 use YandexCheckout\Model\ReceiptInterface;
 use YandexCheckout\Model\ReceiptItem;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Класс сериалайзера объекта запроса к API на проведение платежа
@@ -76,9 +77,16 @@ class CreatePaymentRequestSerializer
 
     public function serialize(CreatePaymentRequestInterface $request)
     {
-        $result = array(
-            'amount' => $this->serializeAmount($request->getAmount()),
-        );
+        $result = array();
+
+        if ($request->getAmount()->getValue() > 0) {
+            $result['amount'] = $this->serializeAmount($request->getAmount());
+        }
+
+        if ($request->hasTransfers()) {
+            $result['transfers'] = $this->serializeTransfers($request->getTransfers());
+        }
+
         if ($request->hasDescription()) {
             $result['description'] = $request->getDescription();
         }
@@ -326,6 +334,24 @@ class CreatePaymentRequestSerializer
             }
 
             $result['vat_data'] = $vatData;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param TransferInterface[] $transfers
+     *
+     * @return array
+     */
+    private function serializeTransfers(array $transfers)
+    {
+        $result = array();
+        foreach ($transfers as $transfer) {
+            $result[] = array(
+                'account_id' => $transfer->getAccountId(),
+                'amount' => $this->serializeAmount($transfer->getAmount())
+            );
         }
 
         return $result;

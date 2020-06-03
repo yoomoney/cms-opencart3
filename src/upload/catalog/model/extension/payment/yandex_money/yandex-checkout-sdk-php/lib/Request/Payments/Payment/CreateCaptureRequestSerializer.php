@@ -28,6 +28,7 @@ namespace YandexCheckout\Request\Payments\Payment;
 
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ReceiptItem;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Класс объекта осуществляющего сериализацию запроса к API на подтверждение заказа
@@ -48,6 +49,9 @@ class CreateCaptureRequestSerializer
         $result = array();
         if ($request->hasAmount()) {
             $result['amount'] = $this->serializeAmount($request->getAmount());
+        }
+        if ($request->hasTransfers()) {
+            $result['transfers'] = $this->serializeTransfers($request->getTransfers());
         }
         if ($request->hasReceipt()) {
             $receipt = $request->getReceipt();
@@ -73,6 +77,22 @@ class CreateCaptureRequestSerializer
                         $itemArray['payment_mode'] = $value;
                     }
 
+                    if ($value = $item->getProductCode()) {
+                        $itemArray['product_code'] = $value;
+                    }
+
+                    if ($value = $item->getCountryOfOriginCode()) {
+                        $itemArray['country_of_origin_code'] = $value;
+                    }
+
+                    if ($value = $item->getCustomsDeclarationNumber()) {
+                        $itemArray['customs_declaration_number'] = $value;
+                    }
+
+                    if ($value = $item->getExcise()) {
+                        $itemArray['excise'] = $value;
+                    }
+
                     $result['receipt']['items'][] = $itemArray;
                 }
 
@@ -82,15 +102,19 @@ class CreateCaptureRequestSerializer
                     if ($value = $customer->getEmail()) {
                         $customerArray['email'] = $value;
                     }
+
                     if ($value = $customer->getPhone()) {
                         $customerArray['phone'] = $value;
                     }
+
                     if ($value = $customer->getFullName()) {
                         $customerArray['full_name'] = $value;
                     }
+
                     if ($value = $customer->getInn()) {
                         $customerArray['inn'] = $value;
                     }
+
                     $result['receipt']['customer'] = $customerArray;
                 }
 
@@ -109,5 +133,23 @@ class CreateCaptureRequestSerializer
             'value'    => $amount->getValue(),
             'currency' => $amount->getCurrency(),
         );
+    }
+
+    /**
+     * @param TransferInterface[] $transfers
+     *
+     * @return array
+     */
+    private function serializeTransfers(array $transfers)
+    {
+        $result = array();
+        foreach ($transfers as $transfer) {
+            $result[] = array(
+                'account_id' => $transfer->getAccountId(),
+                'amount' => $this->serializeAmount($transfer->getAmount())
+            );
+        }
+
+        return $result;
     }
 }

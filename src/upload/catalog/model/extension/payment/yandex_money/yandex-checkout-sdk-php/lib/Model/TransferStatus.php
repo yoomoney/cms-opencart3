@@ -24,17 +24,32 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Helpers\Config;
+namespace YandexCheckout\Model;
 
-interface ConfigurationLoaderInterface
+
+use YandexCheckout\Common\AbstractEnum;
+
+/**
+ * PaymentStatus - Статус операции распределения средств конечному получателю
+ * |Код|Описание|
+ * --- | ---
+ * |pending|Ожидает оплаты покупателем|
+ * |waiting_for_capture|Успешно оплачен покупателем, ожидает подтверждения магазином (capture или aviso)|
+ * |succeeded|Успешно оплачен и получен магазином|
+ * |canceled|Неуспех оплаты или отменен магазином (cancel)|
+ *
+ */
+class TransferStatus extends AbstractEnum
 {
-    /**
-     * @return mixed
-     */
-    public function getConfig();
+    const PENDING = 'pending';
+    const WAITING_FOR_CAPTURE = 'waiting_for_capture';
+    const SUCCEEDED = 'succeeded';
+    const CANCELED = 'canceled';
 
-    /**
-     * @return mixed
-     */
-    public function load();
+    protected static $validValues = array(
+        self::PENDING => true,
+        self::WAITING_FOR_CAPTURE => true,
+        self::SUCCEEDED => true,
+        self::CANCELED => true,
+    );
 }

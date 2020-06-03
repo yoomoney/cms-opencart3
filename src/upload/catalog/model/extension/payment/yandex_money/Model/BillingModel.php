@@ -11,7 +11,7 @@ class BillingModel extends AbstractPaymentModel
 
     public function __construct(Config $config)
     {
-        parent::__construct($config, 'billing');
+        parent::__construct($config, self::PAYMENT_BILLING);
         $this->formId = $this->getConfigValue('form_id');
         $this->purpose = $this->getConfigValue('purpose');
 
@@ -37,7 +37,7 @@ class BillingModel extends AbstractPaymentModel
      */
     public function applyTemplateVariables($controller, &$templateData, $orderInfo)
     {
-        $templateData['billing'] = $this;
+        $templateData[self::PAYMENT_BILLING] = $this;
         $templateData['image_base_path'] = HTTPS_SERVER . 'image/catalog/payment/yandex_money';
         $templateData['validate_url'] = $controller->url->link('extension/payment/yandex_money/confirm', '', true);
         $templateData['action'] = 'https://money.yandex.ru/fastpay/confirm';

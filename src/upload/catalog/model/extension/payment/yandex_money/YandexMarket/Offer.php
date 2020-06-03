@@ -413,11 +413,11 @@ class Offer extends MarketObject
     /**
      * Проверяет была ли установлена старая цена товара
      *
-     * @return bool True если старая цена была установлена, false если нет
+     * @return bool True если старая цена была установлена и больше текущей цены, false если нет
      */
     public function hasOldPrice()
     {
-        return !empty($this->oldPrice);
+        return !empty($this->oldPrice) && $this->oldPrice > $this->price;
     }
 
     /**

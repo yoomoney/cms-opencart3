@@ -30,6 +30,7 @@ use YandexCheckout\Model\ReceiptCustomer;
 use YandexCheckout\Model\ReceiptCustomerInterface;
 use YandexCheckout\Model\ReceiptItemInterface;
 use YandexCheckout\Model\SettlementInterface;
+use YandexCheckout\Model\SupplierInterface;
 
 /**
  * Interface CreateReceiptRequestInterface
@@ -44,6 +45,7 @@ use YandexCheckout\Model\SettlementInterface;
  * @property int $taxSystemCode Код системы налогообложения. Число 1-6.
  * @property int $tax_system_code Код системы налогообложения. Число 1-6.
  * @property ReceiptItemInterface[] $items Список товаров в заказе.
+ * @property SupplierInterface $supplier Информация о поставщике товара или услуги.
  * @property SettlementInterface[] $settlements Массив оплат, обеспечивающих выдачу товара.
  */
 interface CreatePostReceiptRequestInterface
@@ -145,6 +147,16 @@ interface CreatePostReceiptRequestInterface
      * @return CreatePostReceiptRequestInterface
      */
     public function setSettlements($value);
+
+    /**
+     * @return string|null
+     */
+    public function getOnBehalfOf();
+
+    /**
+     * @param string $value
+     */
+    public function setOnBehalfOf($value);
 
     /**
      * Проверяет есть ли в чеке хотя бы одна позиция

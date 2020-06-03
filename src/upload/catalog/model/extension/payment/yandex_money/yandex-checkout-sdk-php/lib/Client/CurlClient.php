@@ -313,7 +313,7 @@ class CurlClient implements ApiClientInterface
     }
 
     /**
-     * @param mixed $config
+     * @inheritDoc
      */
     public function setConfig($config)
     {

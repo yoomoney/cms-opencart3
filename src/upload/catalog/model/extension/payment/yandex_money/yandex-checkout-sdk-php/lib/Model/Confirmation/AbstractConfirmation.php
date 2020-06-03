@@ -37,6 +37,10 @@ use YandexCheckout\Model\ConfirmationType;
  * Способ подтверждения платежа.
  *
  * @property-read string $type
+ *
+ * @method getConfirmationUrl
+ * @method getConfirmationToken
+ * @method getConfirmationData
  */
 abstract class AbstractConfirmation extends AbstractObject
 {

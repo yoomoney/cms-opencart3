@@ -8,7 +8,6 @@ use YandexCheckout\Model\PaymentStatus;
 use YandexMoneyModule\Model\KassaModel;
 use YandexMoneyModule\YandexMarket\Currency;
 use YandexMoneyModule\YandexMarket\Offer;
-use YandexMoneyModule\YandexMarket\YandexMarket;
 
 /**
  * Класс контроллера модуля оплаты с помощью Яндекс.Денег
@@ -892,7 +891,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                 }
             }
 
-            if (!$this->makeOfferColorSizeCombination($offer, $product, $this->getMarket())) {
+            if (!$this->makeOfferColorSizeCombination($offer, $product)) {
                 $offer->setPrice($this->formatPrice($offer->getPrice()));
                 $offer->setOldPrice($this->formatPrice($offer->getOldPrice()));
                 $this->getMarket()->addOffer($offer);
@@ -903,14 +902,12 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
     /**
      * @param Offer $commonOffer
-     * @param $product
+     * @param array $product
      *
      * @return bool
      */
-    private function makeOfferColorSizeCombination(
-        $commonOffer,
-        $product
-    ) {
+    private function makeOfferColorSizeCombination($commonOffer, $product)
+    {
         $colors = array();
         $sizes  = array();
 

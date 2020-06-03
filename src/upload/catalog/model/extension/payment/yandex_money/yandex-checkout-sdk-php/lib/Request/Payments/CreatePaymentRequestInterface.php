@@ -33,6 +33,7 @@ use YandexCheckout\Model\Metadata;
 use YandexCheckout\Model\PaymentData\AbstractPaymentData;
 use YandexCheckout\Model\ReceiptInterface;
 use YandexCheckout\Model\RecipientInterface;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Interface CreatePaymentRequestInterface
@@ -211,4 +212,14 @@ interface CreatePaymentRequestInterface
      * @return Airline
      */
     function getAirline();
+
+    /**
+     * @return bool
+     */
+    function hasTransfers();
+
+    /**
+     * @return TransferInterface[]
+     */
+    function getTransfers();
 }

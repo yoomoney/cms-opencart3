@@ -27,6 +27,7 @@
 namespace YandexCheckout\Request\Receipts;
 
 use YandexCheckout\Model\AmountInterface;
+use YandexCheckout\Model\SupplierInterface;
 
 /**
  * Interface ReceiptItemInterface
@@ -71,5 +72,11 @@ interface ReceiptResponseItemInterface
      * @return int|null Ставка НДС, число 1-6, или null если ставка не задана
      */
     function getVatCode();
+
+    /**
+     * Возвращает информацию о поставщике товара или услуги
+     * @return SupplierInterface
+     */
+    function getSupplier();
 
 }

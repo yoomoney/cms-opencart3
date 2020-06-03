@@ -61,6 +61,7 @@ use YandexCheckout\Model\PaymentMethod\AbstractPaymentMethod;
  * @property CancellationDetailsInterface $cancellation_details Комментарий к отмене платежа
  * @property AuthorizationDetailsInterface $authorizationDetails Данные об авторизации платежа
  * @property AuthorizationDetailsInterface $authorization_details Данные об авторизации платежа
+ * @property TransferInterface[] $transfers Данные о распределении платежа между магазинами
  */
 class Payment extends AbstractObject implements PaymentInterface
 {
@@ -158,6 +159,21 @@ class Payment extends AbstractObject implements PaymentInterface
      * @since 1.0.18
      */
     private $_authorizationDetails;
+
+    /**
+     * @var TransferInterface[]
+     */
+    private $_transfers = array();
+
+    /**
+     * @var MonetaryAmount
+     */
+    private $_incomeAmount;
+
+    /**
+     * @var RequestorInterface
+     */
+    private $_requestor;
 
     /**
      * Признак тестовой операции.
@@ -597,6 +613,69 @@ class Payment extends AbstractObject implements PaymentInterface
     public function setAuthorizationDetails(AuthorizationDetailsInterface $value)
     {
         $this->_authorizationDetails = $value;
+    }
+
+    /**
+     * Устанавливает transfers (массив распределения денег между магазинами)
+     * @param $value
+     */
+    public function setTransfers($value)
+    {
+        if (!is_array($value)) {
+            $message = 'Transfers must be an array of TransferInterface';
+            throw new InvalidPropertyValueTypeException($message, 0, 'Payment.transfers', $value);
+        }
+
+        foreach ($value as $item) {
+            if (!($item instanceof TransferInterface)) {
+                $message = 'Transfers must be an array of TransferInterface';
+                throw new InvalidPropertyValueTypeException($message, 0, 'Payment.transfers', $value);
+            }
+        }
+
+        $this->_transfers = $value;
+    }
+
+    public function getTransfers()
+    {
+        return $this->_transfers;
+    }
+
+    /**
+     * @param MonetaryAmount $amount
+     */
+    public function setIncomeAmount(MonetaryAmount $amount)
+    {
+        $this->_incomeAmount = $amount;
+    }
+
+    public function getIncomeAmount()
+    {
+        return $this->_incomeAmount;
+    }
+
+    /**
+     * @param $value
+     */
+    public function setRequestor($value)
+    {
+        if (is_array($value)) {
+            $value = new Requestor($value);
+        }
+
+        if (!($value instanceof RequestorInterface)) {
+            throw new InvalidPropertyValueTypeException('Invalid Requestor type', 0, 'Payment.requestor', $value);
+        }
+
+        $this->_requestor = $value;
+    }
+
+    /**
+     * @return RequestorInterface
+     */
+    public function getRequestor()
+    {
+        return $this->_requestor;
     }
 
     /**

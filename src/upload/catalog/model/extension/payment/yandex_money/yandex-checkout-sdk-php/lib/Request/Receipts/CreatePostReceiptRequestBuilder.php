@@ -36,6 +36,7 @@ use YandexCheckout\Model\ReceiptCustomerInterface;
 use YandexCheckout\Model\ReceiptItemInterface;
 use YandexCheckout\Model\ReceiptType;
 use YandexCheckout\Model\SettlementInterface;
+use YandexCheckout\Model\SupplierInterface;
 
 class CreatePostReceiptRequestBuilder extends AbstractRequestBuilder
 {
@@ -152,6 +153,16 @@ class CreatePostReceiptRequestBuilder extends AbstractRequestBuilder
     public function setSend($value)
     {
         $this->currentObject->setSend($value);
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     * @return CreatePostReceiptRequestBuilder
+     */
+    public function setOnBehalfOf($value)
+    {
+        $this->currentObject->setOnBehalfOf($value);
         return $this;
     }
 

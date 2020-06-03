@@ -24,56 +24,56 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Client;
-
-use Psr\Log\LoggerInterface;
+namespace YandexCheckout\Model;
 
 /**
- * Interface ApiClientInterface
- * @package YandexCheckout\Client
+ * Interface TransferInterface
+ *
+ * @package YandexCheckout\Model
+ *
+ * @property AmountInterface $amount
+ * @property string $accountId
  */
-interface ApiClientInterface
+interface TransferInterface
 {
     /**
-     * @param $path
-     * @param $method
-     * @param $queryParams
-     * @param $httpBody
-     * @param $headers
-     * @return mixed
+     * Устаналивает id магазина-получателя средств
+     *
+     * @param string $value
+     *
+     * @return void
      */
-    public function call($path, $method, $queryParams, $httpBody = null, $headers = array());
+    public function setAccountId($value);
 
     /**
-     * @param LoggerInterface|null $logger
+     * Возвращает id магазина-получателя средств
+     *
+     * @return string|null
      */
-    public function setLogger($logger);
+    public function getAccountId();
 
     /**
-     * @return UserAgent
+     * Возвращает сумму оплаты
+     *
+     * @return AmountInterface Сумма оплаты
      */
-    public function getUserAgent();
+    public function getAmount();
 
     /**
-     * @param $shopId
-     * @return mixed
+     * Проверяет была ли установлена сумма оплаты
+     *
+     * @return bool True если сумма оплаты была установлена, false если нет
      */
-    public function setShopId($shopId);
+    public function hasAmount();
 
     /**
-     * @param $shopPassword
-     * @return mixed
+     * Устанавливает сумму оплаты
+     * @param AmountInterface|array $value Сумма оплаты
      */
-    public function setShopPassword($shopPassword);
+    public function setAmount($value);
 
     /**
-     * @param $bearerToken
-     * @return mixed
+     * @return string|null статус операции распределения средств конечному получателю
      */
-    public function setBearerToken($bearerToken);
-
-    /**
-     * @param array $config
-     */
-    public function setConfig($config);
+    public function getStatus();
 }
