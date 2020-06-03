@@ -59,7 +59,7 @@ class KassaModel extends AbstractPaymentModel
 
     public function __construct(Config $config)
     {
-        parent::__construct($config, 'kassa');
+        parent::__construct($config, self::PAYMENT_KASSA);
 
         $this->shopId                = $this->getConfigValue('shop_id');
         $this->password              = $this->getConfigValue('password');
@@ -268,16 +268,16 @@ class KassaModel extends AbstractPaymentModel
      */
     public function applyTemplateVariables($controller, &$templateData, $orderInfo)
     {
-        $templateData['kassa']           = $this;
-        $templateData['image_base_path'] = HTTPS_SERVER.'image/catalog/payment/yandex_money';
-        $templateData['validate_url']    = $controller->url->link('extension/payment/yandex_money/create', '', true);
-        $templateData['reset_token_url'] = $controller->url->link('extension/payment/yandex_money/resetToken', '', true);
+        $templateData[self::PAYMENT_KASSA] = $this;
+        $templateData['image_base_path']   = HTTPS_SERVER.'image/catalog/payment/yandex_money';
+        $templateData['validate_url']      = $controller->url->link('extension/payment/yandex_money/create', '', true);
+        $templateData['reset_token_url']   = $controller->url->link('extension/payment/yandex_money/resetToken', '', true);
 
-        $templateData['amount']         = $orderInfo['total'];
-        $templateData['comment']        = $orderInfo['comment'];
-        $templateData['orderId']        = $orderInfo['order_id'];
-        $templateData['customerNumber'] = trim($orderInfo['order_id'].' '.$orderInfo['email']);
-        $templateData['orderText']      = $orderInfo['comment'];
+        $templateData['amount']            = $orderInfo['total'];
+        $templateData['comment']           = $orderInfo['comment'];
+        $templateData['orderId']           = $orderInfo['order_id'];
+        $templateData['customerNumber']    = trim($orderInfo['order_id'].' '.$orderInfo['email']);
+        $templateData['orderText']         = $orderInfo['comment'];
 
         return 'extension/payment/yandex_money/kassa_form';
     }

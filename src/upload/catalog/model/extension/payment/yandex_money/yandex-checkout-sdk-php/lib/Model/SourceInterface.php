@@ -24,17 +24,51 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Helpers\Config;
+namespace YandexCheckout\Model;
 
-interface ConfigurationLoaderInterface
+/**
+ * Interface TransferInterface
+ *
+ * @package YandexCheckout\Model
+ *
+ * @property AmountInterface $amount
+ * @property string $accountId
+ */
+interface SourceInterface
 {
     /**
-     * @return mixed
+     * Устаналивает id магазина-получателя средств
+     *
+     * @param string $value
+     *
+     * @return void
      */
-    public function getConfig();
+    public function setAccountId($value);
 
     /**
-     * @return mixed
+     * Возвращает id магазина с которого будут списаны средства
+     *
+     * @return string|null
      */
-    public function load();
+    public function getAccountId();
+
+    /**
+     * Возвращает сумму оплаты
+     *
+     * @return AmountInterface Сумма оплаты
+     */
+    public function getAmount();
+
+    /**
+     * Проверяет была ли установлена сумма оплаты
+     *
+     * @return bool True если сумма оплаты была установлена, false если нет
+     */
+    public function hasAmount();
+
+    /**
+     * Устанавливает сумму оплаты
+     * @param AmountInterface|array $value Сумма оплаты
+     */
+    public function setAmount($value);
 }

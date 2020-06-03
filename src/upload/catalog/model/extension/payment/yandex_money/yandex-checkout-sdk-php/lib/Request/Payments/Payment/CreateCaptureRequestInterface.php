@@ -29,6 +29,7 @@ namespace YandexCheckout\Request\Payments\Payment;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\MonetaryAmount;
 use YandexCheckout\Model\ReceiptInterface;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Interface CreateCaptureRequestInterface
@@ -65,4 +66,14 @@ interface CreateCaptureRequestInterface
      * @since 1.0.2
      */
     function hasReceipt();
+
+    /**
+     * @return bool
+     */
+    function hasTransfers();
+
+    /**
+     * @return TransferInterface[]
+     */
+    function getTransfers();
 }

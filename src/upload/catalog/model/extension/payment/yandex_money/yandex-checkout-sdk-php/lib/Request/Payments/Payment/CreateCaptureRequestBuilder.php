@@ -61,6 +61,9 @@ class CreateCaptureRequestBuilder extends AbstractPaymentRequestBuilder
         if (!empty($options)) {
             $this->setOptions($options);
         }
+        if (!empty($this->transfers)) {
+            $this->currentObject->setTransfers($this->transfers);
+        }
         if ($this->amount->getValue() > 0) {
             $this->currentObject->setAmount($this->amount);
         }

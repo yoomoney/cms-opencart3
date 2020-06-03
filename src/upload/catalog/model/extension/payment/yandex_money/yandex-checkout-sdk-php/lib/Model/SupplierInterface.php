@@ -24,17 +24,45 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Helpers\Config;
+namespace YandexCheckout\Model;
 
-interface ConfigurationLoaderInterface
+/**
+ * Interface SupplierInterface
+ *
+ * Информация о поставщике товара или услуги. Можно передавать,
+ * если вы отправляете данные для формирования чека по сценарию - сначала платеж, потом чек.
+ *
+ * @package YandexCheckout\Model
+ */
+interface SupplierInterface
 {
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getConfig();
+    public function getName();
 
     /**
-     * @return mixed
+     * @param string|null $value
      */
-    public function load();
+    public function setName($value);
+
+    /**
+     * @return string|null
+     */
+    public function getPhone();
+
+    /**
+     * @param $value
+     */
+    public function setPhone($value);
+
+    /**
+     * @return string|null
+     */
+    public function getInn();
+
+    /**
+     * @param $value
+     */
+    public function setInn($value);
 }

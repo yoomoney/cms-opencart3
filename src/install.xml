@@ -297,19 +297,31 @@
                 $data['yamoney_showInstallmentsBlock'] = $showInstallmentsBlock;
                 $data['yamoney_shop_id'] = $this->config->get('yandex_money_kassa_shop_id');
                 $data['yamoney_language_code'] = $this->language->get('code');
+
+                $data['ymm_option']['color_enabled'] = $this->config->get('yandex_money_market_option_color_enabled');
+                $data['ymm_option']['size_enabled'] = $this->config->get('yandex_money_market_option_size_enabled');
+                $color_option = $this->config->get('yandex_money_market_option_color_option_id');
+                $data['ymm_option']['color'] = !empty($color_option) ? $color_option : '-';
+                $size_option = $this->config->get('yandex_money_market_option_size_option_id');
+                $data['ymm_option']['size'] = !empty($size_option) ? $size_option : '-';
             ]]></add>
         </operation>
         <operation>
             <search trim="true">
                 <![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
             <add position="after"><![CDATA[
-                $data['cost'] = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+                $cost = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+                if ($this->currency->has('RUB')) {
+                    $data['cost'] = sprintf('%.2f', $this->currency->format($cost, 'RUB', '', false));
+                } else {
+                    $data['cost'] = $this->getModel()->convertFromCbrf(array('total' => $cost), 'RUB');
+                }
             ]]></add>
         </operation>
     </file>
     <!-- Отображение виджета "Заплатить по частям" -->
     <file path="catalog/view/theme/*/template/product/product.twig" error="skip">
-        <operation>
+        <operation error="skip" info="Product installments">
             <search><![CDATA[<div id="product"> {% if options %}]]></search>
             <add position="before"><![CDATA[
                 {% if yamoney_showInstallmentsBlock %}
@@ -317,7 +329,7 @@
                 {% endif %}
             ]]></add>
         </operation>
-        <operation>
+        <operation error="skip" info="Product footer">
             <search><![CDATA[{{ footer }}]]></search>
             <add position="before"><![CDATA[
                 <script>
@@ -339,12 +351,49 @@
                         dataLayer.push({ecommerce: {detail: {products: [{
                             id: "{{ product_id }}",
                             name: "{{ heading_title }}",
-                            price: parseFloat("0"+"{{ price }}".replace(/[^.\d]+/g,"")),
+                            price: parseFloat('0'+'{{ price|striptags }}'),
                             brand: "{{ manufacturer }}",
                             variant: "{{ model }}"
                         }]}}});
                     });
                 </script>
+            ]]></add>
+        </operation>
+        <operation error="skip" info="Product select[data-option]">
+            <search position="replace"><![CDATA[<select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" class="form-control">]]></search>
+            <add><![CDATA[<select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" data-option="{{ option.option_id }}" class="form-control">]]></add>
+        </operation>
+        <operation error="skip" info="Product div[data-option]">
+            <search position="replace"><![CDATA[<div id="input-option{{ option.product_option_id }}"> {% for option_value in option.product_option_value %}]]></search>
+            <add><![CDATA[<div id="input-option{{ option.product_option_id }}" data-option="{{ option.option_id }}"> {% for option_value in option.product_option_value %}]]></add>
+        </operation>
+        <operation error="skip" info="Product Color and Size">
+            <search index="0"><![CDATA[$(document).ready(function() {]]></search>
+            <add position="after"><![CDATA[
+    var op = { color: '{{ ymm_option.color }}', size: '{{ ymm_option.size }}' };
+    var h = location.hash.replace('#', '');
+    var color_size = h.split('-');
+    setTimeout(function(){
+        $('[data-option="' + op.color + '"], ' + '[data-option="' + op.size + '"]' ).each(function(i, input) {
+            var tag = $(input).prop('tagName');
+            $(color_size).each(function(j, el) {
+                if (tag == 'SELECT') {
+                    var opt = $(input).find('option[value="'+el+'"]');
+                    if (opt.length) {
+                        opt.attr('selected', 'true');
+                        $(input).trigger('change');
+                    }
+                } else if (tag == 'DIV') {
+                    var opt = $(input).find('input[value="'+el+'"]');
+                    if (opt.length) {
+                        opt.prop('checked', 'true');
+                        $(opt).trigger('click');
+                    }
+                }
+            });
+        });
+    }, 500);
+
             ]]></add>
         </operation>
     </file>

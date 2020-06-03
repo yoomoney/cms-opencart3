@@ -12,7 +12,7 @@ class WalletModel extends AbstractPaymentModel
 
     public function __construct(Config $config)
     {
-        parent::__construct($config, 'wallet');
+        parent::__construct($config, self::PAYMENT_WALLET);
         $this->accountId = $this->getConfigValue('account_id');
         $this->password = $this->getConfigValue('password');
         $this->testMode = $this->getConfigValue('test_mode') == '1';
@@ -38,7 +38,7 @@ class WalletModel extends AbstractPaymentModel
 
     public function applyTemplateVariables($controller, &$templateData, $orderInfo)
     {
-        $templateData['wallet'] = $this;
+        $templateData[self::PAYMENT_WALLET] = $this;
         $templateData['image_base_path'] = HTTPS_SERVER . 'image/catalog/payment/yandex_money';
         $templateData['validate_url'] = $controller->url->link('extension/payment/yandex_money/validate', '', true);
 

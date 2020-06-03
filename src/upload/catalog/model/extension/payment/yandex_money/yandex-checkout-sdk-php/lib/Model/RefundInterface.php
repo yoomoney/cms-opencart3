@@ -85,4 +85,10 @@ interface RefundInterface
      * @return string Комментарий, основание для возврата средств покупателю
      */
     function getComment();
+
+    /**
+     * Возвращает информацию об инициаторе платежа или возврата
+     * @return RequestorInterface
+     */
+    function getRequestor();
 }

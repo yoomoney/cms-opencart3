@@ -320,6 +320,8 @@ class CreatePaymentRequestBuilder extends AbstractPaymentRequestBuilder
             $this->currentObject->setAirline($this->airline);
         }
         $this->currentObject->setAmount($this->amount);
+        $this->currentObject->setTransfers($this->transfers);
+
         return parent::build();
     }
 

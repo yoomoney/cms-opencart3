@@ -96,6 +96,13 @@ interface ReceiptResponseInterface
     public function getSettlements();
 
     /**
+     * Возвращает идентификатор магазин
+     *
+     * @return string|null
+     */
+    public function getOnBehalfOf();
+
+    /**
      * Проверяет есть ли в чеке хотя бы одна позиция
      * @return bool True если чек не пуст, false если в чеке нет ни одной позиции
      */

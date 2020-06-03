@@ -95,4 +95,12 @@ interface ReceiptInterface
      * @return bool True если чек не пуст, false если в чеке нет ни одной позиции
      */
     public function notEmpty();
+
+    /**
+     * Подгоняет стоимость товаров в чеке к общей цене заказа
+     *
+     * @param AmountInterface $orderAmount Общая стоимость заказа
+     * @param bool $withShipping Поменять ли заодно и цену доставки
+     */
+    public function normalize(AmountInterface $orderAmount, $withShipping = false);
 }

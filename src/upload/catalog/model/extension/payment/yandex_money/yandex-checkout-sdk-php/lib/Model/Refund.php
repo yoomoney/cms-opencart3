@@ -84,6 +84,17 @@ class Refund extends AbstractObject implements RefundInterface
     private $_comment;
 
     /**
+     * @var SourceInterface[] Данные о распределении денег — сколько и в какой магазин нужно перевести.
+     */
+    private $_sources;
+
+    /**
+     * @var RequestorInterface
+     */
+    private $_requestor;
+
+
+    /**
      * Возвращает идентификатор возврата платежа
      * @return string Идентификатор возврата
      */
@@ -315,5 +326,56 @@ class Refund extends AbstractObject implements RefundInterface
         } else {
             throw new InvalidPropertyValueTypeException('Empty refund comment', 0, 'Refund.comment', $value);
         }
+    }
+
+    /**
+     * Устанавливает transfers (массив распределения денег между магазинами)
+     * @param SourceInterface[]|array $value
+     */
+    public function setSources($value)
+    {
+        if (!is_array($value)) {
+            $message = 'Sources must be an array of SourceInterface';
+            throw new InvalidPropertyValueTypeException($message, 0, 'Refund.sources', $value);
+        }
+
+        $sources = array();
+        foreach ($value as $item) {
+            if (is_array($item)) {
+                $item = new Source($item);
+            }
+
+            if (!($item instanceof SourceInterface)) {
+                $message = 'Source must be instance of SourceInterface';
+                throw new InvalidPropertyValueTypeException($message, 0, 'Refund.sources', $value);
+            }
+            $sources[] = $item;
+        }
+
+        $this->_sources = $sources;
+    }
+
+    /**
+     * @return RequestorInterface
+     */
+    public function getRequestor()
+    {
+        return $this->_requestor;
+    }
+
+    /**
+     * @param $value
+     */
+    public function setRequestor($value)
+    {
+        if (is_array($value)) {
+            $value = new Requestor($value);
+        }
+
+        if (!($value instanceof RequestorInterface)) {
+            throw new InvalidPropertyValueTypeException('Invalid Requestor type', 0, 'Refund.requestor', $value);
+        }
+
+        $this->_requestor = $value;
     }
 }

@@ -35,6 +35,9 @@ use YandexCheckout\Model\Receipt\ReceiptItemAmount;
 use YandexCheckout\Model\ReceiptInterface;
 use YandexCheckout\Model\ReceiptItem;
 use YandexCheckout\Model\ReceiptItemInterface;
+use YandexCheckout\Model\SourceInterface;
+use YandexCheckout\Model\Transfer;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Базовый класс объекта платежного запроса, передаваемого в методы клиента API
@@ -56,14 +59,28 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
     protected $receipt;
 
     /**
+     * @var TransferInterface[] Массив платежей в пользу разных мерчантов
+     */
+    protected $transfers;
+
+    /**
      * @return self
      */
     protected function initCurrentObject()
     {
-        $this->amount  = new MonetaryAmount();
-        $this->receipt = new Receipt();
+        $this->amount    = new MonetaryAmount();
+        $this->receipt   = new Receipt();
+        $this->transfers = array();
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function build(array $options = null)
+    {
+        return parent::build($options);
     }
 
     /**
@@ -77,13 +94,41 @@ abstract class AbstractPaymentRequestBuilder extends AbstractRequestBuilder
     {
         if ($value === null || $value === '') {
             $this->amount = new MonetaryAmount();
-        } elseif (is_object($value) && $value instanceof AmountInterface) {
+        } elseif ($value instanceof AmountInterface) {
             $this->amount->setValue($value->getValue());
             $this->amount->setCurrency($value->getCurrency());
         } elseif (is_array($value)) {
             $this->amount->fromArray($value);
         } else {
             $this->amount->setValue($value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Устанавливает трансферы
+     *
+     * @param array|string $value Массив трансферов
+     *
+     * @return self Инстанс билдера запросов
+     */
+    public function setTransfers($value)
+    {
+        $value = (array)$value;
+        $this->transfers = array();
+
+        foreach ($value as $item) {
+            $transfer = new Transfer();
+
+            if ($item instanceof TransferInterface) {
+                $transfer->setAmount($item->getAmount());
+                $transfer->setAccountId($item->getAccountId());
+            } elseif (is_array($item)) {
+                $transfer->fromArray($item);
+            }
+
+            $this->transfers[] = $transfer;
         }
 
         return $this;

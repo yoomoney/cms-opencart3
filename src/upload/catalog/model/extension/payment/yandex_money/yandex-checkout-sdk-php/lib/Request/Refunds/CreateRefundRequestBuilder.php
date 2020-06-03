@@ -30,6 +30,7 @@ use YandexCheckout\Common\AbstractPaymentRequestBuilder;
 use YandexCheckout\Common\Exceptions\EmptyPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
+use YandexCheckout\Model\SourceInterface;
 
 /**
  * Класс билдера запросов к API на создание возврата средств
@@ -38,6 +39,11 @@ use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
  */
 class CreateRefundRequestBuilder extends AbstractPaymentRequestBuilder
 {
+    /**
+     * @var SourceInterface[] Данные о распределении денег — сколько и в какой магазин нужно перевести
+     */
+    private $sources;
+
     /**
      * @var CreateRefundRequest Собираемый объет запроса к API
      */
@@ -85,6 +91,19 @@ class CreateRefundRequestBuilder extends AbstractPaymentRequestBuilder
     }
 
     /**
+     * Устанавливает источники возврата
+     *
+     * @param array|string $value Массив трансферов
+     *
+     * @return self Инстанс билдера запросов
+     */
+    public function setSources($value)
+    {
+        $this->currentObject->setSources($value);
+        return $this;
+    }
+
+    /**
      * Строит объект запроса к API
      * @param array|null $options Устаналвиваемые параметры запроса
      * @return CreateRefundRequestInterface Инстанс сгенерированного объекта запроса к API
@@ -94,7 +113,9 @@ class CreateRefundRequestBuilder extends AbstractPaymentRequestBuilder
         if (!empty($options)) {
             $this->setOptions($options);
         }
+
         $this->currentObject->setAmount($this->amount);
+
         if ($this->receipt->notEmpty()) {
             $this->currentObject->setReceipt($this->receipt);
         }

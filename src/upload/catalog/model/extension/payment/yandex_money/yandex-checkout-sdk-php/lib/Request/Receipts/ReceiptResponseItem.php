@@ -34,6 +34,8 @@ use YandexCheckout\Helpers\TypeCast;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\MonetaryAmount;
 use YandexCheckout\Model\Receipt\ReceiptItemAmount;
+use YandexCheckout\Model\Supplier;
+use YandexCheckout\Model\SupplierInterface;
 
 /**
  * Interface ReceiptItemInterface
@@ -74,14 +76,19 @@ class ReceiptResponseItem extends AbstractObject implements ReceiptResponseItemI
     private $_vatCode;
 
     /**
-     * @var string Признак предмета расчета.
+     * @var string Признак предмета расчета
      */
     private $_paymentSubject;
 
     /**
-     * @var string Признак способа расчета.
+     * @var string Признак способа расчета
      */
     private $_paymentMode;
+
+    /**
+     * @var SupplierInterface Информация о поставщике товара или услуги
+     */
+    private $_supplier;
 
     /**
      * Конструктор, устанавливает настройки товара из ассоциативного массива
@@ -98,8 +105,13 @@ class ReceiptResponseItem extends AbstractObject implements ReceiptResponseItemI
         if (!empty($itemData['payment_mode'])) {
             $this->setPaymentMode($itemData['payment_mode']);
         }
+
         if (!empty($itemData['payment_subject'])) {
             $this->setPaymentSubject($itemData['payment_subject']);
+        }
+
+        if (!empty($itemData['supplier'])) {
+            $this->setSupplier($itemData['supplier']);
         }
     }
 
@@ -294,6 +306,40 @@ class ReceiptResponseItem extends AbstractObject implements ReceiptResponseItemI
         } else {
             $this->_paymentMode = $value;
         }
+    }
+
+    /**
+     * @return SupplierInterface
+     */
+    public function getSupplier()
+    {
+        return $this->_supplier;
+    }
+
+    /**
+     * Устанавливает информацию о поставщике товара или услуги.
+     *
+     * @param SupplierInterface|array $value
+     */
+    public function setSupplier($value)
+    {
+        if ($value === null || $value === '') {
+            throw new EmptyPropertyValueException(
+                'Empty supplier value in receipt', 0, 'Receipt.supplier'
+            );
+        }
+
+        if (is_array($value)) {
+            $value = new Supplier($value);
+        }
+
+        if (!($value instanceof SupplierInterface)) {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid supplier value type in receipt', 0, 'Receipt.supplier', $value
+            );
+        }
+
+        $this->_supplier = $value;
     }
 
     /**

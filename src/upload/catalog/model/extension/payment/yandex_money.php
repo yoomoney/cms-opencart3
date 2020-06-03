@@ -23,7 +23,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.4.6';
+    const MODULE_VERSION = '1.5.0';
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -122,7 +122,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             'code'       => 'yandex_money',
             'title'      => $model->getDisplayName(),
             'terms'      => '',
-            'sort_order' => $this->config->get('yandex_money_sort_order'),
+            'sort_order' => $model->getSortOrder(),
         );
 
         return $result;

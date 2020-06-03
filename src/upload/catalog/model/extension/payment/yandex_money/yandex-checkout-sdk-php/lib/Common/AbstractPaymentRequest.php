@@ -30,12 +30,15 @@ use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\Receipt;
 use YandexCheckout\Model\ReceiptInterface;
+use YandexCheckout\Model\Transfer;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Класс объекта запроса к API
  *
  * @property AmountInterface $amount Сумма
  * @property ReceiptInterface $receipt Данные фискального чека 54-ФЗ
+ * @property TransferInterface[] $transfers Данные о распределении платежа между магазинами
  *
  * @since 1.0.18
  */
@@ -50,6 +53,11 @@ class AbstractPaymentRequest extends AbstractRequest
      * @var Receipt Данные фискального чека 54-ФЗ
      */
     protected $_receipt;
+
+    /**
+     * @var TransferInterface[]
+     */
+    protected $_transfers = array();
 
     /**
      * Возвращает сумму оплаты
@@ -119,6 +127,34 @@ class AbstractPaymentRequest extends AbstractRequest
     }
 
     /**
+     * Устанавливает transfers (массив распределения денег между магазинами)
+     * @param TransferInterface[]|array $value
+     */
+    public function setTransfers($value)
+    {
+        if (!is_array($value)) {
+            $message = 'Transfers must be an array of TransferInterface';
+            throw new InvalidPropertyValueTypeException($message, 0, 'Payment.transfers', $value);
+        }
+
+        $transfers = array();
+        foreach ($value as $item) {
+            if (is_array($item)) {
+                $item = new Transfer($item);
+            }
+
+            if (!($item instanceof TransferInterface)) {
+                $message = 'Transfers must be an array of TransferInterface';
+                throw new InvalidPropertyValueTypeException($message, 0, 'Payment.transfers', $value);
+            }
+
+            $transfers[] = $item;
+        }
+
+        $this->_transfers = $transfers;
+    }
+
+    /**
      * Валидирует объект запроса
      * @return bool True если запрос валиден и его можно отправить в API, false если нет
      */
@@ -131,8 +167,36 @@ class AbstractPaymentRequest extends AbstractRequest
 
         $value = $this->_amount->getValue();
         if (empty($value) || $value <= 0.0) {
-            $this->setValidationError('Invalid payment amount value: '.$value);
+            $this->setValidationError('Invalid payment amount value: ' . $value);
+
             return false;
+        }
+
+        if (!empty($this->_transfers)) {
+            $sum = 0;
+            foreach ($this->_transfers as $transfer) {
+                if ($transfer->getAmount() === null) {
+                    $this->setValidationError('Payment amount not specified');
+                    return false;
+                }
+
+                $value = $transfer->getAmount()->getValue();
+                if (empty($value) || $value <= 0.0) {
+                    $this->setValidationError('Invalid transfer amount value: ' . $value);
+                    return false;
+                }
+                $sum += (float) $value;
+
+                $accountId = $transfer->getAccountId();
+                if (empty($accountId)) {
+                    $this->setValidationError('Transfer account id not specified');
+                    return false;
+                }
+            }
+
+            if ($sum !== (float) $this->getAmount()->getValue()) {
+                $this->setValidationError('Transfer amount sum does not match top-level amount');
+            }
         }
 
         if ($this->_receipt !== null && $this->_receipt->notEmpty()) {
@@ -145,5 +209,15 @@ class AbstractPaymentRequest extends AbstractRequest
         }
 
         return true;
+    }
+
+    public function hasTransfers()
+    {
+        return !empty($this->_transfers);
+    }
+
+    public function getTransfers()
+    {
+        return $this->_transfers;
     }
 }

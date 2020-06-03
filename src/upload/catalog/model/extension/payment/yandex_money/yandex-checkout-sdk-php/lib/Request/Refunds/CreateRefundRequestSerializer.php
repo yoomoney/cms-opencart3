@@ -26,7 +26,10 @@
 
 namespace YandexCheckout\Request\Refunds;
 
+use YandexCheckout\Model\AmountInterface;
 use YandexCheckout\Model\ReceiptItem;
+use YandexCheckout\Model\SourceInterface;
+use YandexCheckout\Model\TransferInterface;
 
 /**
  * Класс сериалайзера запросов к API на создание нового возврата средств
@@ -92,6 +95,41 @@ class CreateRefundRequestSerializer
             if (!empty($value)) {
                 $result['receipt']['tax_system_code'] = $value;
             }
+        }
+
+        if ($request->hasSources()) {
+            $result['sources'] = $this->serializeSources($request->getSources());
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param AmountInterface $amount
+     *
+     * @return array
+     */
+    private function serializeAmount(AmountInterface $amount)
+    {
+        return array(
+            'value'    => $amount->getValue(),
+            'currency' => $amount->getCurrency(),
+        );
+    }
+
+    /**
+     * @param SourceInterface[] $transfers
+     *
+     * @return array
+     */
+    private function serializeSources(array $sources)
+    {
+        $result = array();
+        foreach ($sources as $source) {
+            $result[] = array(
+                'account_id' => $source->getAccountId(),
+                'amount' => $this->serializeAmount($source->getAmount())
+            );
         }
 
         return $result;
