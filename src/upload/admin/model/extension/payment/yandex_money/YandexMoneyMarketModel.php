@@ -191,7 +191,7 @@ class YandexMoneyMarketModel
     public function checkConfig()
     {
         $errors = array();
-        if ($this->config->get('yandex_money_market_shopname') == '') {
+        if (empty($this->config->get('yandex_money_market_shopname'))) {
             $errors[] = 'market_error_message_empty_shop_name';
         }
 
@@ -810,16 +810,35 @@ HTML;
         $checked = $enabled === 'on' ? 'checked="checked"' : '';
         $select  = $this->htmlOptionSelect($option);
 
+        $text_name    = $this->language->get("market_option_name_{$option}_label");
+        $enabled_name = $this->config->get("yandex_money_market_option_name_{$option}_enabled");
+        $checked_name = $enabled_name === 'on' ? 'checked="checked"' : '';
+
+        $placeholder_prefix = $this->language->get("market_option_prefix_{$option}_label");
+        $text_prefix        = $this->config->get("yandex_money_market_option_prefix_{$option}_text");
+
         $html = <<<HTML
             <div class="form-group">
-                <label class="col-sm-4 yandex-money-market-font-weight-normal yandex-money-market-with-padding-top">
+                <label class="col-sm-4 control-label text-left yandex-money-market-font-weight-normal yandex-money-market-with-padding-top">
                     <input type="checkbox" name="yandex_money_market_option_{$option}_enabled" value="on"
                         class="form-check-input" {$checked} />
                     {$text}
                 </label>
-                <span class="col-sm-8">
+                <div class="col-sm-8">
                     {$select}
-                </span>
+                </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <label class="col-sm-4 control-label yandex-money-market-font-weight-normal yandex-money-market-with-padding-top">
+                            <input type="checkbox" name="yandex_money_market_option_name_{$option}_enabled" value="on"
+                                class="form-check-input" {$checked_name} />
+                            {$text_name}
+                        </label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" name="yandex_money_market_option_prefix_{$option}_text" id="yandex_money_market_option_prefix_{$option}_text" value="{$text_prefix}" placeholder="{$placeholder_prefix}">
+                        </div>
+                    </div>
+                </div>
             </div>
 HTML;
 
