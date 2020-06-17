@@ -910,14 +910,26 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $colors = array();
         $sizes  = array();
+        $name_color_enabled = ($this->config->get('yandex_money_market_option_name_color_enabled') === 'on');
+        $name_size_enabled = ($this->config->get('yandex_money_market_option_name_size_enabled') === 'on');
+        $px_color = '';
+        $px_size = '';
 
         if ($this->config->get('yandex_money_market_option_color_enabled') === 'on') {
+            if ($name_color_enabled) {
+                $px_color = $this->config->get('yandex_money_market_option_prefix_color_text');
+                $px_color = $px_color ? trim($px_color) . ' ' : '';
+            }
             $colorOptionId = $this->config->get('yandex_money_market_option_color_option_id');
             $colors        = $this->getMarketModel()->getProductOptions(array('option_id' => $colorOptionId),
                 $product['product_id']);
         }
 
         if ($this->config->get('yandex_money_market_option_size_enabled') === 'on') {
+            if ($this->config->get('yandex_money_market_option_name_size_enabled') === 'on') {
+                $px_size = $this->config->get('yandex_money_market_option_prefix_size_text');
+                $px_size = $px_size ? trim($px_size) . ' ' : '';
+            }
             $sizeOptionId = $this->config->get('yandex_money_market_option_size_option_id');
             $sizes        = $this->getMarketModel()->getProductOptions(array('option_id' => $sizeOptionId),
                 $product['product_id']);
@@ -927,31 +939,44 @@ class ControllerExtensionPaymentYandexMoney extends Controller
             return false;
         }
 
+        $names = array();
+
         /** @var Offer[] $colorOffers */
         $colorOffers = array();
         if (count($colors)) {
-            foreach ($colors as $option) {
+            foreach ($colors as $i => $option) {
                 $offer = clone $commonOffer;
                 $offer->setGroupId($product['product_id']);
                 $offer->setId($product['product_id'].'c'.$option['option_value_id']);
-                $offer->setModel($offer->getModel().', '.$option['name']);
                 $offer->addParameter($option['option_name'], $option['name']);
                 $this->updateOfferPrice($offer, $option['price_prefix'], $option['price']);
                 $this->updateOfferWeight($offer, $option, $product['weight_unit']);
                 $offer->setUrl($offer->getUrl().'#'.$option['product_option_value_id']);
-                $colorOffers[] = $offer;
+                $colorOffers[$i] = $offer;
+                if ($name_color_enabled) {
+                    $names[$i][] = $px_color . $option['name'];
+                } else {
+                    $names[$i] = array();
+                }
             }
         } else {
             $colorOffers[] = $commonOffer;
         }
 
-        foreach ($colorOffers as $colorOffer) {
+        foreach ($colorOffers as $i => $colorOffer) {
             if (count($sizes)) {
                 foreach ($sizes as $option) {
                     $offer = clone $colorOffer;
                     $offer->setGroupId($product['product_id']);
                     $offer->setId($offer->getId().'s'.$option['option_value_id']);
-                    $offer->setModel($offer->getModel().', '.$option['name']);
+                    if ($name_size_enabled) {
+                        $subNames = array_merge($names[$i], array($px_size . $option['name']));
+                    } else {
+                        $subNames = $names[$i];
+                    }
+                    if (count($subNames)) {
+                        $offer->setModel($offer->getModel() . ' (' . implode(', ', $subNames) . ')');
+                    }
                     $offer->addParameter($option['option_name'], $option['name']);
                     $this->updateOfferPrice($offer, $option['price_prefix'], $option['price']);
                     $this->updateOfferWeight($offer, $option, $product['weight_unit']);
@@ -964,6 +989,9 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     $this->getMarket()->addOffer($offer);
                 }
             } else {
+                if (count($names[$i])) {
+                    $colorOffer->setModel($colorOffer->getModel() . ' (' . implode(', ', $names[$i]) . ')');
+                }
                 $colorOffer->setPrice($this->formatPrice($colorOffer->getPrice()));
                 if ($colorOffer->getOldPrice()) {
                     $colorOffer->setOldPrice($this->formatPrice($colorOffer->getOldPrice()));

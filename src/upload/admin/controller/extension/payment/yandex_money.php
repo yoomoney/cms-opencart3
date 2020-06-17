@@ -12,7 +12,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.5.0';
+    const MODULE_VERSION = '1.5.1';
 
     /**
      * @var integer
@@ -120,8 +120,11 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     $this->updateCounterCode();
                 }
 
+                $cache->delete("ym_market_xml");
+
                 $this->session->data['success']         = $this->language->get('kassa_text_success');
                 $this->session->data['last-active-tab'] = $data['lastActiveTab'];
+
                 if (isset($this->request->post['language_reload'])) {
                     $this->session->data['success-message'] = 'Настройки были сохранены';
                     $this->response->redirect(
@@ -1050,23 +1053,25 @@ class ControllerExtensionPaymentYandexMoney extends Controller
     {
         $data                  = array();
         $data['market_status'] = array();
+
         foreach ($this->getModel()->getMarket()->checkConfig() as $errorMessage) {
             $data['market_status'][] = $this->errors_alert($this->language->get($errorMessage));
         }
 
-        if ($this->config->get('yandex_money_metrika_number') == '') {
-            $data['metrika_status'][] = $this->errors_alert('Не заполнен номер счётчика');
+        if ($this->config->get('yandex_money_metrika_active') == 1) {
+            if ($this->config->get('yandex_money_metrika_number') == '') {
+                $data['metrika_status'][] = $this->errors_alert('Не заполнен номер счётчика');
+            }
+            if ($this->config->get('yandex_money_metrika_idapp') == '') {
+                $data['metrika_status'][] = $this->errors_alert('ID Приложения не заполнено');
+            }
+            if ($this->config->get('yandex_money_metrika_pw') == '') {
+                $data['metrika_status'][] = $this->errors_alert('Пароль приложения не заполнено');
+            }
+            if ($this->config->get('yandex_money_metrika_o2auth') == '') {
+                $data['metrika_status'][] = $this->errors_alert('Получите токен OAuth');
+            }
         }
-        if ($this->config->get('yandex_money_metrika_idapp') == '') {
-            $data['metrika_status'][] = $this->errors_alert('ID Приложения не заполнено');
-        }
-        if ($this->config->get('yandex_money_metrika_pw') == '') {
-            $data['metrika_status'][] = $this->errors_alert('Пароль приложения не заполнено');
-        }
-        if ($this->config->get('yandex_money_metrika_o2auth') == '') {
-            $data['metrika_status'][] = $this->errors_alert('Получите токен OAuth');
-        }
-
 
         if (empty($data['market_status'])) {
             $data['market_status'][] = '';
