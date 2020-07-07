@@ -104,19 +104,10 @@ class CancellationDetails extends AbstractObject implements CancellationDetailsI
     {
         if ($value === null || $value === '') {
             throw new EmptyPropertyValueException('Empty party value', 0, 'cancellation_details.party');
-        }
-        if (TypeCast::canCastToEnumString($value)) {
-            $value = strtolower((string)$value);
-            if (CancellationDetailsPartyCode::valueExists($value)) {
-                $this->_party = $value;
-            } else {
-                throw new InvalidPropertyValueException(
-                    'Invalid party value: "'.$value.'"', 0, 'cancellation_details.party', $value
-                );
-            }
+        } elseif (!TypeCast::canCastToString($value)) {
+            throw new InvalidPropertyValueTypeException('Invalid party value type', 0, 'cancellation_details.party', $value);
         } else {
-            throw new InvalidPropertyValueTypeException('Invalid party value type', 0, 'cancellation_details.party',
-                $value);
+            $this->_party = strtolower((string)$value);
         }
     }
 
@@ -128,19 +119,10 @@ class CancellationDetails extends AbstractObject implements CancellationDetailsI
     {
         if ($value === null || $value === '') {
             throw new EmptyPropertyValueException('Empty reason value', 0, 'cancellation_details.reason');
-        }
-        if (TypeCast::canCastToEnumString($value)) {
-            $value = strtolower((string)$value);
-            if (CancellationDetailsReasonCode::valueExists($value)) {
-                $this->_reason = $value;
-            } else {
-                throw new InvalidPropertyValueException(
-                    'Invalid reason value: "'.$value.'"', 0, 'cancellation_details.reason', $value
-                );
-            }
+        } elseif (!TypeCast::canCastToString($value)) {
+            throw new InvalidPropertyValueTypeException('Invalid reason value type', 0, 'cancellation_details.reason');
         } else {
-            throw new InvalidPropertyValueTypeException('Invalid reason value type', 0, 'cancellation_details.reason',
-                $value);
+            $this->_reason = strtolower((string)$value);
         }
     }
 }
