@@ -263,6 +263,10 @@ class BaseClient
      */
     protected function encodeData($serializedData)
     {
+        if ($serializedData === array()) {
+            return '{}';
+        }
+
         $result = json_encode($serializedData);
         if ($result === false) {
             $errorCode = json_last_error();

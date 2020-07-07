@@ -36,6 +36,7 @@ class YandexMoneyMarketModel
     private $option;
 
     private $fields = array(
+        'yandex_money_market_active',
         'yandex_money_market_shopname',
         'yandex_money_market_full_shopname',
         'yandex_money_market_features',
