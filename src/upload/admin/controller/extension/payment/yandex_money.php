@@ -63,7 +63,15 @@ class ControllerExtensionPaymentYandexMoney extends Controller
         $data = array(
             'lastActiveTab' => $this->session->data['last-active-tab'],
         );
+
         if ($this->request->server['REQUEST_METHOD'] === 'POST') {
+
+            if ($this->validate($this->request)) {
+                $this->enableB2bSberbank();
+                $this->getModel()->installEventForSecondReceipt();
+            } else {
+                $this->saveValidationErrors();
+            }
 
             $isUpdatedCounterSettings = $this->isUpdatedCounterSettings($this->request->post);
             $settings                 = $this->model_setting_setting->getSetting(self::MODULE_NAME);
@@ -120,13 +128,6 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
             $this->session->data['success']         = $this->language->get('kassa_text_success');
             $this->session->data['last-active-tab'] = $data['lastActiveTab'];
-
-            if ($this->validate($this->request)) {
-                $this->enableB2bSberbank();
-                $this->getModel()->installEventForSecondReceipt();
-            } else {
-                $this->saveValidationErrors();
-            }
 
             if (isset($this->request->post['language_reload'])) {
                 $this->session->data['success-message'] = 'Настройки были сохранены';
