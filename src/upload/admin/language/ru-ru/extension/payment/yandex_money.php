@@ -135,7 +135,7 @@ $_['kassa_default_payment_description']     = 'Оплата заказа №%ord
 
 $_['kassa_tab_header']   = 'Яндекс.Касса';
 $_['wallet_tab_header']  = 'Яндекс.Деньги';
-$_['billing_tab_header'] = 'Яндекс.Платёжка';
+$_['billing_tab_header'] = 'Платёжка';
 $_['metrika_tab_header'] = 'Яндекс.Метрика';
 $_['market_tab_header']  = 'Яндекс.Маркет';
 
@@ -176,22 +176,22 @@ $_['wallet_any_geo_zone']         = 'Любая зона';
 $_['wallet_sort_order_label']       = 'Сортировка';
 $_['wallet_sort_order_description'] = '';
 
-$_['billing_page_title']         = 'Настройки Яндекс.Платёжки';
+$_['billing_page_title']         = 'Настройки Платёжки';
 $_['billing_header_description'] = '';
 $_['billing_version_string']     = 'Версия модуля';
 
-$_['billing_enable_label']           = 'Включить прием платежей через Яндекс.Платёжку';
+$_['billing_enable_label']           = 'Включить прием платежей через Платёжку';
 $_['billing_form_id_label']          = 'ID формы';
 $_['billing_form_id_description']    = '';
 $_['billing_form_id_error_required'] = 'Укажите идентификатор формы';
 
 $_['billing_purpose_label']       = 'Назначение платежа';
 $_['billing_purpose_description'] = 'Назначение будет в платежном поручении: напишите в нем всё, что поможет отличить заказ, который оплатили через Платежку';
-$_['billing_default_purpose']     = 'Номер заказа %order_id% Оплата через Яндекс.Платежку';
+$_['billing_default_purpose']     = 'Номер заказа %order_id% Оплата через Платежку';
 
 $_['billing_display_name_label']       = 'Название платежного сервиса';
 $_['billing_display_name_description'] = 'Это название увидит пользователь';
-$_['billing_default_display_name']     = 'Яндекс.Платежка (банковские карты, кошелек)';
+$_['billing_default_display_name']     = 'Платежка (банковские карты, кошелек)';
 
 $_['billing_success_order_status_label']       = 'Статус заказа';
 $_['billing_success_order_status_description'] = 'Статус должен показать, что результат платежа неизвестен: заплатил клиент или нет, вы можете узнать только из уведомления на электронной почте или в своем банке';

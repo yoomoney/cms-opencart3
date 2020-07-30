@@ -284,7 +284,7 @@ class KassaSecondReceiptModel
             $this->log("error", "Fail get receipt message: " . $e->getMessage());
         }
 
-        return array_pop($receipts);
+        return array_shift($receipts);
     }
 
     /**
