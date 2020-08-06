@@ -68,6 +68,8 @@ use YandexCheckout\Request\Receipts\CreatePostReceiptRequest;
 use YandexCheckout\Request\Receipts\CreatePostReceiptRequestInterface;
 use YandexCheckout\Request\Receipts\CreatePostReceiptRequestSerializer;
 use YandexCheckout\Request\Receipts\ReceiptResponseFactory;
+use YandexCheckout\Request\Receipts\ReceiptsRequest;
+use YandexCheckout\Request\Receipts\ReceiptsRequestSerializer;
 use YandexCheckout\Request\Receipts\ReceiptsResponse;
 use YandexCheckout\Request\Refunds\CreateRefundRequest;
 use YandexCheckout\Request\Refunds\CreateRefundRequestInterface;
@@ -92,7 +94,7 @@ class Client extends BaseClient
     /**
      * Текущая версия библиотеки
      */
-    const SDK_VERSION = '1.6.4';
+    const SDK_VERSION = '1.6.5';
 
     /**
      * Получить список платежей магазина.
@@ -697,6 +699,7 @@ class Client extends BaseClient
      * @throws TooManyRequestsException
      * @throws UnauthorizedException
      * @throws ExtensionNotFoundException
+     * @throws Exception
      */
     public function getReceipts($filter = null)
     {
@@ -706,16 +709,10 @@ class Client extends BaseClient
             $queryParams = array();
         } else {
             if (is_array($filter)) {
-                $queryParams = $filter;
-            } elseif ($filter instanceof PaymentInterface) {
-                $queryParams = array(
-                    'payment_id' => $filter->getId()
-                );
-            } elseif ($filter instanceof RefundInterface) {
-                $queryParams = array(
-                    'refund_id' => $filter->getId()
-                );
+                $filter = ReceiptsRequest::builder()->build($filter);
             }
+            $serializer  = new ReceiptsRequestSerializer();
+            $queryParams = $serializer->serialize($filter);
         }
 
         $response = $this->execute($path, HttpVerb::GET, $queryParams);

@@ -24,37 +24,92 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Request\Payments;
+namespace YandexCheckout\Request\Receipts;
 
 use YandexCheckout\Common\AbstractRequestBuilder;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueException;
 use YandexCheckout\Common\Exceptions\InvalidPropertyValueTypeException;
 
 /**
- * Билдер объектов запросов к API для пролучения списка платежей магазина
+ * Класс билдера объектов запросов к API списка чеков
  *
- * @package YandexCheckout\Request\Payments
+ * @package YandexCheckout\Request\Receipts
  */
-class PaymentsRequestBuilder extends AbstractRequestBuilder
+class ReceiptsRequestBuilder extends AbstractRequestBuilder
 {
     /**
-     * @var PaymentsRequest Собираемый объект запроса списка платежей магазина
+     * @var ReceiptsRequest Инстанс собираемого объекта запроса
      */
     protected $currentObject;
 
     /**
-     * Возвращает новый объект запроса для получения списка платежей, который в дальнейшем будет собираться в билдере
-     * @return PaymentsRequest Объект запроса списка платежей магазина
+     * Инициализирует новый инстанс собираемого объекта
+     * @return ReceiptsRequest Инстанс собираемого запроса
      */
     protected function initCurrentObject()
     {
-        return new PaymentsRequest();
+        return new ReceiptsRequest();
     }
 
     /**
-     * Устанавливает страница выдачи результатов
-     * @param string|null $value Страница выдачи результатов или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     * Устанавливает идентификатор возврата
+     * @param string $value Идентификатор возврата, который ищется в API
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
+     *
+     * @throws InvalidPropertyValueException Выбрасывается если длина переданного значения не равна 36
+     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
+     */
+    public function setRefundId($value)
+    {
+        $this->currentObject->setRefundId($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает идентификатор платежа или null если требуется его удалить
+     * @param string|null $value Идентификатор платежа
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
+     *
+     * @throws InvalidPropertyValueException Выбрасывается если длина переданной строки не равна 36 символам
+     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
+     */
+    public function setPaymentId($value)
+    {
+        $this->currentObject->setPaymentId($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает статус выбираемых чеков
+     * @param string $value Статус выбираемых платежей или null чтобы удалить значение
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
+     *
+     * @throws InvalidPropertyValueException Выбрасывается если переданное значение не является валидным статусом
+     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
+     */
+    public function setStatus($value)
+    {
+        $this->currentObject->setStatus($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает ограничение количества объектов чеков
+     * @param string $value Ограничение количества объектов чеков или null чтобы удалить значение
+     * @return ReceiptsRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод было передана не целое число
+     */
+    public function setLimit($value)
+    {
+        $this->currentObject->setLimit($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает токен следующей страницы выборки
+     * @param string $value Токен следующей страницы выборки или null чтобы удалить значение
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
      *
      * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
      */
@@ -65,19 +120,9 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
-     * @deprecated Будет удален в следующих версиях
-     * @param $value
-     * @return PaymentsRequestBuilder
-     */
-    public function setPage($value)
-    {
-        return $this->setCursor($value);
-    }
-
-    /**
-     * Устанавливает дату создания от которой выбираются платежи
+     * Устанавливает дату создания от которой выбираются чеки
      * @param \DateTime|string|int|null $value Время создания, от (не включая) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
      *
      * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
      * строка или число, которые не удалось преобразовать в валидную дату)
@@ -91,9 +136,9 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
-     * Устанавливает дату создания от которой выбираются платежи
+     * Устанавливает дату создания от которой выбираются чеки
      * @param \DateTime|string|int|null $value Время создания, от (включительно) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
      *
      * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
      * строка или число, которые не удалось преобразовать в валидную дату)
@@ -107,9 +152,9 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
-     * Устанавливает дату создания до которой выбираются платежи
+     * Устанавливает дату создания до которой выбираются чеки
      * @param \DateTime|string|int|null $value Время создания, до (не включая) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
      *
      * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
      * строка или число, которые не удалось преобразовать в валидную дату)
@@ -123,9 +168,9 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
-     * Устанавливает дату создания до которой выбираются платежи
+     * Устанавливает дату создания до которой выбираются чеки
      * @param \DateTime|string|int|null $value Время создания, до (включительно) или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
+     * @return ReceiptsRequestBuilder Инстанс текущего объекта билдера
      *
      * @throws InvalidPropertyValueException Генерируется если была передана дата в невалидном формате (была передана
      * строка или число, которые не удалось преобразовать в валидную дату)
@@ -139,49 +184,9 @@ class PaymentsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
-     * Устанавливает ограничение количества объектов платежа
-     * @param string $value Ограничение количества объектов платежа или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод было передана не целое число
-     */
-    public function setLimit($value)
-    {
-        $this->currentObject->setLimit($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает идентификатор шлюза
-     * @param string|null $value Идентификатор шлюза или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
-     */
-    public function setRecipientGatewayId($value)
-    {
-        $this->currentObject->setRecipientGatewayId($value);
-        return $this;
-    }
-
-    /**
-     * Устанавливает статус выбираемых платежей
-     * @param string $value Статус выбираемых платежей или null чтобы удалить значение
-     * @return PaymentsRequestBuilder Инстанс текущего билдера
-     *
-     * @throws InvalidPropertyValueException Выбрасывается если переданное значение не является валидным статусом
-     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
-     */
-    public function setStatus($value)
-    {
-        $this->currentObject->setStatus($value);
-        return $this;
-    }
-
-    /**
-     * Собирает и возвращает объект запроса списка платежей магазина
+     * Собирает и возвращает объект запроса списка чеков магазина
      * @param array|null $options Массив с настройками запроса
-     * @return PaymentsRequestInterface Инстанс объекта запроса к API для получения списка плаитежей магазина
+     * @return ReceiptsRequestInterface Инстанс объекта запроса к API для получения списка чеков магазина
      */
     public function build(array $options = null)
     {

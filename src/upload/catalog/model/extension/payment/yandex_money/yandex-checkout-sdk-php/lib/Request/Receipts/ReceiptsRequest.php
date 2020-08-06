@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Request\Refunds;
+namespace YandexCheckout\Request\Receipts;
 
 use Exception;
 use YandexCheckout\Common\AbstractRequest;
@@ -36,18 +36,19 @@ use YandexCheckout\Model\RefundStatus;
 /**
  * Класс объекта запроса к API списка возвратов магазина
  *
- * @package YandexCheckout\Request\Refunds
+ * @package YandexCheckout\Request\Receipts
  *
  * @property \DateTime $createdAtGte Время создания, от (включительно)
  * @property \DateTime $createdAtGt Время создания, от (не включая)
  * @property \DateTime $createdAtLte Время создания, до (включительно)
  * @property \DateTime $createdAtLt Время создания, до (не включая)
  * @property string $paymentId Идентификатор платежа
+ * @property string $refundId Идентификатор возврата
  * @property string $status Статус возврата
  * @property integer|null $limit Ограничение количества объектов возврата, отображаемых на одной странице выдачи
  * @property string $cursor Токен для получения следующей страницы выборки
  */
-class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
+class ReceiptsRequest extends AbstractRequest implements ReceiptsRequestInterface
 {
     const MAX_LIMIT_VALUE = 100;
 
@@ -72,9 +73,14 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
     private $_createdAtLt;
 
     /**
-     * @var string Идентификатор шлюза
+     * @var string Идентификатор платежа
      */
     private $_paymentId;
+
+    /**
+     * @var string Идентификатор возврата
+     */
+    private $_refundId;
 
     /**
      * @var string Статус возврата
@@ -93,31 +99,44 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
 
     /**
      * Возвращает идентификатор возврата
-     * @deprecated Будет удален в следующих версиях
      * @return string Идентификатор возврата
      */
     public function getRefundId()
     {
-        return null;
+        return $this->_refundId;
     }
 
     /**
      * Проверяет был ли установлен идентификатор возврата
-     * @deprecated Будет удален в следующих версиях
      * @return bool True если идентификатор возврата был установлен, false если не был
      */
     public function hasRefundId()
     {
-        return false;
+        return !empty($this->_refundId);
     }
 
     /**
      * Устанавливает идентификатор возврата
-     * @deprecated Будет удален в следующих версиях
      * @param string $value Идентификатор возврата, который ищется в API
      */
     public function setRefundId($value)
-    {}
+    {
+        if ($value === null || $value === '') {
+            $this->_refundId = null;
+        } elseif (TypeCast::canCastToString($value)) {
+            $length = mb_strlen((string)$value, 'utf-8');
+            if ($length != 36) {
+                throw new InvalidPropertyValueException(
+                    'Invalid payment id value in ReceiptsRequest', 0, 'ReceiptsRequest.refundId', $value
+                );
+            }
+            $this->_refundId = (string)$value;
+        } else {
+            throw new InvalidPropertyValueTypeException(
+                'Invalid payment id value type in ReceiptsRequest', 0, 'ReceiptsRequest.refundId', $value
+            );
+        }
+    }
 
     /**
      * Возвращает идентификатор платежа если он задан или null
@@ -152,72 +171,16 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
             $length = mb_strlen((string)$value, 'utf-8');
             if ($length != 36) {
                 throw new InvalidPropertyValueException(
-                    'Invalid payment id value in RefundsRequest', 0, 'RefundsRequest.paymentId', $value
+                    'Invalid payment id value in ReceiptsRequest', 0, 'ReceiptsRequest.paymentId', $value
                 );
             }
             $this->_paymentId = (string)$value;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid payment id value type in RefundsRequest', 0, 'RefundsRequest.paymentId', $value
+                'Invalid payment id value type in ReceiptsRequest', 0, 'ReceiptsRequest.paymentId', $value
             );
         }
     }
-
-    /**
-     * Возвращает идентификатор магазина, если он был задан
-     * @deprecated Будет удален в следующих версиях
-     * @return string|null Идентификатор магазина
-     */
-    public function getAccountId()
-    {
-        return null;
-    }
-
-    /**
-     * Проверяет, был ли установлен идентификатор магазина
-     * @deprecated Будет удален в следующих версиях
-     * @return bool True если идентификатор магазина был установлен, false если нет
-     */
-    public function hasAccountId()
-    {
-        return false;
-    }
-
-    /**
-     * Устанавлвиает идентификатор магазина
-     * @deprecated Будет удален в следующих версиях
-     * @param string $value Идентификатор магазина или null чтобы удалить значение
-     */
-    public function setAccountId($value)
-    {}
-
-    /**
-     * Возвращает идентификатор шлюза
-     * @deprecated Будет удален в следующих версиях
-     * @return string|null Идентификатор шлюза
-     */
-    public function getGatewayId()
-    {
-        return null;
-    }
-
-    /**
-     * Проверяет был ли установлен идентификатор шлюза
-     * @deprecated Будет удален в следующих версиях
-     * @return bool True если идентификатор шлюза был установлен, false если нет
-     */
-    public function hasGatewayId()
-    {
-        return false;
-    }
-
-    /**
-     * Устанавливает идентификатор шлюза
-     * @deprecated Будет удален в следующих версиях
-     * @param string|null $value Идентификатор шлюза или null чтобы удалить значение
-     */
-    public function setGatewayId($value)
-    {}
 
     /**
      * Возвращает дату создания от которой будут возвращены возвраты или null если дата не была установлена
@@ -254,13 +217,13 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
             $dateTime = TypeCast::castToDateTime($value);
             if ($dateTime === null) {
                 throw new InvalidPropertyValueException(
-                    'Invalid created_gte value in RefundsRequest', 0, 'RefundsRequest.createdAtGte'
+                    'Invalid created_gte value in ReceiptsRequest', 0, 'ReceiptsRequest.createdAtGte'
                 );
             }
             $this->_createdAtGte = $dateTime;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid created_gte value type in RefundsRequest', 0, 'RefundsRequest.createdAtGte'
+                'Invalid created_gte value type in ReceiptsRequest', 0, 'ReceiptsRequest.createdAtGte'
             );
         }
     }
@@ -300,13 +263,13 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
             $dateTime = TypeCast::castToDateTime($value);
             if ($dateTime === null) {
                 throw new InvalidPropertyValueException(
-                    'Invalid created_gt value in RefundsRequest', 0, 'RefundsRequest.createdAtGt'
+                    'Invalid created_gt value in ReceiptsRequest', 0, 'ReceiptsRequest.createdAtGt'
                 );
             }
             $this->_createdAtGt = $dateTime;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid created_gt value type in RefundsRequest', 0, 'RefundsRequest.createdAtGt'
+                'Invalid created_gt value type in ReceiptsRequest', 0, 'ReceiptsRequest.createdAtGt'
             );
         }
     }
@@ -346,13 +309,13 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
             $dateTime = TypeCast::castToDateTime($value);
             if ($dateTime === null) {
                 throw new InvalidPropertyValueException(
-                    'Invalid created_lte value in RefundsRequest', 0, 'RefundsRequest.createdLte'
+                    'Invalid created_lte value in ReceiptsRequest', 0, 'ReceiptsRequest.createdLte'
                 );
             }
             $this->_createdAtLte = $dateTime;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid created_lte value type in RefundsRequest', 0, 'RefundsRequest.createdLte'
+                'Invalid created_lte value type in ReceiptsRequest', 0, 'ReceiptsRequest.createdLte'
             );
         }
     }
@@ -392,130 +355,16 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
             $dateTime = TypeCast::castToDateTime($value);
             if ($dateTime === null) {
                 throw new InvalidPropertyValueException(
-                    'Invalid created_lt value in RefundsRequest', 0, 'RefundsRequest.createdLt'
+                    'Invalid created_lt value in ReceiptsRequest', 0, 'ReceiptsRequest.createdLt'
                 );
             }
             $this->_createdAtLt = $dateTime;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid created_lt value type in RefundsRequest', 0, 'RefundsRequest.createdLt'
+                'Invalid created_lt value type in ReceiptsRequest', 0, 'ReceiptsRequest.createdLt'
             );
         }
     }
-
-    /**
-     * Возвращает дату проведения от которой будут возвращены возвраты или null если дата не была установлена
-     * @deprecated Будет удален в следующих версиях
-     * @return \DateTime|null Время проведения операции, от (включительно)
-     */
-    public function getAuthorizedGte()
-    {
-        return null;
-    }
-
-    /**
-     * Проверяет была ли установлена дата проведения от которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @return bool True если дата была установлена, false если нет
-     */
-    public function hasAuthorizedGte()
-    {
-        return false;
-    }
-
-    /**
-     * Устанавливает дату проведения от которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @param \DateTime|string|int|null $value Время проведения операции, от (не включая) или null чтобы удалить
-     * значение
-     */
-    public function setAuthorizedGte($value)
-    {}
-
-    /**
-     * Возвращает дату проведения от которой будут возвращены возвраты или null если дата не была установлена
-     * @deprecated Будет удален в следующих версиях
-     * @return \DateTime|null Время проведения операции, от (не включая)
-     */
-    public function getAuthorizedGt()
-    {
-        return null;
-    }
-
-    /**
-     * Проверяет была ли установлена дата проведения от которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @return bool True если дата была установлена, false если нет
-     */
-    public function hasAuthorizedGt()
-    {
-        return false;
-    }
-
-    /**
-     * Устанавливает дату проведения от которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @param \DateTime|string|int|null $value Время проведения операции, от (не включая) или null чтобы удалить
-     * значение
-     */
-    public function setAuthorizedGt($value)
-    {}
-
-    /**
-     * Возвращает дату проведения до которой будут возвращены возвраты или null если дата не была установлена
-     * @deprecated Будет удален в следующих версиях
-     * @return \DateTime|null Время проведения, до (включительно)
-     */
-    public function getAuthorizedLte()
-    {
-        return null;
-    }
-
-    /**
-     * Проверяет была ли установлена дата проведения до которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @return bool True если дата была установлена, false если нет
-     */
-    public function hasAuthorizedLte()
-    {
-        return false;
-    }
-
-    /**
-     * Устанавливает дату проведения до которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @param \DateTime|string|int|null $value Время проведения, до (включительно) или null чтобы удалить значение
-     */
-    public function setAuthorizedLte($value)
-    {}
-
-    /**
-     * Возвращает дату проведения до которой будут возвращены платежи возвраты или null если она не была установлена
-     * @deprecated Будет удален в следующих версиях
-     * @return \DateTime|null Время проведения, до (не включая)
-     */
-    public function getAuthorizedLt()
-    {
-        return null;
-    }
-
-    /**
-     * Проверяет была ли установлена дата проведения до которой выбираются вовзраты
-     * @deprecated Будет удален в следующих версиях
-     * @return bool True если дата была установлена, false если нет
-     */
-    public function hasAuthorizedLt()
-    {
-        return false;
-    }
-
-    /**
-     * Устанавливает дату проведения до которой выбираются возвраты
-     * @deprecated Будет удален в следующих версиях
-     * @param \DateTime|string|int|null $value Время проведения, до (не включая) или null чтобы удалить значение
-     */
-    public function setAuthorizedLt($value)
-    {}
 
     /**
      * Возвращает статус выбираемых возвратов или null если он до этого не был установлен
@@ -549,14 +398,14 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
         } elseif (TypeCast::canCastToEnumString($value)) {
             if (!RefundStatus::valueExists((string)$value)) {
                 throw new InvalidPropertyValueException(
-                    'Invalid status value in RefundsRequest', 0, 'RefundsRequest.status', $value
+                    'Invalid status value in ReceiptsRequest', 0, 'ReceiptsRequest.status', $value
                 );
             } else {
                 $this->_status = (string)$value;
             }
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid status value in RefundsRequest', 0, 'RefundsRequest.status', $value
+                'Invalid status value type in ReceiptsRequest', 0, 'ReceiptsRequest.status', $value
             );
         }
     }
@@ -593,36 +442,9 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
             $this->_cursor = (string) $value;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid status value in RefundsRequest', 0, 'RefundsRequest.cursor', $value
+                'Invalid status value type in ReceiptsRequest', 0, 'ReceiptsRequest.cursor', $value
             );
         }
-    }
-
-    /**
-     * @deprecated Будет удален в следующих версиях
-     * @return string
-     */
-    public function getNextPage()
-    {
-        return $this->_cursor;
-    }
-
-    /**
-     * @deprecated Будет удален в следующих версиях
-     * @return bool
-     */
-    public function hasNextPage()
-    {
-        return !empty($this->_cursor);
-    }
-
-    /**
-     * @deprecated Будет удален в следующих версиях
-     * @param $value
-     */
-    public function setNextPage($value)
-    {
-        $this->setCursor($value);
     }
 
     /**
@@ -656,13 +478,13 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
         } elseif (is_int($value)) {
             if ($value < 0 || $value > self::MAX_LIMIT_VALUE) {
                 throw new InvalidPropertyValueException(
-                    'Invalid limit value in RefundsRequest', 0, 'RefundsRequest.limit', $value
+                    'Invalid limit value in ReceiptsRequest', 0, 'ReceiptsRequest.limit', $value
                 );
             }
             $this->_limit = $value;
         } else {
             throw new InvalidPropertyValueTypeException(
-                'Invalid limit value type in RefundsRequest', 0, 'RefundsRequest.limit', $value
+                'Invalid limit value type in ReceiptsRequest', 0, 'ReceiptsRequest.limit', $value
             );
         }
     }
@@ -678,10 +500,10 @@ class RefundsRequest extends AbstractRequest implements RefundsRequestInterface
 
     /**
      * Возвращает инстанс билдера объектов запросов списка возвратов магазина
-     * @return RefundsRequestBuilder Билдер объектов запросов списка возвратов
+     * @return ReceiptsRequestBuilder Билдер объектов запросов списка возвратов
      */
     public static function builder()
     {
-        return new RefundsRequestBuilder();
+        return new ReceiptsRequestBuilder();
     }
 }

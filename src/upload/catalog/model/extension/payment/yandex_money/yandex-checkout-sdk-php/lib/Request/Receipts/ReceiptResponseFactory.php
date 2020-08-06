@@ -38,6 +38,7 @@ class ReceiptResponseFactory
     private $typeClassMap = array(
         ReceiptType::PAYMENT => 'PaymentReceiptResponse',
         ReceiptType::REFUND  => 'RefundReceiptResponse',
+        ReceiptType::SIMPLE  => 'SimpleReceiptResponse',
     );
 
     /**
@@ -48,7 +49,13 @@ class ReceiptResponseFactory
     public function factory($data)
     {
         if (array_key_exists('type', $data)) {
-            $type = $data['type'];
+            if (array_key_exists('refund_id', $data)) {
+                $type = ReceiptType::REFUND;
+            } elseif (array_key_exists('payment_id', $data)) {
+                $type = ReceiptType::PAYMENT;
+            } else {
+                $type = ReceiptType::SIMPLE;
+            }
         } else {
             throw new \InvalidArgumentException(
                 'Parameter type not specified in ReceiptResponseFactory.factory()'

@@ -47,6 +47,11 @@ class ReceiptsResponse
     private $items;
 
     /**
+     * @var string|null Токен следующей страницы
+     */
+    private $nextCursor;
+
+    /**
      * @var ReceiptResponseFactory Фабрика для создания чеков
      */
     private $factory;
@@ -71,6 +76,10 @@ class ReceiptsResponse
                 $this->items[] = $receipt;
             }
         }
+
+        if (!empty($response['next_cursor'])) {
+            $this->nextCursor = $response['next_cursor'];
+        }
     }
 
     /**
@@ -91,4 +100,21 @@ class ReceiptsResponse
         return $this->items;
     }
 
+    /**
+     * Возвращает токен следующей страницы, если он задан, или null
+     * @return string|null Токен следующей страницы
+     */
+    public function getNextCursor()
+    {
+        return $this->nextCursor;
+    }
+
+    /**
+     * Проверяет имееотся ли в ответе токен следующей страницы
+     * @return bool True если токен следующей страницы есть, false если нет
+     */
+    public function hasNextCursor()
+    {
+        return $this->nextCursor !== null;
+    }
 }

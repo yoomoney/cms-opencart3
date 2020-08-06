@@ -24,34 +24,36 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Request\Payments;
+namespace YandexCheckout\Request\Receipts;
 
 /**
- * Класс сериализатора объектов запросов к API для получения списка платежей
+ * Класс сериализатора объектов запросов к API для получения списка возвратов
  *
- * @package YandexCheckout\Request\Payments
+ * @package YandexCheckout\Request\Receipts
  */
-class PaymentsRequestSerializer
+class ReceiptsRequestSerializer
 {
     /**
      * @var array Карта маппинга свойств объекта запроса на поля отправляемого запроса
      */
     private static $propertyMap = array(
-        'createdAtGte'       => 'created_at.gte',
-        'createdAtGt'        => 'created_at.gt',
-        'createdAtLte'       => 'created_at.lte',
-        'createdAtLt'        => 'created_at.lt',
-        'status'             => 'status',
-        'limit'              => 'limit',
-        'cursor'             => 'cursor',
+        'cursor'         => 'cursor',
+        'createdAtGte'   => 'created_at.gte',
+        'createdAtGt'    => 'created_at.gt',
+        'createdAtLte'   => 'created_at.lte',
+        'createdAtLt'    => 'created_at.lt',
+        'limit'          => 'limit',
+        'paymentId'      => 'payment_id',
+        'refundId'       => 'refund_id',
+        'status'         => 'status',
     );
 
     /**
      * Сериализует объект запроса к API для дальнейшей его отправки
-     * @param PaymentsRequestInterface $request Сериализуемый объект
+     * @param ReceiptsRequestInterface $request Сериализуемый объект
      * @return array Массив с инфомрацией, отпарвляемый в дальнейшем в API
      */
-    public function serialize(PaymentsRequestInterface $request)
+    public function serialize(ReceiptsRequestInterface $request)
     {
         $result = array();
         foreach (self::$propertyMap as $property => $name) {
