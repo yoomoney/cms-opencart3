@@ -12,7 +12,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.6.1';
+    const MODULE_VERSION = '1.7.0';
 
     /**
      * @var integer
@@ -162,7 +162,7 @@ class ControllerExtensionPaymentYandexMoney extends Controller
 
         $data['action']              = $this->url->link('extension/payment/'.self::MODULE_NAME,
             'user_token='.$this->session->data['user_token'], true);
-        $data['cancel']              = $this->url->link('extension/extension',
+        $data['cancel']              = $this->url->link('marketplace/extension',
             'user_token='.$this->session->data['user_token'].'&type=payment', true);
         $data['kassa_logs_link']     = $this->url->link(
             'extension/payment/'.self::MODULE_NAME.'/logs',

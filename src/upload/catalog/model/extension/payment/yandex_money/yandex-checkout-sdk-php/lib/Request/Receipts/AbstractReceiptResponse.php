@@ -246,7 +246,9 @@ abstract class AbstractReceiptResponse extends AbstractObject implements Receipt
      */
     public function setObjectId($value)
     {
-        if (TypeCast::canCastToString($value)) {
+        if ($value === null || $value === '') {
+            $this->_object_id = null;
+        } elseif (TypeCast::canCastToString($value)) {
             $this->_object_id = (string)$value;
         } else {
             throw new InvalidPropertyValueTypeException('Invalid receipt object_id type', 0, 'Receipt.object_id', $value);
@@ -261,10 +263,10 @@ abstract class AbstractReceiptResponse extends AbstractObject implements Receipt
      */
     private function factoryObjectId($receiptData)
     {
-        if ($receiptData['type'] === ReceiptType::PAYMENT) {
-            return $receiptData['payment_id'];
-        } elseif ($receiptData['type'] === ReceiptType::REFUND) {
+        if (array_key_exists('refund_id', $receiptData)) {
             return $receiptData['refund_id'];
+        } elseif (array_key_exists('payment_id', $receiptData)) {
+            return $receiptData['payment_id'];
         }
         return null;
     }
@@ -303,6 +305,7 @@ abstract class AbstractReceiptResponse extends AbstractObject implements Receipt
                 'Invalid status value type', 0, 'Receipt.status', $value
             );
         }
+        return $this;
     }
 
     /**

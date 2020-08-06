@@ -24,32 +24,23 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Model;
-
-use YandexCheckout\Common\AbstractEnum;
+namespace YandexCheckout\Request\Receipts;
 
 /**
- * ReceiptType - Тип чека в онлайн-кассе.
- * |Код|Описание|
- * --- | ---
- * |payment|Приход|
- * |refund|Возврат|
- * |simple|Простой|
+ * Class SimpleReceiptResponse
+ * @package YandexCheckout\Model
+ *
+ * Чек, не привязанный ни к платежу, ни к возврату
  */
-class ReceiptType extends AbstractEnum
+class SimpleReceiptResponse extends AbstractReceiptResponse
 {
-    /** @var string Тип чека: приход */
-    const PAYMENT = 'payment';
-
-    /** @var string Тип чека: возврат */
-    const REFUND  = 'refund';
-
-    /** @var string Тип чека: простой */
-    const SIMPLE  = 'simple';
-
-    protected static $validValues = array(
-        self::PAYMENT => true,
-        self::REFUND  => true,
-        self::SIMPLE  => true,
-    );
+    /**
+     * Установка свойств, присущих конкретному объекту
+     *
+     * @param array $receiptData
+     *
+     * @return void
+     */
+    public function setSpecificProperties($receiptData)
+    {}
 }

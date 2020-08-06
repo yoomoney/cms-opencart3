@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-namespace YandexCheckout\Request\Refunds;
+namespace YandexCheckout\Request\Receipts;
 
 /**
  * Интерфейс объекта запроса списка возвратов
@@ -32,6 +32,7 @@ namespace YandexCheckout\Request\Refunds;
  * @package YandexCheckout\Request\Refunds
  *
  * @property-read string $paymentId Идентификатор платежа
+ * @property-read string $refundId Идентификатор возврата
  * @property-read \DateTime $createdAtGte Время создания, от (включительно)
  * @property-read \DateTime $createdAtGt Время создания, от (не включая)
  * @property-read \DateTime $createdAtLte Время создания, до (включительно)
@@ -40,7 +41,7 @@ namespace YandexCheckout\Request\Refunds;
  * @property-read string $cursor Токен для получения следующей страницы выборки
  * @property-read integer|null $limit Ограничение количества объектов, отображаемых на одной странице выдачи
  */
-interface RefundsRequestInterface
+interface ReceiptsRequestInterface
 {
     /**
      * Возвращает идентификатор возврата
@@ -65,30 +66,6 @@ interface RefundsRequestInterface
      * @return bool True если идентификатор был задан, false если нет
      */
     function hasPaymentId();
-
-    /**
-     * Возвращает идентификатор магазина, если он был задан
-     * @return string|null Идентификатор магазина
-     */
-    function getAccountId();
-
-    /**
-     * Проверяет, был ли установлен идентификатор магазина
-     * @return bool True если идентификатор магазина был установлен, false если нет
-     */
-    function hasAccountId();
-
-    /**
-     * Возвращает идентификатор шлюза
-     * @return string|null Идентификатор шлюза
-     */
-    function getGatewayId();
-
-    /**
-     * Проверяет был ли установлен идентификатор шлюза
-     * @return bool True если идентификатор шлюза был установлен, false если нет
-     */
-    function hasGatewayId();
 
     /**
      * Возвращает дату создания от которой будут возвращены возвраты или null если дата не была установлена
@@ -161,4 +138,16 @@ interface RefundsRequestInterface
      * @return bool True если токен был установлен, false если нет
      */
     function hasCursor();
+
+    /**
+     * Возвращает ограничение количества объектов или null если оно до этого не было установлено
+     * @return string|null Ограничение количества объектов
+     */
+    function getLimit();
+
+    /**
+     * Проверяет было ли установлено ограничение количества объектов
+     * @return bool True если ограничение количества объектов было установлено, false если нет
+     */
+    function hasLimit();
 }

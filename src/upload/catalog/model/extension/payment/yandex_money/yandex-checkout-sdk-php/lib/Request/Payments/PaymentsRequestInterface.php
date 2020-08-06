@@ -31,11 +31,15 @@ namespace YandexCheckout\Request\Payments;
  *
  * @package YandexCheckout\Request\Payments
  *
- * @property-read string|null $page Страница выдачи результатов, которую необходимо отобразить
+ * @property-read string|null $cursor Страница выдачи результатов, которую необходимо отобразить
  * @property-read \DateTime|null $createdAtGte Время создания, от (включительно)
  * @property-read \DateTime|null $createdAtGt Время создания, от (не включая)
  * @property-read \DateTime|null $createdAtLte Время создания, до (включительно)
  * @property-read \DateTime|null $createdAtLt Время создания, до (не включая)
+ * @property-read \DateTime|null $capturedAtGte Время подтверждения, от (включительно)
+ * @property-read \DateTime|null $capturedAtGt Время подтверждения, от (не включая)
+ * @property-read \DateTime|null $capturedAtLte Время подтверждения, до (включительно)
+ * @property-read \DateTime|null $capturedAtLt Время подтверждения, до (не включая)
  * @property-read integer|null $limit Ограничение количества объектов платежа, отображаемых на одной странице выдачи
  * @property-read string|null $recipientGatewayId Идентификатор шлюза.
  * @property-read string|null $status Статус платежа
@@ -46,13 +50,13 @@ interface PaymentsRequestInterface
      * Возвращает страницу выдачи результатов или null если она до этого не была установлена
      * @return string|null Страница выдачи результатов
      */
-    function getPage();
+    function getCursor();
 
     /**
      * Проверяет была ли установлена страница выдачи результатов
      * @return bool True если страница выдачи результатов была установлена, false если нет
      */
-    function hasPage();
+    function hasCursor();
 
     /**
      * Возвращает дату создания от которой будут возвращены платежи или null если дата не была установлена

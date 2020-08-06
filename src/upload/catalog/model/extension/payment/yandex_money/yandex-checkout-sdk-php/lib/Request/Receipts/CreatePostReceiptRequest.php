@@ -430,11 +430,6 @@ class CreatePostReceiptRequest extends AbstractRequest implements CreatePostRece
             return false;
         }
 
-        if (!$this->getObjectId()) {
-            $this->setValidationError('Receipt object_id not specified');
-            return false;
-        }
-
         return true;
     }
 

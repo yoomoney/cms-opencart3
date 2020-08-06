@@ -53,6 +53,7 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает идентификатор возврата
+     * @deprecated Будет удален в следующих версиях
      * @param string $value Идентификатор возврата, который ищется в API
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
      *
@@ -81,6 +82,7 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавлвиает идентификатор магазина
+     * @deprecated Будет удален в следующих версиях
      * @param string $value Идентификатор магазина или null чтобы удалить значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
      *
@@ -94,6 +96,7 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает идентификатор шлюза
+     * @deprecated Будет удален в следующих версиях
      * @param string|null $value Идентификатор шлюза или null чтобы удалить значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
      *
@@ -120,16 +123,39 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
     }
 
     /**
+     * Устанавливает ограничение количества объектов возвратов
+     * @param string $value Ограничение количества объектов возвратов или null чтобы удалить значение
+     * @return RefundsRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueTypeException Выбрасывается если в метод было передана не целое число
+     */
+    public function setLimit($value)
+    {
+        $this->currentObject->setLimit($value);
+        return $this;
+    }
+
+    /**
      * Устанавливает токен следующей страницы выборки
      * @param string $value Токен следующей страницы выборки или null чтобы удалить значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
      *
      * @throws InvalidPropertyValueTypeException Выбрасывается если в метод была передана не строка
      */
+    public function setCursor($value)
+    {
+        $this->currentObject->setCursor($value);
+        return $this;
+    }
+
+    /**
+     * @deprecated Будет удален в следующих версиях
+     * @param $value
+     * @return $RefundsRequestBuilder
+     */
     public function setNextPage($value)
     {
-        $this->currentObject->setNextPage($value);
-        return $this;
+        return $this->setCursor($value);
     }
 
     /**
@@ -142,9 +168,9 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
      * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
      * строка, не число и не значение типа \DateTime)
      */
-    public function setCreatedGt($value)
+    public function setCreatedAtGt($value)
     {
-        $this->currentObject->setCreatedGt($value);
+        $this->currentObject->setCreatedAtGt($value);
         return $this;
     }
 
@@ -158,9 +184,9 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
      * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
      * строка, не число и не значение типа \DateTime)
      */
-    public function setCreatedGte($value)
+    public function setCreatedAtGte($value)
     {
-        $this->currentObject->setCreatedGte($value);
+        $this->currentObject->setCreatedAtGte($value);
         return $this;
     }
 
@@ -174,9 +200,9 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
      * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
      * строка, не число и не значение типа \DateTime)
      */
-    public function setCreatedLt($value)
+    public function setCreatedAtLt($value)
     {
-        $this->currentObject->setCreatedLt($value);
+        $this->currentObject->setCreatedAtLt($value);
         return $this;
     }
 
@@ -190,14 +216,15 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
      * @throws InvalidPropertyValueTypeException Генерируется если была передана дата с не тем типом (передана не
      * строка, не число и не значение типа \DateTime)
      */
-    public function setCreatedLte($value)
+    public function setCreatedAtLte($value)
     {
-        $this->currentObject->setCreatedLte($value);
+        $this->currentObject->setCreatedAtLte($value);
         return $this;
     }
 
     /**
      * Устанавливает дату проведения от которой выбираются возвраты
+     * @deprecated Будет удален в следующих версиях
      * @param \DateTime|string|int|null $value Время проведения операции, от (не включая) или null чтобы удалить
      * значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
@@ -215,6 +242,7 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает дату проведения от которой выбираются возвраты
+     * @deprecated Будет удален в следующих версиях
      * @param \DateTime|string|int|null $value Время проведения операции, от (не включая) или null чтобы удалить
      * значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
@@ -232,6 +260,7 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает дату проведения до которой выбираются возвраты
+     * @deprecated Будет удален в следующих версиях
      * @param \DateTime|string|int|null $value Время проведения, до (не включая) или null чтобы удалить значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
      *
@@ -248,6 +277,7 @@ class RefundsRequestBuilder extends AbstractRequestBuilder
 
     /**
      * Устанавливает дату проведения до которой выбираются возвраты
+     * @deprecated Будет удален в следующих версиях
      * @param \DateTime|string|int|null $value Время проведения, до (включительно) или null чтобы удалить значение
      * @return RefundsRequestBuilder Инстанс текущего объекта билдера
      *

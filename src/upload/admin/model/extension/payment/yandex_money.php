@@ -5,7 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.6.1';
+    const MODULE_VERSION = '1.7.0';
     const YCMS_EVENT_SECOND_RECEIPT_CODE = 'ycms_second_receipt_trigger';
 
     private $kassaModel;
@@ -68,11 +68,6 @@ class ModelExtensionPaymentYandexMoney extends Model
 
     public function uninstall()
     {
-        if ($this->hasEvent(self::YCMS_EVENT_CODE)) {
-            $this->load->model('setting/event');
-            $this->model_setting_event->deleteEventByCode(self::YCMS_EVENT_CODE);
-        }
-
         $this->log('info', 'uninstall yandex_money module');
     }
 
