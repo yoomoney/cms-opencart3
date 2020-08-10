@@ -23,7 +23,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.7.0';
+    const MODULE_VERSION = '1.7.1';
     private $kassaModel;
     private $walletModel;
     private $billingModel;
@@ -457,10 +457,19 @@ class ModelExtensionPaymentYandexMoney extends Model
         if ($secondReceipt->sendSecondReceipt($newStatusId)) {
             $settlementsSum = $secondReceipt->getSettlementsSum();
             $comment = sprintf($this->language->get('second_receipt_history'), $settlementsSum);
-            $this->model_checkout_order->addOrderHistory($orderId, $newStatusId, $comment);
+            $this->addOrderHistory($orderId, $newStatusId, $comment);
         }
     }
 
+    /**
+     * @param int $orderId
+     * @param int $newStatusId
+     * @param string $comment
+     */
+    public function addOrderHistory($orderId, $newStatusId, $comment)
+    {
+        $this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$orderId . "', order_status_id = '" . (int)$newStatusId . "', notify = '0', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
+    }
 
     /**
      * @param int $orderId

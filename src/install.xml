@@ -2,7 +2,7 @@
 <modification>
     <name>Y.CMS for Opencart 3.x</name>
     <code>ycms.2.0</code>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
     <author>Yandex.Money</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -314,7 +314,8 @@
                 if ($this->currency->has('RUB')) {
                     $data['cost'] = sprintf('%.2f', $this->currency->format($cost, 'RUB', '', false));
                 } else {
-                    $data['cost'] = $this->getModel()->convertFromCbrf(array('total' => $cost), 'RUB');
+                    $this->load->model('extension/payment/yandex_money');
+                    $data['cost'] = $this->model_extension_payment_yandex_money->convertFromCbrf(array('total' => $cost), 'RUB');
                 }
             ]]></add>
         </operation>
