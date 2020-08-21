@@ -460,7 +460,13 @@ class ControllerExtensionPaymentYandexMoney extends Controller
                     'Payment not captured: invalid payment status "'.$payment->getStatus().'"');
             } else {
                 $payment = $notification->getObject();
-                if ($payment->getPaymentMethod()->getType() == PaymentMethodType::BANK_CARD) {
+                $capturePaymentMethods = array(
+                    PaymentMethodType::BANK_CARD,
+                    PaymentMethodType::YANDEX_MONEY,
+                    PaymentMethodType::GOOGLE_PAY,
+                    PaymentMethodType::APPLE_PAY,
+                );
+                if (in_array($payment->getPaymentMethod()->getType(), $capturePaymentMethods)) {
                     $this->getModel()->confirmOrder($orderId);
                     $kassa = $this->getModel()->getKassaModel();
                     $this->model_checkout_order->addOrderHistory(

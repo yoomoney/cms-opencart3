@@ -4,6 +4,7 @@ namespace YandexMoneyModule\Model;
 
 use Config;
 use YandexCheckout\Model\CurrencyCode;
+use YandexCheckout\Model\Payment;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataRate;
 use YandexCheckout\Model\PaymentData\B2b\Sberbank\VatDataType;
 use YandexCheckout\Model\PaymentMethodType;
@@ -308,7 +309,15 @@ class KassaModel extends AbstractPaymentModel
 
     public function getCaptureValue($paymentMethod)
     {
-        return !($this->enableHoldMode && in_array($paymentMethod, array('', PaymentMethodType::BANK_CARD)));
+        $paymentMethodsForHold = array(
+            '',
+            PaymentMethodType::BANK_CARD,
+            PaymentMethodType::YANDEX_MONEY,
+            PaymentMethodType::GOOGLE_PAY,
+            PaymentMethodType::APPLE_PAY,
+            self::CUSTOM_PAYMENT_METHOD_WIDGET,
+        );
+        return !($this->enableHoldMode && in_array($paymentMethod, $paymentMethodsForHold));
     }
 
     /**
