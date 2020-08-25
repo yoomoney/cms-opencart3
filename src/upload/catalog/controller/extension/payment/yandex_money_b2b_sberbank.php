@@ -151,7 +151,7 @@ class ControllerExtensionPaymentYandexMoneyB2bSberbank extends ControllerExtensi
                     ->setMetadata(array(
                         'order_id'       => $orderId,
                         'cms_name'       => 'ya_api_ycms_opencart3',
-                        'module_version' => '1.3.3',
+                        'module_version' => self::MODULE_VERSION,
                     ));
 
             $confirmation = array(
