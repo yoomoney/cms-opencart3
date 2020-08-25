@@ -20,10 +20,8 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'yandex_money'.DIRECTORY_SEPARATOR.'aut
  */
 class ModelExtensionPaymentYandexMoney extends Model
 {
-    /**
-     * string
-     */
-    const MODULE_VERSION = '1.8.0';
+    const MODULE_VERSION = '1.8.1';
+
     private $kassaModel;
     private $walletModel;
     private $billingModel;
