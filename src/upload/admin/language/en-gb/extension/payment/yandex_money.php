@@ -323,6 +323,9 @@ $_['metrika_callback']       = 'Link for the app';
 
 // Error
 $_['error_permission']   = 'You do not have the right to manage the module!';
+$_['error_install_widget'] = 'Чтобы покупатели могли заплатить вам через Apple Pay, <a href="https://kassa.yandex.ru/docs/merchant.ru.yandex.kassa">скачайте файл apple-developer-merchantid-domain-association</a> и добавьте его в папку ./well-known на вашем сайте. Если не знаете, как это сделать, обратитесь к администратору сайта или в поддержку хостинга. Не забудьте также подключить оплату через Apple Pay <a href="https://kassa.yandex.ru/my/payment-methods/settings#applePay">в личном кабинете Кассы</a>. <a href="https://kassa.yandex.ru/developers/payment-forms/widget#apple-pay-configuration">Почитать о подключении Apple Pay в документации Кассы</a>';
+
+
 $_['active_on']          = 'Activated';
 $_['active_off']          = 'Disabled';
 $_['active']          = 'Activity';
