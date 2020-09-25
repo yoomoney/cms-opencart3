@@ -43,22 +43,22 @@
             <input type="hidden" name="last_active_tab" id="last-active-tab" value="{{ lastActiveTab }}" />
             <div class="tab-content bootstrap">
                 <div class="tab-pane{{ (lastActiveTab == 'tab-kassa' ? ' active' : '') }}" id="tab-kassa">
-                    {% include 'extension/payment/yandex_money/kassa.twig' %}
+                    {{ load.view('extension/payment/yandex_money/kassa', data) }}
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-wallet' ? ' active' : '') }}" id="tab-wallet">
-                    {% include 'extension/payment/yandex_money/wallet.twig' %}
+                    {{ load.view('extension/payment/yandex_money/wallet', data) }}
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-billing' ? ' active' : '') }}" id="tab-billing">
-                    {% include 'extension/payment/yandex_money/billing.twig' %}
+                    {{ load.view('extension/payment/yandex_money/billing', data) }}
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-metrika' ? ' active' : '') }}" id="tab-metrika">
-                    {% include 'extension/payment/yandex_money/metrika.twig' %}
+                    {{ load.view('extension/payment/yandex_money/metrika', data) }}
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-market' ? ' active' : '') }}" id="tab-market">
-                    {% include 'extension/payment/yandex_money/market.twig' %}
+                    {{ load.view('extension/payment/yandex_money/market', data) }}
                 </div>
                 <div class="tab-pane{{ (lastActiveTab == 'tab-updater' ? ' active' : '') }}" id="tab-updater">
-                    {% include 'extension/payment/yandex_money/updater.twig' %}
+                    {{ load.view('extension/payment/yandex_money/updater', data) }}
                 </div>
             </div>
         </form>
