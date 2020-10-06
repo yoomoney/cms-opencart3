@@ -409,6 +409,7 @@ $_['b2b_tax_rate_untaxed_label']     = 'Without VAT';
 $_['b2b_tax_rate_7_label']           = '7%';
 $_['b2b_tax_rate_10_label']          = '10%';
 $_['b2b_tax_rate_18_label']          = '18%';
+$_['b2b_tax_rate_20_label']          = '20%';
 $_['b2b_sberbank_tax_message']       = 'There is a restriction for payments via Sberbank Business Online: one receipt can only contain products with the same VAT rate. If the client wants to pay for products with different VAT rates at the same time, we will show him the message explaining that it\'s not possible.';
 
 $_['kassa_payment_mode_default_label']          = 'Признак способа расчета';
