@@ -38,7 +38,7 @@ use YandexCheckout\Model\TransferInterface;
  *
  * @property-read string $paymentId Айди платежа для которого создаётся возврат
  * @property-read AmountInterface $amount Сумма возврата
- * @property-read string $comment Комментарий к операции возврата, основание для возврата средств покупателю.
+ * @property-read string $description Комментарий к операции возврата, основание для возврата средств покупателю.
  * @property-read ReceiptInterface|null $receipt Инстанс чека или null
  */
 interface CreateRefundRequestInterface
@@ -57,15 +57,29 @@ interface CreateRefundRequestInterface
 
     /**
      * Возвращает комментарий к возврату или null, если комментарий не задан
+     * @deprecated Устарел. Будет удален в одной из следующих версий
      * @return string Комментарий к операции возврата, основание для возврата средств покупателю.
      */
     function getComment();
 
     /**
+     * Возвращает комментарий к возврату или null, если комментарий не задан
+     * @return string Комментарий к операции возврата, основание для возврата средств покупателю.
+     */
+    function getDescription();
+
+    /**
      * Проверяет задан ли комментарий к создаваемому возврату
+     * @deprecated Устарел. Будет удален в одной из следующих версий
      * @return bool True если комментарий установлен, false если нет
      */
     function hasComment();
+
+    /**
+     * Проверяет задан ли комментарий к создаваемому возврату
+     * @return bool True если комментарий установлен, false если нет
+     */
+    function hasDescription();
 
     /**
      * Возвращает инстанс чека или null если чек не задан

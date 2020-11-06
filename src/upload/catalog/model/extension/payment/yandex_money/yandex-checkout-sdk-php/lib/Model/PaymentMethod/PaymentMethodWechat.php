@@ -28,6 +28,9 @@ namespace YandexCheckout\Model\PaymentMethod;
 
 use YandexCheckout\Model\PaymentMethodType;
 
+/**
+ * @deprecated Класс будет удалён в одной из будущих версий.
+ */
 class PaymentMethodWechat extends AbstractPaymentMethod
 {
     public function __construct()

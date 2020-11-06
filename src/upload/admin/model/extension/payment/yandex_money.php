@@ -5,7 +5,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '1.9.3';
+    const MODULE_VERSION = '1.9.4';
     const YCMS_EVENT_SECOND_RECEIPT_CODE = 'ycms_second_receipt_trigger';
 
     private $kassaModel;
@@ -14,7 +14,7 @@ class ModelExtensionPaymentYandexMoney extends Model
     private $metrikaModel;
     private $market;
     private $client;
-    private $repository = 'yandex-money/yandex-money-ycms-opencart3';
+    private $repository = 'yoomoney/yandex-money-ycms-opencart3';
     private $backupDirectory = 'yandex_money/backup';
     private $versionDirectory = 'yandex_money/updates';
     private $downloadDirectory = 'yandex_money';
@@ -431,7 +431,7 @@ class ModelExtensionPaymentYandexMoney extends Model
             $builder->setAmount($amount)
                     ->setCurrency(\YandexCheckout\Model\CurrencyCode::RUB)
                     ->setPaymentId($payment->getId())
-                    ->setComment($comment);
+                    ->setDescription($comment);
             $request = $builder->build();
         } catch (Exception $e) {
             $this->log('error', 'Failed to create refund: '.$e->getMessage());

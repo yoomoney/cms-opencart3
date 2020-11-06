@@ -54,8 +54,8 @@ class CreateRefundRequestSerializer
                 'currency' => $request->getAmount()->getCurrency(),
             ),
         );
-        if ($request->hasComment()) {
-            $result['comment'] = $request->getComment();
+        if ($request->hasDescription()) {
+            $result['description'] = $request->getDescription();
         }
         if ($request->hasReceipt()) {
             $receipt           = $request->getReceipt();
@@ -83,11 +83,11 @@ class CreateRefundRequestSerializer
                 $result['receipt']['items'][] = $itemArray;
             }
 
-            $value = $receipt->getEmail();
+            $value = $receipt->getCustomer()->getEmail();
             if (!empty($value)) {
                 $result['receipt']['customer']['email'] = $value;
             }
-            $value = $receipt->getPhone();
+            $value = $receipt->getCustomer()->getPhone();
             if (!empty($value)) {
                 $result['receipt']['customer']['phone'] = $value;
             }

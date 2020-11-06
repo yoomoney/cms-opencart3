@@ -40,7 +40,7 @@ namespace YandexCheckout\Model;
  * @property-read AmountInterface $amount Сумма возврата
  * @property-read string $receiptRegistration Статус регистрации чека
  * @property-read string $receipt_registration Статус регистрации чека
- * @property-read string $comment Комментарий, основание для возврата средств покупателю
+ * @property-read string $description Комментарий, основание для возврата средств покупателю
  */
 interface RefundInterface
 {
@@ -82,9 +82,16 @@ interface RefundInterface
 
     /**
      * Возвращает комментарий к возврату
+     * @deprecated Устарел. Будет удален в одной из следующих версий
      * @return string Комментарий, основание для возврата средств покупателю
      */
     function getComment();
+
+    /**
+     * Возвращает комментарий к возврату
+     * @return string Комментарий, основание для возврата средств покупателю
+     */
+    function getDescription();
 
     /**
      * Возвращает информацию об инициаторе платежа или возврата
