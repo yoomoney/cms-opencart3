@@ -21,7 +21,7 @@ use YandexMoneyModule\YandexMarket\Offer;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.9.3';
+    const MODULE_VERSION = '1.9.4';
 
     /**
      * @var ModelExtensionPaymentYandexMoney

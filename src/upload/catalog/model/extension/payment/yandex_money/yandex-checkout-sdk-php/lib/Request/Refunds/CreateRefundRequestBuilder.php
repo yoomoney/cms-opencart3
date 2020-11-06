@@ -78,15 +78,28 @@ class CreateRefundRequestBuilder extends AbstractPaymentRequestBuilder
 
     /**
      * Устанавливает комментарий к возврату
+     * @deprecated Устарел. Будет удален в одной из следующих версий
      * @param string $value Комментарий к возврату
      * @return CreateRefundRequestBuilder Инстанс текущего билдера
      *
-     * @throws InvalidPropertyValueException Выбрасывается если переданная строка длинее 250 символов
      * @throws InvalidPropertyValueTypeException Выбрасывается если была передана не строка
      */
     public function setComment($value)
     {
-        $this->currentObject->setComment($value);
+        $this->currentObject->setDescription($value);
+        return $this;
+    }
+
+    /**
+     * Устанавливает комментарий к возврату
+     * @param string $value Комментарий к возврату
+     * @return CreateRefundRequestBuilder Инстанс текущего билдера
+     *
+     * @throws InvalidPropertyValueTypeException Выбрасывается если была передана не строка
+     */
+    public function setDescription($value)
+    {
+        $this->currentObject->setDescription($value);
         return $this;
     }
 

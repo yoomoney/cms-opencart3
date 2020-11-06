@@ -44,7 +44,7 @@ use YandexCheckout\Helpers\TypeCast;
  * @property AmountInterface $amount Сумма возврата
  * @property string $receiptRegistration Статус регистрации чека
  * @property string $receipt_registration Статус регистрации чека
- * @property string $comment Комментарий, основание для возврата средств покупателю
+ * @property string $description Комментарий, основание для возврата средств покупателю
  */
 class Refund extends AbstractObject implements RefundInterface
 {
@@ -81,7 +81,7 @@ class Refund extends AbstractObject implements RefundInterface
     /**
      * @var string Комментарий, основание для возврата средств покупателю
      */
-    private $_comment;
+    private $_description;
 
     /**
      * @var SourceInterface[] Данные о распределении денег — сколько и в какой магазин нужно перевести.
@@ -298,15 +298,26 @@ class Refund extends AbstractObject implements RefundInterface
 
     /**
      * Возвращает комментарий к возврату
+     * @deprecated Устарел. Будет удален в одной из следующих версий
      * @return string Комментарий, основание для возврата средств покупателю
      */
     public function getComment()
     {
-        return $this->_comment;
+        return $this->_description;
+    }
+
+    /**
+     * Возвращает комментарий к возврату
+     * @return string Комментарий, основание для возврата средств покупателю
+     */
+    public function getDescription()
+    {
+        return $this->_description;
     }
 
     /**
      * Устанавливает комментарий к возврату
+     * @deprecated Устарел. Будет удален в одной из следующих версий
      * @param string $value Комментарий, основание для возврата средств покупателю
      *
      * @throws EmptyPropertyValueException Выбрасывается если был передан пустой аргумент
@@ -315,16 +326,24 @@ class Refund extends AbstractObject implements RefundInterface
      */
     public function setComment($value)
     {
+        $this->setDescription($value);
+    }
+
+    /**
+     * Устанавливает комментарий к возврату
+     * @param string $value Комментарий, основание для возврата средств покупателю
+     *
+     * @throws EmptyPropertyValueException Выбрасывается если был передан пустой аргумент
+     * @throws InvalidPropertyValueTypeException Выбрасывается если аргумент не является строкой
+     */
+    public function setDescription($value)
+    {
         if ($value === null || $value === '') {
-            throw new EmptyPropertyValueException('Empty refund comment', 0, 'Refund.comment');
+            throw new EmptyPropertyValueException('Empty refund description', 0, 'Refund.description');
         } elseif (TypeCast::canCastToEnumString($value)) {
-            $length = mb_strlen((string)$value, 'utf-8');
-            if ($length > 250) {
-                throw new InvalidPropertyValueException('Empty refund comment', 0, 'Refund.comment', $value);
-            }
-            $this->_comment = (string)$value;
+            $this->_description = (string)$value;
         } else {
-            throw new InvalidPropertyValueTypeException('Empty refund comment', 0, 'Refund.comment', $value);
+            throw new InvalidPropertyValueTypeException('Empty refund description', 0, 'Refund.description', $value);
         }
     }
 

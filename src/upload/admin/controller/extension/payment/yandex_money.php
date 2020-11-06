@@ -12,7 +12,7 @@ use YandexCheckout\Model\PaymentStatus;
 class ControllerExtensionPaymentYandexMoney extends Controller
 {
     const MODULE_NAME = 'yandex_money';
-    const MODULE_VERSION = '1.9.3';
+    const MODULE_VERSION = '1.9.4';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;

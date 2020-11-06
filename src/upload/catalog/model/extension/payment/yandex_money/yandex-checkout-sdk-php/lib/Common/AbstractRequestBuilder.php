@@ -106,8 +106,9 @@ abstract class AbstractRequestBuilder
             if (method_exists($this, $method)) {
                 $this->{$method} ($value);
             } else {
-                $tmp = implode('', array_map('ucfirst', explode('_', $property)));
-                $method = 'set' . ucfirst($tmp);
+                $property = str_replace('.', '_', $property);
+                $field = implode('', array_map('ucfirst', explode('_', $property)));
+                $method = 'set' . ucfirst($field);
                 if (method_exists($this, $method)) {
                     $this->{$method} ($value);
                 }

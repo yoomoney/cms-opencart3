@@ -76,7 +76,8 @@ class PaymentsResponse
                 $payment->setDescription($paymentInfo['description']);
             }
             $payment->setCreatedAt(strtotime($paymentInfo['created_at']));
-            if ($method = $this->factoryPaymentMethod($paymentInfo['payment_method'])) {
+            if (!empty($paymentInfo['payment_method'])
+                && $method = $this->factoryPaymentMethod($paymentInfo['payment_method'])) {
                 $payment->setPaymentMethod($method);
             }
             $payment->setPaid($paymentInfo['paid']);
@@ -95,8 +96,12 @@ class PaymentsResponse
                 if ($paymentInfo['confirmation']['type'] === ConfirmationType::REDIRECT) {
                     $confirmation = new ConfirmationRedirect();
                     $confirmation->setConfirmationUrl($paymentInfo['confirmation']['confirmation_url']);
-                    $confirmation->setEnforce($paymentInfo['confirmation']['enforce']);
-                    $confirmation->setReturnUrl($paymentInfo['confirmation']['return_url']);
+                    if (!empty($paymentInfo['confirmation']['enforce'])) {
+                        $confirmation->setEnforce($paymentInfo['confirmation']['enforce']);
+                    }
+                    if (!empty($paymentInfo['confirmation']['return_url'])) {
+                        $confirmation->setReturnUrl($paymentInfo['confirmation']['return_url']);
+                    }
                 } else {
                     $confirmation = new ConfirmationExternal();
                 }

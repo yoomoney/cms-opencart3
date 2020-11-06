@@ -41,7 +41,12 @@ class PaymentsRequestSerializer
         'createdAtGt'        => 'created_at.gt',
         'createdAtLte'       => 'created_at.lte',
         'createdAtLt'        => 'created_at.lt',
+        'capturedAtGte'      => 'captured_at.gte',
+        'capturedAtGt'       => 'captured_at.gt',
+        'capturedAtLte'      => 'captured_at.lte',
+        'capturedAtLt'       => 'captured_at.lt',
         'status'             => 'status',
+        'paymentMethod'      => 'payment_method',
         'limit'              => 'limit',
         'cursor'             => 'cursor',
     );

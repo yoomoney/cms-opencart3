@@ -56,8 +56,8 @@ abstract class AbstractRefundResponse extends Refund
             $this->setReceiptRegistration($options['receipt_registration']);
         }
 
-        if (!empty($options['comment'])) {
-            $this->setComment($options['comment']);
+        if (!empty($options['description'])) {
+            $this->setDescription($options['description']);
         }
     }
 }

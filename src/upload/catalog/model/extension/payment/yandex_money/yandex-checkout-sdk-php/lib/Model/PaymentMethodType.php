@@ -62,6 +62,9 @@ class PaymentMethodType extends AbstractEnum
     const B2B_SBERBANK   = 'b2b_sberbank';
     const TINKOFF_BANK   = 'tinkoff_bank';
     const PSB            = 'psb';
+    /**
+     * @deprecated Будет удален в следующих версиях
+     */
     const WECHAT         = 'wechat';
 
     protected static $validValues = array(
