@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <modification>
-    <name>Y.CMS for Opencart 3.x</name>
-    <code>ycms.2.0</code>
-    <version>1.9.4</version>
-    <author>Yandex.Money</author>
+    <name>YooMoney for Opencart 3.x</name>
+    <code>YooMoney</code>
+    <version>2.0.0</version>
+    <author>YooMoney</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
         <operation error="skip">
             <search><![CDATA[// History]]></search>
             <add position="before"><![CDATA[
-            $this->language->load('extension/payment/yandex_money');
+            $this->language->load('extension/payment/yoomoney');
             $data['heading_title'] = $this->language->get('text_order');
             if ($order_info['payment_method'] == $this->language->get('kassa_title') || $order_info['payment_method'] == $this->language->get('p2p_title')) {
                $this->session->data['order_id'] = $this->request->get['order_id'];
-               $data['yandex_money'] = $this->load->controller('extension/payment/yandex_money');
+               $data['yoomoney'] = $this->load->controller('extension/payment/yoomoney');
             }]]></add>
         </operation>
     </file>
@@ -21,9 +21,9 @@
         <operation error="skip">
             <search><![CDATA[</tfoot>]]></search>
             <add position="before"><![CDATA[
-            {% if yandex_money is defined and yandex_money %}
+            {% if yoomoney is defined and yoomoney %}
             <tr>
-                <td colspan="{{ products ? '6' : '5' }}">{{ yandex_money }}</td>
+                <td colspan="{{ products ? '6' : '5' }}">{{ yoomoney }}</td>
             </tr>
             {% endif %}
         ]]></add>
@@ -43,19 +43,19 @@
         $result = array();
         $orderIds = array();
         foreach ($query->rows as $record) {
-            if ($record['payment_code'] === 'yandex_money') {
+            if ($record['payment_code'] === 'yoomoney') {
                 $orderIds[] = $record['order_id'];
             }
             $result[$record['order_id']] = $record;
         }
         if (!empty($orderIds)) {
-            $sql = 'SELECT `order_id`, `payment_id`, `status` FROM `' . DB_PREFIX . 'ya_money_payment` WHERE `order_id` IN (' . implode(',', $orderIds) . ')';
+            $sql = 'SELECT `order_id`, `payment_id`, `status` FROM `' . DB_PREFIX . 'yoomoney_payment` WHERE `order_id` IN (' . implode(',', $orderIds) . ')';
             $recordSet = $this->db->query($sql);
             foreach ($recordSet->rows as $record) {
-                $result[$record['order_id']]['yandex_money_payment_id'] = $record['payment_id'];
-                $result[$record['order_id']]['yandex_money_payment_status'] = $record['status'];
+                $result[$record['order_id']]['yoomoney_payment_id'] = $record['payment_id'];
+                $result[$record['order_id']]['yoomoney_payment_status'] = $record['status'];
             }
-            $sql = 'SELECT `order_id`, `refund_id`, `status`, `amount` FROM `' . DB_PREFIX . 'ya_money_refunds` WHERE `order_id` IN (' . implode(',', $orderIds) . ') AND `status` <> \'canceled\'';
+            $sql = 'SELECT `order_id`, `refund_id`, `status`, `amount` FROM `' . DB_PREFIX . 'yoomoney_refunds` WHERE `order_id` IN (' . implode(',', $orderIds) . ') AND `status` <> \'canceled\'';
             $recordSet = $this->db->query($sql);
             foreach ($recordSet->rows as $record) {
                 if (!isset($result[$record['order_id']]['refund_amount'])) {
@@ -89,18 +89,18 @@
         <operation error="skip">
             <search><![CDATA['shipping_code' => $result['shipping_code'],]]></search>
             <add position="after"><![CDATA[
-                'payment_code'   => (isset($result['payment_code']) && $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_invoice') && $result['order_status_id'] == 1) ? $result['payment_code'] : '',
-                'payment_status' => (isset($result['yandex_money_payment_status']) ? $result['yandex_money_payment_status'] : ''),
-                'email'          => (isset($result['email']) && $this->config->get('yandex_money_kassa_enabled')) ? $result['email'] : '',
+                'payment_code'   => (isset($result['payment_code']) && $this->config->get('yoomoney_kassa_enabled') && $this->config->get('yoomoney_kassa_invoice') && $result['order_status_id'] == 1) ? $result['payment_code'] : '',
+                'payment_status' => (isset($result['yoomoney_payment_status']) ? $result['yoomoney_payment_status'] : ''),
+                'email'          => (isset($result['email']) && $this->config->get('yoomoney_kassa_enabled')) ? $result['email'] : '',
                 'refund_amount'  => (isset($result['refund_amount']) ? $result['refund_amount'] : ''),
-                'refund_url'     => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link('extension/payment/yandex_money/refund', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
-                'capture_url'    => (isset($result['payment_code']) && $result['payment_code'] == 'yandex_money') ? $this->url->link('extension/payment/yandex_money/capture', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
+                'refund_url'     => (isset($result['payment_code']) && $result['payment_code'] == 'yoomoney') ? $this->url->link('extension/payment/yoomoney/refund', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
+                'capture_url'    => (isset($result['payment_code']) && $result['payment_code'] == 'yoomoney') ? $this->url->link('extension/payment/yoomoney/capture', 'order_id='.$result['order_id'].'&user_token='.$this->session->data['user_token'], true) : '',
             ]]></add>
         </operation>
         <operation error="skip">
             <search><![CDATA[$data['user_token'] = $this->session->data['user_token'];]]></search>
             <add position="after"><![CDATA[
-        if ($this->config->get('yandex_money_kassa_enabled')) {
+        if ($this->config->get('yoomoney_kassa_enabled')) {
             $data['button_invoice_kassa'] = $this->language->get('button_invoice_kassa');
             $data['store_url'] = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
         }
@@ -112,7 +112,7 @@
             <search>
                 <![CDATA[<li><a href="{{ order.edit }}"><i class="fa fa-pencil"></i> {{ button_edit }}</a></li>]]></search>
             <add position="after"><![CDATA[
-                {% if order.payment_code is defined and order.payment_code == 'yandex_money' %}
+                {% if order.payment_code is defined and order.payment_code == 'yoomoney' %}
                     <li><a href="javascript://" class="invoice-button" data-order_id="{{ order.order_id }}" data-customer="{{ order.customer }}" data-email="{{ order.email }}"><i class="fa fa-envelope"></i> Выставить счёт</a></li>
                 {% endif %}
                 {% if order.payment_status is defined and order.payment_status == 'succeeded' %}
@@ -131,7 +131,7 @@
                 var text = 'Вы действительно хотите отправить счёт пользователю ' + node.dataset.customer + ' на адрес ' + node.dataset.email + '?';
                 if (confirm(text)) {
                     jQuery.ajax({
-                        url: '{{ store_url }}admin/index.php?route=extension/payment/yandex_money/sendmail&user_token={{ user_token }}&order_id=' + node.dataset.order_id,
+                        url: '{{ store_url }}admin/index.php?route=extension/payment/yoomoney/sendmail&user_token={{ user_token }}&order_id=' + node.dataset.order_id,
                         dataType: 'json',
                         crossDomain: true,
                         beforeSend: function() {
@@ -196,10 +196,7 @@
         <operation error="skip">
             <search><![CDATA[$data['newsletter'] = $this->url->link('account/newsletter']]></search>
             <add position="after"><![CDATA[
-            $data['yandex_metrika_html_code'] = $this->config->get('yandex_money_metrika_active') && $this->config->get('yandex_money_metrika_code')
-                ? html_entity_decode($this->config->get('yandex_money_metrika_code'), ENT_QUOTES, 'UTF-8')
-                : '';
-            $data['yandex_money_kassa_show_in_footer'] = $this->config->get('yandex_money_kassa_enabled') && $this->config->get('yandex_money_kassa_show_in_footer');
+            $data['yoomoney_kassa_show_in_footer'] = $this->config->get('yoomoney_kassa_enabled') && $this->config->get('yoomoney_kassa_show_in_footer');
             ]]></add>
         </operation>
     </file>
@@ -207,8 +204,8 @@
         <operation>
             <search><![CDATA[if (isset($this->session->data['order_id'])) {]]></search>
             <add position="after"><![CDATA[
-                $this->load->model('extension/payment/yandex_money');
-                $data['script_order'] = $this->model_extension_payment_yandex_money->getMetricsJavaScript($this->session->data['order_id']);
+                $this->load->model('extension/payment/yoomoney');
+                $data['script_order'] = $this->model_extension_payment_yoomoney->getMetricsJavaScript($this->session->data['order_id']);
             ]]></add>
         </operation>
     </file>
@@ -225,43 +222,10 @@
     </file>
     <file path="catalog/view/theme/*/template/common/footer.twig">
         <operation>
-            <search><![CDATA[<footer]]></search>
-            <add position="before"><![CDATA[
-            {{ yandex_metrika_html_code }}
-            <script type="text/javascript">
-                window.dataLayer = window.dataLayer || [];
-                function sendEcommerceAdd(id, quantity) {
-                   $.ajax({
-                        url: 'index.php?route=extension/payment/yandex_money/productInfo',
-                        type: 'post',
-                        data: 'id=' + id,
-                        dataType: 'json',
-                        success: function(json) {
-                            json.quantity = quantity;
-                            dataLayer.push({ecommerce: {add: {products: [json]}}});
-                        }
-                    });
-                }
-                $(window).on("load", function () {
-                    var opencartCartAdd = cart.add;
-                    cart.add = function (product_id, quantity) {
-                        opencartCartAdd(product_id, quantity);
-                        sendEcommerceAdd(product_id, typeof(quantity) !== 'undefined' ? parseInt(quantity) : 1);
-                    };
-
-                    $('#button-cart').on('click', function() {
-                        var ecommerce_product = new Array();
-                        sendEcommerceAdd($('#product input[name="product_id"]').val(), parseInt($('#product input[name="quantity"]').val()));
-                    });
-                });
-            </script>
-            ]]></add>
-        </operation>
-        <operation>
             <search><![CDATA[<p>{{ powered }}</p>]]></search>
             <add position="after"><![CDATA[
-            {% if yandex_money_kassa_show_in_footer is defined and yandex_money_kassa_show_in_footer %}
-            <p><a href="https://kassa.yandex.ru/?_openstat=promo;merchants;opencart2">Работает Яндекс.Касса</a></p>
+            {% if yoomoney_kassa_show_in_footer is defined and yoomoney_kassa_show_in_footer %}
+            <p><a href="https://yookassa.ru/?_openstat=promo;merchants;opencart3">Работает ЮKassa</a></p>
             {% endif %}
             ]]></add>
         </operation>
@@ -280,7 +244,7 @@
         <operation>
             <search><![CDATA[</head>]]></search>
             <add position="before"><![CDATA[
-                {% if config is defined and config.get('yandex_money_kassa_enabled') and (config.get('yandex_money_kassa_use_installments_button') or config.get('yandex_money_kassa_add_installments_block')) %}
+                {% if config is defined and config.get('yoomoney_kassa_enabled') and (config.get('yoomoney_kassa_use_installments_button') or config.get('yoomoney_kassa_add_installments_block')) %}
                 <script src="https://static.yandex.net/kassa/pay-in-parts/ui/v1/"></script>
                 {% endif %}
             ]]></add>
@@ -291,19 +255,12 @@
         <operation>
             <search trim="true"><![CDATA[if ($product_info) {]]></search>
             <add position="after"><![CDATA[
-                $showInstallmentsBlock = $this->config->get('yandex_money_kassa_enabled')
-                    && $this->config->get('yandex_money_kassa_add_installments_block');
+                $showInstallmentsBlock = $this->config->get('yoomoney_kassa_enabled')
+                    && $this->config->get('yoomoney_kassa_add_installments_block');
 
-                $data['yamoney_showInstallmentsBlock'] = $showInstallmentsBlock;
-                $data['yamoney_shop_id'] = $this->config->get('yandex_money_kassa_shop_id');
-                $data['yamoney_language_code'] = $this->language->get('code');
-
-                $data['ymm_option']['color_enabled'] = $this->config->get('yandex_money_market_option_color_enabled');
-                $data['ymm_option']['size_enabled'] = $this->config->get('yandex_money_market_option_size_enabled');
-                $color_option = $this->config->get('yandex_money_market_option_color_option_id');
-                $data['ymm_option']['color'] = !empty($color_option) ? $color_option : '-';
-                $size_option = $this->config->get('yandex_money_market_option_size_option_id');
-                $data['ymm_option']['size'] = !empty($size_option) ? $size_option : '-';
+                $data['yoomoney_showInstallmentsBlock'] = $showInstallmentsBlock;
+                $data['yoomoney_shop_id'] = $this->config->get('yoomoney_kassa_shop_id');
+                $data['yoomoney_language_code'] = $this->language->get('code');
             ]]></add>
         </operation>
         <operation>
@@ -314,8 +271,8 @@
                 if ($this->currency->has('RUB')) {
                     $data['cost'] = sprintf('%.2f', $this->currency->format($cost, 'RUB', '', false));
                 } else {
-                    $this->load->model('extension/payment/yandex_money');
-                    $data['cost'] = $this->model_extension_payment_yandex_money->convertFromCbrf(array('total' => $cost), 'RUB');
+                    $this->load->model('extension/payment/yoomoney');
+                    $data['cost'] = $this->model_extension_payment_yoomoney->convertFromCbrf(array('total' => $cost), 'RUB');
                 }
             ]]></add>
         </operation>
@@ -325,7 +282,7 @@
         <operation error="skip" info="Product installments">
             <search><![CDATA[<div id="product"> {% if options %}]]></search>
             <add position="before"><![CDATA[
-                {% if yamoney_showInstallmentsBlock %}
+                {% if yoomoney_showInstallmentsBlock %}
                     <ul class="list-unstyled"><li class="installments-info"></li></ul>
                 {% endif %}
             ]]></add>
@@ -334,12 +291,12 @@
             <search><![CDATA[{{ footer }}]]></search>
             <add position="before"><![CDATA[
                 <script>
-                    {% if yamoney_showInstallmentsBlock %}
+                    {% if yoomoney_showInstallmentsBlock %}
                         if (typeof YandexCheckoutCreditUI !== "undefined") {
                             const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
-                                shopId: '{{ yamoney_shop_id }}',
+                                shopId: '{{ yoomoney_shop_id }}',
                                 sum: parseFloat('{{ cost }}'),
-                                language: '{{ yamoney_language_code }}'
+                                language: '{{ yoomoney_language_code }}'
                             });
                             yamoneyCheckoutCreditUI({
                                 type: 'info',
@@ -360,43 +317,6 @@
                 </script>
             ]]></add>
         </operation>
-        <operation error="skip" info="Product select[data-option]">
-            <search position="replace"><![CDATA[<select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" class="form-control">]]></search>
-            <add><![CDATA[<select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" data-option="{{ option.option_id }}" class="form-control">]]></add>
-        </operation>
-        <operation error="skip" info="Product div[data-option]">
-            <search position="replace"><![CDATA[<div id="input-option{{ option.product_option_id }}"> {% for option_value in option.product_option_value %}]]></search>
-            <add><![CDATA[<div id="input-option{{ option.product_option_id }}" data-option="{{ option.option_id }}"> {% for option_value in option.product_option_value %}]]></add>
-        </operation>
-        <operation error="skip" info="Product Color and Size">
-            <search index="0"><![CDATA[$(document).ready(function() {]]></search>
-            <add position="after"><![CDATA[
-    var op = { color: '{{ ymm_option.color }}', size: '{{ ymm_option.size }}' };
-    var h = location.hash.replace('#', '');
-    var color_size = h.split('-');
-    setTimeout(function(){
-        $('[data-option="' + op.color + '"], ' + '[data-option="' + op.size + '"]' ).each(function(i, input) {
-            var tag = $(input).prop('tagName');
-            $(color_size).each(function(j, el) {
-                if (tag == 'SELECT') {
-                    var opt = $(input).find('option[value="'+el+'"]');
-                    if (opt.length) {
-                        opt.attr('selected', 'true');
-                        $(input).trigger('change');
-                    }
-                } else if (tag == 'DIV') {
-                    var opt = $(input).find('input[value="'+el+'"]');
-                    if (opt.length) {
-                        opt.prop('checked', 'true');
-                        $(opt).trigger('click');
-                    }
-                }
-            });
-        });
-    }, 500);
-
-            ]]></add>
-        </operation>
     </file>
     <file path="admin/view/template/catalog/product_form.twig" error="skip">
         <operation error="skip" info="Add Product Properties">
@@ -406,13 +326,13 @@
                  </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-ym_payment_mode"><span data-toggle="tooltip" title="">Признак способа расчета</span></label>
+                <label class="col-sm-2 control-label" for="input-yoomoney_payment_mode"><span data-toggle="tooltip" title="">Признак способа расчета</span></label>
                 <div class="col-sm-10">
-                  <select name="ym_payment_mode" id="ym_payment_mode" class="form-control">
+                  <select name="yoomoney_payment_mode" id="yoomoney_payment_mode" class="form-control">
 
                     {% for pmValue,pmTitle in paymentModeEnum %}
 
-                    <option value="{{ pmValue }}" {{ product_ym_payment_mode == pmValue ? ' selected' : '' }}>{{ pmTitle }}</option>
+                    <option value="{{ pmValue }}" {{ product_yoomoney_payment_mode == pmValue ? ' selected' : '' }}>{{ pmTitle }}</option>
 
                     {% endfor %}
 
@@ -420,13 +340,13 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="ym_payment_subject"><span data-toggle="tooltip" title="">Признак предмета расчета</span></label>
+                <label class="col-sm-2 control-label" for="yoomoney_payment_subject"><span data-toggle="tooltip" title="">Признак предмета расчета</span></label>
                 <div class="col-sm-10">
-                  <select name="ym_payment_subject" id="ym_payment_subject" class="form-control">
+                  <select name="yoomoney_payment_subject" id="yoomoney_payment_subject" class="form-control">
 
                     {% for psValue,psTitle in paymentSubjectEnum %}
 
-                    <option value="{{ psValue }}" {{ product_ym_payment_subject == psValue ? ' selected' : '' }}>{{ psTitle }}</option>
+                    <option value="{{ psValue }}" {{ product_yoomoney_payment_subject == psValue ? ' selected' : '' }}>{{ psTitle }}</option>
 
                     {% endfor %}
 
@@ -441,11 +361,11 @@
             <add><![CDATA[
                 $data['layouts'] = $this->model_design_layout->getLayouts();
                 if(!empty($this->request->get['product_id'])) {
-                    $res = $this->db->query('SELECT * FROM `'.DB_PREFIX.'ya_money_product_properties` WHERE product_id='.$this->request->get['product_id']);
+                    $res = $this->db->query('SELECT * FROM `'.DB_PREFIX.'yoomoney_product_properties` WHERE product_id='.$this->request->get['product_id']);
                     $productProp = $res->row;
                 }
-                $data['product_ym_payment_mode'] = !empty($productProp['payment_mode']) ? $productProp['payment_mode'] : '';
-                $data['product_ym_payment_subject'] = !empty($productProp['payment_subject']) ? $productProp['payment_subject'] : '';
+                $data['product_yoomoney_payment_mode'] = !empty($productProp['payment_mode']) ? $productProp['payment_mode'] : '';
+                $data['product_yoomoney_payment_subject'] = !empty($productProp['payment_subject']) ? $productProp['payment_subject'] : '';
 
                 $data['paymentModeEnum'] = array(
                     'full_prepayment'    => 'Полная предоплата (\'full_prepayment\')',
@@ -480,10 +400,10 @@
             <search position="after"><![CDATA[$this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);]]></search>
             <add><![CDATA[
                 $this->model_catalog_product->editProduct($this->request->get['product_id'], $this->request->post);
-                if(!empty($this->request->post['ym_payment_mode']) && !empty($this->request->post['ym_payment_subject'])) {
-                    $res = $this->db->query('INSERT INTO `'.DB_PREFIX.'ya_money_product_properties` (product_id, payment_mode, payment_subject)
-                        VALUES('.$this->request->get['product_id'].', "'.$this->request->post['ym_payment_mode'].'", "'.$this->request->post['ym_payment_subject'].'")
-                        ON DUPLICATE KEY UPDATE  payment_mode="'.$this->request->post['ym_payment_mode'].'", payment_subject="'.$this->request->post['ym_payment_subject'].'"'
+                if(!empty($this->request->post['yoomoney_payment_mode']) && !empty($this->request->post['yoomoney_payment_subject'])) {
+                    $res = $this->db->query('INSERT INTO `'.DB_PREFIX.'yoomoney_product_properties` (product_id, payment_mode, payment_subject)
+                        VALUES('.$this->request->get['product_id'].', "'.$this->request->post['yoomoney_payment_mode'].'", "'.$this->request->post['yoomoney_payment_subject'].'")
+                        ON DUPLICATE KEY UPDATE  payment_mode="'.$this->request->post['yoomoney_payment_mode'].'", payment_subject="'.$this->request->post['yoomoney_payment_subject'].'"'
                     );
                 }
             ]]></add>

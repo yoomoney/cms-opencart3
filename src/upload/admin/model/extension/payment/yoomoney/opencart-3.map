@@ -1,0 +1,11 @@
+f:src/upload/admin/controller/extension/payment/yoomoney.php:admin/controller/extension/payment/yoomoney.php
+f:src/upload/{admin,catalog}/language/{en-gb,ru-ru}/extension/payment/yoomoney.php:{admin,catalog}/language/{en-gb,ru-ru}/extension/payment/yoomoney.php
+d:src/upload/{admin,catalog}/model/extension/payment/yoomoney:{admin,catalog}/model/extension/payment/yoomoney
+f:src/upload/admin/model/extension/payment/yoomoney.php:admin/model/extension/payment/yoomoney.php
+d:src/upload/admin/view/template/extension/payment/yoomoney:admin/view/template/extension/payment/yoomoney
+f:src/upload/admin/view/template/extension/payment/yoomoney.twig:admin/view/template/extension/payment/yoomoney.twig
+f:src/upload/catalog/{controller,model}/extension/payment/yoomoney.php:catalog/{controller,model}/extension/payment/yoomoney.php
+f:src/upload/catalog/view/theme/default/template/extension/payment/yoomoney_failure_status.tpl:catalog/view/theme/default/template/extension/payment/yoomoney_failure_status.tpl
+f:src/upload/catalog/view/theme/default/template/extension/payment/yoomoney_success_status.tpl:catalog/view/theme/default/template/extension/payment/yoomoney_success_status.tpl
+d:src/upload/catalog/view/theme/default/template/extension/payment/yoomoney:catalog/view/theme/default/template/extension/payment/yoomoney
+d:src/upload/image/catalog/payment/yoomoney:image/catalog/payment/yoomoney

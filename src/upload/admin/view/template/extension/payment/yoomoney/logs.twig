@@ -1,0 +1,55 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <button type="submit" form="form-payment-yoomoney" data-toggle="tooltip" title="{{ language.get('button_save') }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ language.get('button_cancel') }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+            </div>
+            <h1>{{ language.get('module_title') }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Журнал сообщений платежного модуля ЮMoney</h4>
+            </div>
+            <div class="panel-body">
+                <form action="" method="post" id="log-form">
+                    <input type="hidden" name="clear-logs" value="0" />
+                    <input type="hidden" name="download" value="0" />
+                    <div class="buttons">
+                        <button type="button" class="btn btn-primary" data-value="download">Скачать файл сообщений</button>
+                        <button type="button" class="btn btn-danger" data-value="clear-logs">Очистить файл сообщений</button>
+                    </div>
+                </form>
+                {% if not logs %}
+                <p>Журнал сообщений пуст.</p>
+                {% else %}
+                <pre style="margin-top: 10px; font-size: 9pt;">{{ logs }}</pre>
+                {%  endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        var form = jQuery('#log-form');
+        form.find('button').bind('click', function () {
+            form[0][this.dataset.value].value = 1;
+            if (this.dataset.value == 'download') {
+                form[0].target = '_blank';
+            } else {
+                form[0].target = '_self';
+            }
+            form[0].submit();
+        });
+    });
+</script>
+{{ footer }}

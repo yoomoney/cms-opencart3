@@ -1,0 +1,666 @@
+{% if kassa.isTestMode() %}
+    <div class="alert alert-info">
+        <i class="fa fa-exclamation-circle"></i>{{ language.get('kassa_test_mode_description') }}
+    </div>
+{% endif %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ language.get('kassa_page_title') }}</h3>
+    </div>
+    <div class="panel-body">
+        <div>
+            <p>{{ language.get('kassa_header_description') }}</p>
+            <p>{{ language.get('kassa_version_string') }}:&nbsp;{{ module_version }}</p>
+        </div>
+
+        {% if error_kassa_invalid_credentials is defined %}
+            <div class="alert alert-danger"><i
+                        class="fa fa-exclamation-circle"></i> {{ error_kassa_invalid_credentials }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="kassa-enabled" name="yoomoney_kassa_enabled"
+                           value="on"{{ kassa.isEnabled() ? ' checked' : '' }} class="enable-button"/>
+                    {{ language.get('kassa_enable_label') }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-sm-2 control-label" for="kassa-shop-id">{{ language.get('kassa_shop_id_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_kassa_shop_id" value="{{ kassa.getShopId() }}"
+                       placeholder="{{ language.get('kassa_shop_id_label') }}" id="kassa-shop-id" class="form-control"/>
+                {% if error_kassa_shop_id is defined and error_kassa_shop_id %}
+                    <div class="text-danger">{{ error_kassa_shop_id }}</div>
+                {% else %}
+                    <p class="help-block">{{ language.get('kassa_shop_id_description') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-sm-2 control-label"
+                   for="kassa-password">{{ language.get('kassa_password_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_kassa_password" value="{{ kassa.getPassword() }}"
+                       placeholder="{{ language.get('kassa_password_label') }}" id="kassa-password"
+                       class="form-control"/>
+                {% if error_kassa_password is defined and error_kassa_password %}
+                    <div class="text-danger">{{ error_kassa_password }}</div>
+                {% else %}
+                    <p class="help-block">{{ language.get('kassa_password_description') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   for="kassa-payment-mode">{{ language.get('kassa_payment_mode_label') }}</label>
+            <div class="col-sm-10">
+                <label class="form-check-label">
+                    <input type="radio" name="yoomoney_kassa_payment_mode" value="kassa"
+                           id="kassa-payment-mode-kassa"
+                           class="form-check-input"{{ kassa.getEpl() ? ' checked' : '' }} />
+                    {{ language.get('kassa_payment_mode_kassa_label') }}
+                </label>
+            </div>
+            <div class="col-sm-10 col-sm-offset-2" style="padding-bottom: 10px;"
+                 id="kassa-payment-mode-kassa-container">
+                <label class="form-check-label">
+                    <input type="checkbox" name="yoomoney_kassa_use_installments_button" value="on"
+                           id="kassa-use-installments-button"
+                           class="form-check-input"{{ kassa.useInstallmentsButton() ? ' checked' : '' }} />
+                    {{ language.get('kassa_use_installments_button_label') }}
+                </label>
+                <br>
+                <label class="form-check-label" style="margin-left: 20px;">
+                    <input type="checkbox" name="yoomoney_kassa_add_installments_block" value="on"
+                           class="form-check-input"{{ kassa.getAddInstallmentsBlock() ? ' checked' : '' }} />
+                    {{ language.get('kassa_add_installments_block_label') }}
+                </label>
+            </div>
+            <div class="col-sm-10 col-sm-offset-2">
+                <label class="form-check-label">
+                    <input type="radio" name="yoomoney_kassa_payment_mode" value="shop" id="kassa-payment-mode-shop"
+                           class="form-check-input"{{ kassa.getEpl() ? '' : ' checked' }} />
+                    {{ language.get('kassa_payment_mode_shop_label') }}
+                </label>
+            </div>
+            <div class="col-sm-10 col-sm-offset-2" id="kassa-payment-mode-shop-container">
+                <div style="display: none" id="kassa-payment-method-warning" class="alert alert-warning"></div>
+                {% for id, enabled in kassa.getPaymentMethods() %}
+                    <label class="form-check-label">
+                        <input type="checkbox" name="yoomoney_kassa_payment_method_{{ id }}" value="on"
+                               id="kassa-payment-method-{{ id }}"
+                               class="form-check-input"{{ enabled ? ' checked' : '' }} />
+                        {{ language.get('kassa_payment_method_' ~ id) }}
+                    </label><br/>
+                {% endfor %}
+                <label class="form-check-label" style="margin-left: 20px;">
+                    <input type="checkbox" name="yoomoney_kassa_add_installments_block" value="on"
+                           class="form-check-input"{{ kassa.getAddInstallmentsBlock() ? ' checked' : '' }} />
+                    {{ language.get('kassa_add_installments_block_label') }}
+                </label>
+                {% if error_kassa_payment_method %}
+                    <div class="text-danger">{{ error_kassa_payment_method }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Currency Start-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="yoomoney-kassa-currency">{{ language.get('kassa_currency') }}</label>
+            <div class="col-sm-5">
+                <select id="yoomoney-kassa-currency" name="yoomoney_kassa_currency" class="form-control">
+                    {% for code, data in kassa_currencies %}
+                        <option value="{{ code }}"{{ kassa.getCurrency() == code ? ' selected' : '' }}>{{ data.code }} ({{ data.title }})</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('kassa_currency_help') }}</p>
+            </div>
+            <div class="col-sm-5">
+                <label class="form-check-label">
+                    <input type="checkbox" name="yoomoney_kassa_currency_convert" value="on"
+                           id="currency_convert"
+                           class="form-check-input"{{ kassa.getCurrencyConvert() ? ' checked' : '' }} />
+                    {{ language.get('kassa_currency_convert') }}
+                </label>
+                <p class="help-block">{{ language.get('kassa_currency_convert_help') }}</p>
+            </div>
+        </div>
+
+        <!-- Sbbol Start-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   for="b2b_sberbank_enabled">{{ language.get('b2b_sberbank_label') }}</label>
+            <div class="col-sm-10">
+                <input type="checkbox" id="b2b_sberbank_enabled" name="yoomoney_kassa_b2b_sberbank_enabled"
+                       value="on"{{ kassa.getB2bSberbankEnabled() ? ' checked' : '' }} />
+                {{ language.get('b2b_sberbank_on_label') }}
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"
+                           for="b2b-sberbank-description-template">{{ language.get('b2b_sberbank_template_label') }}</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="yoomoney_kassa_b2b_sberbank_payment_purpose"
+                               value="{{ kassa.getB2bSberbankPaymentPurpose() }}"
+                               placeholder="{{ language.get('kassa_default_payment_description') }}"
+                               id="_b2b_sberbank_payment_purpose" class="form-control"/>
+                        <p class="help-block">{{ language.get('b2b_sberbank_template_help') }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                        {{ language.get('b2b_sberbank_vat_default_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="b2b-tax-rate-default" name="yoomoney_kassa_b2b_tax_rate_default"
+                                class="form-control">
+                            {% for id, name in b2bTaxRates %}
+                                <option value="{{ id }}"{{ kassa.getB2bSberbankDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block">{{ language.get('b2b_sberbank_vat_default_help') }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">
+                        {{ language.get('b2b_sberbank_vat_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>{{ language.get('b2b_sberbank_vat_cms_label') }}</th>
+                                <th>{{ language.get('b2b_sberbank_vat_sbbol_label') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for id, name in shopTaxRates %}
+                                <tr>
+                                    <td>
+                                        <label class="control-label" for="b2b-tax-rate-{{ id }}">{{ name }}</td>
+                                    <td>
+                                        <select id="b2b-tax-rate-{{ id }}"
+                                                name="yoomoney_kassa_b2b_tax_rates[{{ id }}]"
+                                                class="form-control">
+                                            {% for taxRateId, taxRateName in b2bTaxRates %}
+                                                <option value="{{ taxRateId }}"{{ kassa.getB2bTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sbbol End -->
+
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="kassa-enable-hold-mode"
+                           name="yoomoney_kassa_enable_hold_mode"
+                           value="on" {{ kassa.getEnableHoldMode() ? 'checked' : '' }}/>
+                    {{ language.get('kassa_hold_setting_label') }}
+                </label>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-10 col-sm-offset-2">
+                    <div class="statuses-wrapper">
+
+                        <div id="kassa-statuses-label" class="col-sm-offset-6 col-sm-6">
+                            <label> {{ language.get('kassa_statuses_description_label') }} </label>
+                        </div>
+
+                        <label class="col-sm-6 control-label" for="kassa-hold-order-status">
+                            {{ language.get('kassa_hold_order_status_label') }}
+                        </label>
+                        <div class="col-sm-6" style="margin-bottom: 10px;">
+                            <select id="kassa-hold-order-status" name="yoomoney_kassa_hold_order_status"
+                                    class="form-control">
+                                {% for id, name in orderStatuses %}
+                                    <option value="{{ id }}"{{ kassa.getHoldOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <label class="col-sm-6 control-label" for="kassa-cancel-order-status">
+                            {{ language.get('kassa_cancel_order_status_label') }}
+                        </label>
+
+                        <div class="col-sm-6">
+                            <select id="kassa-cancel-order-status" name="yoomoney_kassa_cancel_order_status"
+                                    class="form-control">
+
+                                {% for id, name in orderStatuses %}
+                                    <option value="{{ id }}"{{ kassa.getOrderCanceledStatus() == id ? ' selected' : '' }}> {{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   for="kassa-payment-description">{{ language.get('kassa_payment_description_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_kassa_payment_description"
+                       value="{{ kassa.getPaymentDescription() }}"
+                       placeholder="{{ language.get('kassa_default_payment_description') }}"
+                       id="kassa-payment-description" class="form-control"/>
+                <p class="help-block">{{ language.get('kassa_payment_description_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   for="kassa-display-name">{{ language.get('kassa_display_name_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_kassa_display_name" value="{{ kassa.getDisplayName() }}"
+                       placeholder="{{ language.get('kassa_display_name_label') }}" id="kassa-display-name"
+                       class="form-control"/>
+                <p class="help-block">{{ language.get('kassa_display_name_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="kassa-send-receipt" name="yoomoney_kassa_send_receipt"
+                           value="on"{{ kassa.isSendReceipt() ? ' checked' : '' }} />
+                    {{ language.get('kassa_send_receipt_label') }}
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <div class="form-group receipt-only">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <h4>{{ language.get('kassa_send_receipt_tax_rate_title') }}</h4>
+                    </div>
+                </div>
+                <div class="form-group receipt-only">
+                    <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                        {{ language.get('kassa_tax_rate_default_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="kassa-tax-rate-default" name="yoomoney_kassa_tax_rate_default"
+                                class="form-control">
+                            {% for id, name in kassaTaxRates %}
+                                <option value="{{ id }}"{{ kassa.getDefaultTaxRate() == id ? ' selected' : '' }}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block">{{ language.get('kassa_tax_rate_default_description') }}</p>
+                    </div>
+                </div>
+                <div class="form-group receipt-only">
+                    <label class="col-sm-2 control-label">
+                        {{ language.get('kassa_tax_rate_table_caption') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>{{ language.get('kassa_shop_tax_rate_header') }}</th>
+                                <th>{{ language.get('kassa_kassa_tax_rate_header') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for id, name in shopTaxRates %}
+                                <tr>
+                                    <td>
+                                        <label class="control-label" for="kassa-tax-rate-{{ id }}">{{ name }}</td>
+                                    <td>
+                                        <select id="kassa-tax-rate-{{ id }}"
+                                                name="yoomoney_kassa_tax_rates[{{ id }}]"
+                                                class="form-control">
+                                            {% for taxRateId, taxRateName in kassaTaxRates %}
+                                                <option value="{{ taxRateId }}"{{ kassa.getTaxRateId(id) == taxRateId ? ' selected' : '' }}>{{ taxRateName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="form-group receipt-only">
+                    <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                        {{ language.get('kassa_payment_mode_default_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="kassa-payment-mode-default" name="yoomoney_kassa_payment_mode_default"
+                                class="form-control">
+                            {% for id, name in kassa.getPaymentModeEnum() %}
+                                <option value="{{ id }}"{{ kassa.getDefaultPaymentMode() == id ? ' selected' : '' }}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group receipt-only">
+                    <label class="col-sm-2 control-label" for="kassa-tax-rate-default">
+                        {{ language.get('kassa_payment_subject_default_label') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="kassa-tax-rate-default" name="yoomoney_kassa_payment_subject_default"
+                                class="form-control">
+                            {% for id, name in kassa.getPaymentSubjectEnum() %}
+                                <option value="{{ id }}"{{ kassa.getDefaultPaymentSubject() == id ? ' selected' : '' }}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <p class="help-block receipt-only">{{ language.get('kassa_payment_subject_default_description') }}</p>
+                <div class="form-group receipt-only">
+
+                    <label class="col-sm-2 control-label">
+                        {{ language.get('kassa_second_receipt_header') }}
+                    </label>
+                    <div class="col-sm-10">
+                        <label style="font-weight: 600; padding-top: 9px; cursor: pointer" class="form-check-label">
+                            <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" id="kassa-second-receipt-enable-on" name="yoomoney_kassa_second_receipt_enable" value="1" class="form-check-input" {{ kassa.isSecondReceipt() ? ' checked' : '' }}/>
+                            {{ language.get('kassa_second_receipt_enable') }}
+                        </label>
+                        <label style="font-weight: 600; margin-left: 10px; cursor: pointer" class="form-check-label">
+                            <input style="vertical-align:middle;margin:-2px 3px 0 0;cursor: pointer" type="radio" id="kassa-second-receipt-enable-off" name="yoomoney_kassa_second_receipt_enable" value="0" class="form-check-input" {{ kassa.isSecondReceipt() ? ' ' : ' checked' }}/>
+                            {{ language.get('kassa_second_receipt_disable') }}
+                        </label>
+                    </div>
+                    <div class="col-sm-10 col-sm-offset-2 second-receipt-wrapper">
+                        <p>{{ language.get('kassa_second_receipt_description') }}</p>
+                        <table class="table table-hover">
+                            <tbody>
+                            <tr>
+                                <td style="border: none">
+                                    <label class="control-label">
+                                        {{ language.get('kassa_second_receipt_enable_label') }}
+                                    </label>
+                                </td>
+                                <td style="border: none">
+                                    <select id="kassa-second-receipt-status" name="yoomoney_kassa_second_receipt_status" class="form-control col-xl-4 col-md-4" data-toggle="tooltip" data-placement="left" title="">
+                                        {% for id, name in orderStatuses %}
+                                            <option value="{{ id }}"{{ kassa.getSecondReceiptStatus == id ? ' selected' : '' }}>{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="help-block">{{ language.get('kassa_second_receipt_help_info') }}</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Показывать ссылку на сайт ЮKassa</label>
+            <div class="col-sm-10">
+                <select id="kassa-show-in-footer" name="yoomoney_kassa_show_in_footer" class="form-control">
+                    <option value="off"
+                            {% if not kassa.getShowLinkInFooter() %}selected{% endif %}>{{ language.get('kassa_debug_log_off') }}</option>
+                    <option value="on"
+                            {% if kassa.getShowLinkInFooter() %}selected{% endif %}>{{ language.get('kassa_debug_log_on') }}</option>
+                </select>
+                <p class="help-block">Ссылка будет отображаться в подвале вашего сайта.</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-notification-url">
+                {{ language.get('kassa_notification_url_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="kassa-notification-url" name="kassa_notification_url"
+                       value="{{ notificationUrl }}" class="form-control" disabled/>
+                <p class="help-block">{{ language.get('kassa_notification_url_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="kassa-invoice" name="yoomoney_kassa_invoice"
+                           value="on"{{ kassa.isInvoicesEnabled() ? ' checked' : '' }} />
+                    {{ language.get('kassa_invoice_label') }}
+                </label>
+            </div>
+        </div>
+        <div class="form-group invoice-only">
+            <label class="col-sm-2 control-label">{{ language.get('kassa_invoice_heading_label') }}</label>
+            <label class="col-sm-2 control-label" for="kassa-invoice-subject">
+                {{ language.get('kassa_invoice_subject_label') }}
+            </label>
+            <div class="col-sm-8">
+                <input type="text" id="kassa-invoice-subject" name="yoomoney_kassa_invoice_subject"
+                       value="{{ kassa.getInvoiceSubject() }}" class="form-control"/>
+                <p class="help-block">{{ language.get('kassa_invoice_subject_description') }}</p>
+            </div>
+            <label class="col-sm-2 col-sm-offset-2 control-label" for="kassa-invoice-message">
+                {{ language.get('kassa_invoice_message_label') }}
+            </label>
+            <div class="col-sm-8">
+                <textarea id="kassa-invoice-message" name="yoomoney_kassa_invoice_message"
+                          class="form-control">{{ kassa.getInvoiceMessage() }}</textarea>
+                <p class="help-block">{{ language.get('kassa_invoice_message_description') }}</p>
+            </div>
+            <div class="col-sm-10 col-sm-offset-4">
+                <label>
+                    <input type="checkbox" id="kassa-invoice-logo" name="yoomoney_kassa_invoice_logo"
+                           value="on"{{ kassa.getSendInvoiceLogo() ? ' checked' : '' }} />
+                    {{ language.get('kassa_invoice_logo_label') }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-2 control-label"><strong>{{ language.get('kassa_before_redirect_label') }}</strong></div>
+            <div class="col-sm-10">
+                <label>
+                    <input type="checkbox" name="yoomoney_kassa_create_order_before_redirect"
+                           id="yoomoney_kassa_create_order_before_redirect"
+                           value="on" {% if kassa.getCreateOrderBeforeRedirect() %}checked{% endif %} />
+                    {{ language.get('kassa_create_order_label') }}
+                </label><br/>
+                <label>
+                    <input type="checkbox" name="yoomoney_kassa_clear_cart_before_redirect"
+                           id="yoomoney_kassa_clear_cart_before_redirect"
+                           value="on" {% if kassa.getClearCartBeforeRedirect() %}checked{% endif %} />
+                    {{ language.get('kassa_clear_cart_label') }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-success-order-status">
+                {{ language.get('kassa_success_order_status_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="kassa-success-order-status" name="yoomoney_kassa_success_order_status"
+                        class="form-control">
+                    {% for id, name in orderStatuses %}
+                        <option value="{{ id }}"{{ kassa.getSuccessOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('kassa_success_order_status_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-min-payment-amount">
+                {{ language.get('kassa_minimum_payment_amount_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="kassa-min-payment-amount" name="yoomoney_kassa_minimum_payment_amount"
+                       value="{{ kassa.getMinPaymentAmount() }}" class="form-control"/>
+                <p class="help-block">{{ language.get('kassa_minimum_payment_amount_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-geo-zone">
+                {{ language.get('kassa_geo_zone_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="kassa-geo-zone" name="yoomoney_kassa_geo_zone" class="form-control">
+                    <option value="0"{{ kassa.getGeoZoneId() == 0 ? ' selected' : '' }}>{{ language.get('kassa_any_geo_zone') }}</option>
+                    {% for id, name in geoZones %}
+                        <option value="{{ id }}"{{ kassa.getGeoZoneId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('kassa_geo_zone_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-debug-log">
+                {{ language.get('kassa_debug_log_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="kassa-debug-log" name="yoomoney_kassa_debug_log" class="form-control">
+                    <option value="off"{{ kassa.getDebugLog() ? '' : ' selected' }}>{{ language.get('kassa_debug_log_off') }}</option>
+                    <option value="on"{{ kassa.getDebugLog() ? ' selected' : '' }}>{{ language.get('kassa_debug_log_on') }}</option>
+                </select>
+                <p class="help-block">{{ language.get('kassa_debug_log_description') }}</p>
+                <p class="help-block"><a href="{{ kassa_logs_link }}">{{ language.get('kassa_view_logs') }}</a></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">{{ language.get('kassa_payment_list_label') }}</label>
+            <div class="col-sm-9">
+                <p class="help-block"><a
+                            href="{{ kassa_payments_link }}">{{ language.get('kassa_payment_list_link') }}</a></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-sort-order">
+                {{ language.get('kassa_sort_order_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="kassa-sort-order" name="yoomoney_kassa_sort_order"
+                       value="{{ yoomoney_kassa_sort_order }}" class="form-control"/>
+                <p class="help-block">{{ language.get('kassa_sort_order_description') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+
+        function togglePaymentMode(value) {
+            if (value == 'kassa') {
+                jQuery('#kassa-payment-mode-kassa-container').slideDown();
+                jQuery('#kassa-payment-mode-shop-container').slideUp();
+            } else {
+                jQuery('#kassa-payment-mode-kassa-container').slideUp();
+                jQuery('#kassa-payment-mode-shop-container').slideDown();
+            }
+        }
+
+        function toggleSendReceipt(value) {
+            if (value) {
+                jQuery('.receipt-only').slideDown();
+            } else {
+                jQuery('.receipt-only').slideUp();
+            }
+        }
+
+        function toggleSecondReceipt(value) {
+            if (value == 1) {
+                jQuery('.second-receipt-wrapper').slideDown();
+            } else {
+                jQuery('.second-receipt-wrapper').slideUp();
+            }
+        }
+
+        function toggleInvoice(value) {
+            if (value) {
+                jQuery('.invoice-only').slideDown();
+            } else {
+                jQuery('.invoice-only').slideUp();
+            }
+        }
+
+        function toggleStatuses(value) {
+            if (value) {
+                jQuery('.statuses-wrapper').slideDown();
+            } else {
+                jQuery('.statuses-wrapper').slideUp();
+            }
+        }
+
+        var form = document.getElementById('form-payment-yoomoney');
+        togglePaymentMode(form.yoomoney_kassa_payment_mode.value);
+        toggleSendReceipt(form.yoomoney_kassa_send_receipt.checked);
+        toggleSecondReceipt(form.yoomoney_kassa_second_receipt_enable.value);
+        toggleInvoice(form.yoomoney_kassa_invoice.checked);
+
+        jQuery('#kassa-enable-hold-mode').bind('change', function () {
+            toggleStatuses(this.checked);
+        });
+
+        jQuery('input[name=yoomoney_kassa_payment_mode]').click(function () {
+            togglePaymentMode(form.yoomoney_kassa_payment_mode.value)
+        });
+
+        jQuery('#kassa-payment-mode-shop-container input').change(function () {
+            if (jQuery(this).attr('name') !== 'yoomoney_kassa_payment_method_widget') {
+                return;
+            } else if (!jQuery(this).prop('checked')) {
+                return;
+            }
+
+            jQuery.ajax({
+                url: "{{ install_widget }}",
+                dataType: "json",
+                method: "GET",
+                success: function (data) {
+                    if (!data.ok) {
+                        jQuery('#kassa-payment-method-warning').html(data.error).show();
+                    }
+                },
+            });
+        })
+
+        jQuery('#kassa-send-receipt').bind('change', function () {
+            toggleSendReceipt(this.checked);
+        });
+
+        jQuery('input[name=yoomoney_kassa_second_receipt_enable]').bind('change', function () {
+            toggleSecondReceipt(this.value);
+        });
+
+        jQuery('#kassa-invoice').bind('change', function () {
+            toggleInvoice(this.checked);
+        });
+
+        jQuery('input[name=yoomoney_kassa_add_installments_block]').on('change', function () {
+            var checked = this.checked;
+            jQuery('input[name=yoomoney_kassa_add_installments_block]').each(function () {
+                this.checked = checked;
+            });
+        });
+    });
+
+</script>
