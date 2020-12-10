@@ -1,0 +1,91 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <button type="submit" form="form-payment-yoomoney" data-toggle="tooltip" title="{{ language.get('button_save') }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ language.get('button_cancel') }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+            </div>
+            <h1>{{ language.get('module_title') }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        {%  if successMessage %}
+        <div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> {{ successMessage }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {%  endif %}
+        {%  if is_needed_show_nps %}
+            <div class="alert alert-success yoomoney_nps_block">
+                <i class="fa fa-exclamation-circle"></i>
+                {{ nps_block_text }}
+                <button type="button" class="close yoomoney_nps_close"  data-dismiss="alert"
+                        data-link="{{ callback_off_nps }}">&times;</button>
+            </div>
+        {% endif %}
+        <ul class="nav nav-tabs">
+            <li{{ (lastActiveTab == 'tab-kassa' ? ' class="active"' : '') }}><a href="#tab-kassa" data-toggle="tab">{{ language.get('kassa_tab_header') }}</a></li>
+            <li{{ (lastActiveTab == 'tab-wallet' ? ' class="active"' : '') }}><a href="#tab-wallet" data-toggle="tab">{{ language.get('wallet_tab_header') }}</a></li>
+            <li{{ (lastActiveTab == 'tab-updater' ? ' class="active"' : '') }}><a href="#tab-updater" data-toggle="tab">{{ language.get('updater_tab_header') }}</a></li>
+        </ul>
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment-yoomoney" class="form-horizontal">
+            <input type="hidden" name="yoomoney_nps_prev_vote_time" value="{{ yoomoney_nps_prev_vote_time }}">
+            <input type="hidden" name="language_reload" value="1" />
+            <input type="hidden" name="last_active_tab" id="last-active-tab" value="{{ lastActiveTab }}" />
+            <div class="tab-content bootstrap">
+                <div class="tab-pane{{ (lastActiveTab == 'tab-kassa' ? ' active' : '') }}" id="tab-kassa">
+                    {{ load.view('extension/payment/yoomoney/kassa', data) }}
+                </div>
+                <div class="tab-pane{{ (lastActiveTab == 'tab-wallet' ? ' active' : '') }}" id="tab-wallet">
+                    {{ load.view('extension/payment/yoomoney/wallet', data) }}
+                </div>
+                <div class="tab-pane{{ (lastActiveTab == 'tab-updater' ? ' active' : '') }}" id="tab-updater">
+                    {{ load.view('extension/payment/yoomoney/updater', data) }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+jQuery(document).ready(function () {
+    var buttons = jQuery('.enable-button');
+    buttons.change(function () {
+        if (this.checked) {
+            for (var i = 0; i < buttons.length; ++i) {
+                if (buttons[i] != this) {
+                    buttons[i].checked = false;
+                }
+            }
+        }
+    });
+    var currentTabInput = jQuery('#last-active-tab')[0];
+    $('ul.nav-tabs li').on('shown.bs.tab', function (e) {
+        currentTabInput.value = e.target.getAttribute('href').substr(1);
+    });
+
+    function yoomoney_nps_close() {
+        $.ajax({url: $('.yoomoney_nps_close').data('link')})
+            .done(function () {
+                $('.yoomoney_nps_block').slideUp();
+                $('input[name=yoomoney_nps_prev_vote_time]').val('{{ yoomoney_nps_current_vote_time }}');
+            });
+    }
+
+    function yoomoney_nps_goto() {
+        window.open('https://yandex.ru/poll/5YnSCJumJDKHPi4hLiMDyZ');
+        yoomoney_nps_close();
+    }
+
+    $('.yoomoney_nps_link').on('click', yoomoney_nps_goto);
+    $('.yoomoney_nps_close').on('click', yoomoney_nps_close);
+});
+</script>
+
+{{ footer }}

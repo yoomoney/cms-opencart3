@@ -1,0 +1,124 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ language.get('wallet_page_title') }}</h3>
+    </div>
+    <div class="panel-body">
+        <div>
+            <p>{{ language.get('wallet_header_description') }}</p>
+            <p>{{ language.get('wallet_version_string') }} {{ module_version }}</p>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <label>
+                    <input type="checkbox" id="wallet-enabled" name="yoomoney_wallet_enabled" value="on"{{ wallet.isEnabled() ? ' checked' : '' }} class="enable-button" />
+                    {{ language.get('wallet_enable_label') }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label class="col-sm-2 control-label" for="wallet-account-id">{{ language.get('wallet_account_id_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_wallet_account_id" value="{{ wallet.getAccountId() }}" placeholder="{{ language.get('wallet_account_id_label') }}" id="wallet-account-id" class="form-control" />
+                {% if error_wallet_account_id is defined and error_wallet_account_id %}
+                <div class="text-danger">{{ error_wallet_account_id }}</div>
+                {% else %}
+                <p class="help-block">{{ language.get('wallet_account_id_description') }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-group required">
+            <label class="col-sm-2 control-label" for="wallet-password">{{ language.get('wallet_password_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_wallet_password" value="{{ wallet.getPassword() }}" placeholder="{{ language.get('wallet_password_label') }}" id="wallet-password" class="form-control" />
+                {% if error_wallet_password is defined and error_wallet_password %}
+                <div class="text-danger">{{ error_wallet_password }}</div>
+                {% else %}
+                <p class="help-block">{{ language.get('wallet_password_description') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="wallet-display-name">{{ language.get('wallet_display_name_label') }}</label>
+            <div class="col-sm-10">
+                <input type="text" name="yoomoney_wallet_display_name" value="{{ wallet.getDisplayName() }}" placeholder="{{ language.get('wallet_display_name_label') }}" id="wallet-display-name" class="form-control" />
+                <p class="help-block">{{ language.get('wallet_display_name_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="wallet-notification-url">
+                {{ language.get('wallet_notification_url_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="wallet-notification-url" name="wallet_notification_url" value="{{ callbackUrl }}" class="form-control" disabled />
+                <p class="help-block">{{ language.get('wallet_notification_url_description') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-2 control-label"><strong>{{ language.get('wallet_before_redirect_label') }}</strong></div>
+            <div class="col-sm-10">
+                <label>
+                    <input type="checkbox" name="yoomoney_wallet_create_order_before_redirect" id="yoomoney_wallet_create_order_before_redirect"
+                           value="on" {% if wallet.getCreateOrderBeforeRedirect() %}checked{% endif %} />
+                    {{ language.get('wallet_create_order_label') }}
+                </label><br />
+                <label>
+                    <input type="checkbox" name="yoomoney_wallet_clear_cart_before_redirect" id="yoomoney_wallet_clear_cart_before_redirect"
+                           value="on" {% if wallet.getClearCartBeforeRedirect() %}checked{% endif %} />
+                    {{ language.get('wallet_clear_cart_label') }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="wallet-success-order-status">
+                {{ language.get('wallet_success_order_status_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="wallet-success-order-status" name="yoomoney_wallet_success_order_status" class="form-control">
+                    {% for id, name in orderStatuses %}
+                    <option value="{{ id }}"{{ wallet.getSuccessOrderStatusId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('wallet_success_order_status_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="wallet-min-payment-amount">
+                {{ language.get('wallet_minimum_payment_amount_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="wallet-min-payment-amount" name="yoomoney_wallet_minimum_payment_amount" value="{{ wallet.getMinPaymentAmount() }}" class="form-control" />
+                <p class="help-block">{{ language.get('wallet_minimum_payment_amount_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="kassa-geo-zone">
+                {{ language.get('wallet_geo_zone_label') }}
+            </label>
+            <div class="col-sm-10">
+                <select id="kassa-geo-zone" name="yoomoney_wallet_geo_zone" class="form-control">
+                    <option value="0"{{ wallet.getGeoZoneId() == 0 ? ' selected' : '' }}>{{ language.get('wallet_any_geo_zone') }}</option>
+                    {% for id, name in geoZones %}
+                    <option value="{{ id }}"{{ wallet.getGeoZoneId() == id ? ' selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="help-block">{{ language.get('wallet_geo_zone_description') }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="wallet-sort-order">
+                {{ language.get('wallet_sort_order_label') }}
+            </label>
+            <div class="col-sm-10">
+                <input type="text" id="wallet-sort-order" name="yoomoney_wallet_sort_order" value="{{ yoomoney_wallet_sort_order }}" class="form-control" />
+                <p class="help-block">{{ language.get('wallet_sort_order_description') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
