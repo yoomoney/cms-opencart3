@@ -2,7 +2,7 @@
 <modification>
     <name>YooMoney for Opencart 3.x</name>
     <code>YooMoney</code>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <author>YooMoney</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
@@ -245,7 +245,7 @@
             <search><![CDATA[</head>]]></search>
             <add position="before"><![CDATA[
                 {% if config is defined and config.get('yoomoney_kassa_enabled') and (config.get('yoomoney_kassa_use_installments_button') or config.get('yoomoney_kassa_add_installments_block')) %}
-                <script src="https://static.yandex.net/kassa/pay-in-parts/ui/v1/"></script>
+                <script src="https://static.yoomoney.ru/checkout-credit-ui/v1/index.js"></script>
                 {% endif %}
             ]]></add>
         </operation>
@@ -292,8 +292,8 @@
             <add position="before"><![CDATA[
                 <script>
                     {% if yoomoney_showInstallmentsBlock %}
-                        if (typeof YandexCheckoutCreditUI !== "undefined") {
-                            const yamoneyCheckoutCreditUI = YandexCheckoutCreditUI({
+                        if (typeof CheckoutCreditUI !== "undefined") {
+                            const yamoneyCheckoutCreditUI = CheckoutCreditUI({
                                 shopId: '{{ yoomoney_shop_id }}',
                                 sum: parseFloat('{{ cost }}'),
                                 language: '{{ yoomoney_language_code }}'

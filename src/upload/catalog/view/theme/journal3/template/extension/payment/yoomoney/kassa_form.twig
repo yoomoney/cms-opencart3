@@ -190,16 +190,16 @@
 
             {% if kassa.isInstallmentsOn() %}
                 function createCheckoutCreditUI() {
-                    if (typeof YandexCheckoutCreditUI === "undefined") {
+                    if (typeof CheckoutCreditUI === "undefined") {
                         setTimeout(createCheckoutCreditUI, 200);
                         return;
                     }
-                    const checkoutCreditUI = YandexCheckoutCreditUI({
+                    const yoomoneyCheckoutCreditUI = CheckoutCreditUI({
                         shopId: {{ kassa.getShopId() }},
                         sum: {{ amount }},
                         language: "{{ language.get('code') }}"
                     });
-                    const checkoutCreditButton = checkoutCreditUI({
+                    const checkoutCreditButton = yoomoneyCheckoutCreditUI({
                         type: 'button',
                         tag: 'button',
                         domSelector: '.yoomoney_kassa_installments_button_container'
