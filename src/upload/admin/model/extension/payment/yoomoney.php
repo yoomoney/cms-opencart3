@@ -5,7 +5,7 @@ class ModelExtensionPaymentYoomoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '2.0.0';
+    const MODULE_VERSION = '2.0.1';
     const YOOMONEY_EVENT_SECOND_RECEIPT_CODE = 'yoomoney_second_receipt_trigger';
 
     private $kassaModel;
