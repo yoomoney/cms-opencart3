@@ -101,151 +101,154 @@
             </div>
         {% endif %}
     </form>
-    <div id="payment-form"></div>
+    <div id="payment-form" style="display: none;"></div>
     <script src="https://yookassa.ru/checkout-ui/v2.js"></script>
     <script type="text/javascript"><!--
-        jQuery(document).ready(function () {
-            var paymentType = jQuery('input[name=kassa_payment_method]');
-            paymentType.change(function () {
-                var id = '#payment-' + jQuery(this).val();
-                jQuery('.additional').css('display', 'none');
-                jQuery(id).css('display', 'block');
-            });
+        var paymentType = jQuery('input[name=kassa_payment_method]');
+        paymentType.change(function () {
+            var id = '#payment-' + jQuery(this).val();
+            jQuery('.additional').css('display', 'none');
+            jQuery(id).css('display', 'block');
+        });
 
-            var continueButton = jQuery('#continue-button');
-            continueButton.off('click').on('click', function (event) {
-                event.preventDefault();
-                createPayment();
-            });
+        var continueButton = jQuery('#continue-button');
+        continueButton.off('click').on('click', function (event) {
+            event.preventDefault();
+            createPayment();
+        });
 
-            function createPayment() {
-                var form = jQuery("#yoomoney-payment-form")[0];
-                jQuery.ajax({
-                    url: "{{ validate_url }}",
-                    dataType: "json",
-                    method: "GET",
-                    data: {
-                        paymentType: form.kassa_payment_method.value,
-                        qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
-                        alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
-                    },
-                    beforeSend: function() {
-                        continueButton.button('loading');
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            if (data.token) {
-                                jQuery('#payment-form').empty();
-                                initWidget(data);
-                            } else {
-                                document.location = data.redirect;
-                            }
+        function createPayment() {
+            var form = jQuery("#yoomoney-payment-form")[0];
+            jQuery('#payment-form').hide();
+            jQuery.ajax({
+                url: "{{ validate_url }}",
+                dataType: "json",
+                method: "GET",
+                data: {
+                    paymentType: form.kassa_payment_method.value,
+                    qiwiPhone: (form.qiwiPhone ? form.qiwiPhone.value : ''),
+                    alphaLogin: (form.alfaLogin ? form.alfaLogin.value : '')
+                },
+                beforeSend: function() {
+                    continueButton.button('loading');
+                },
+                success: function (data) {
+                    if (data.success) {
+                        if (data.token) {
+                            initWidget(data);
                         } else {
-                            onValidateError(data.error);
-                            continueButton.button('reset');
+                            document.location = data.redirect;
                         }
-                    },
-                    failure: function () {
-                        onValidateError('Failed to create payment');
+                    } else {
+                        onValidateError(data.error);
                         continueButton.button('reset');
                     }
-                });
-            }
-
-            function initWidget(data) {
-                const checkout = new window.YooMoneyCheckoutWidget({
-                    confirmation_token: data.token,
-                    return_url: data.redirect,
-                    embedded_3ds: true,
-                    error_callback(error) {
-                        if (error.error === 'token_expired') {
-                            resetToken();
-                            createPayment();
-                        }
-                    }
-                });
-
-                checkout.render('payment-form');
-            }
-
-            function resetToken() {
-                jQuery.ajax({
-                    url: "{{ reset_token_url }}",
-                    dataType: "json",
-                    method: "GET",
-                    failure: function () {
-                        onValidateError("Failed to reset token");
-                    }
-                });
-            }
-
-            {% if kassa.isInstallmentsOn() %}
-                function createCheckoutCreditUI() {
-                    if (typeof CheckoutCreditUI === "undefined") {
-                        setTimeout(createCheckoutCreditUI, 200);
-                        return;
-                    }
-                    const yoomoneyCheckoutCreditUI = CheckoutCreditUI({
-                        shopId: {{ kassa.getShopId() }},
-                        sum: {{ amount }},
-                        language: "{{ language.get('code') }}"
-                    });
-                    const checkoutCreditButton = yoomoneyCheckoutCreditUI({
-                        type: 'button',
-                        tag: 'button',
-                        domSelector: '.yoomoney_kassa_installments_button_container'
-                    });
-                    jQuery('.yoomoney_kassa_installments_button_container button').off('click').on('click', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        jQuery.ajax({
-                            url: "{{ validate_url }}",
-                            dataType: "json",
-                            method: "GET",
-                            data: {
-                                paymentType: "installments",
-                            },
-                            success: function (data) {
-                                if (data.success) {
-                                    document.location = data.redirect;
-                                } else {
-                                    onValidateError(data.error);
-                                }
-                            },
-                            failure: function () {
-                                onValidateError("Failed to create payment");
-                            }
-                        });
-                    });
+                },
+                failure: function () {
+                    onValidateError('Failed to create payment');
+                    continueButton.button('reset');
                 }
+            });
+        }
 
-                setTimeout(createCheckoutCreditUI, 200);
-
-                jQuery.get("https://yoomoney.ru/credit/order/ajax/credit-pre-schedule?shopId="
-                    + {{ kassa.getShopId() }} +"&sum=" + {{ amount }}, function (data) {
-                    const yoomoney_installments_amount_text = "{{ language.get('text_method_installments_amount') }}";
-                    if (yoomoney_installments_amount_text && data && data.amount) {
-                        jQuery('label.kassa_payment_method_installments').append(yoomoney_installments_amount_text.replace('%s', data.amount));
+        function initWidget(data) {
+            var widget_form = jQuery('#payment-form');
+            widget_form.empty();
+            const checkout = new window.YooMoneyCheckoutWidget({
+                confirmation_token: data.token,
+                return_url: data.redirect,
+                embedded_3ds: true,
+                error_callback(error) {
+                    if (error.error === 'token_expired') {
+                        resetToken();
+                        createPayment();
                     }
+                }
+            });
+
+            checkout.render('payment-form');
+            jQuery('#yoomoney-payment-form').hide();
+            widget_form.show();
+        }
+
+        function resetToken() {
+            jQuery.ajax({
+                url: "{{ reset_token_url }}",
+                dataType: "json",
+                method: "GET",
+                failure: function () {
+                    onValidateError("Failed to reset token");
+                }
+            });
+        }
+
+        {% if kassa.isInstallmentsOn() %}
+            function createCheckoutCreditUI() {
+                if (typeof CheckoutCreditUI === "undefined") {
+                    setTimeout(createCheckoutCreditUI, 200);
+                    return;
+                }
+                const yoomoneyCheckoutCreditUI = CheckoutCreditUI({
+                    shopId: {{ kassa.getShopId() }},
+                    sum: {{ amount }},
+                    language: "{{ language.get('code') }}"
                 });
-            {% endif %}
-            function onValidateError(errorMessage) {
-                var warning = jQuery('#yoomoney-payment-form .alert');
-                if (warning.length > 0) {
-                    warning.fadeOut(300, function () {
-                        warning.remove();
-                        var content = '<div class="alert alert-danger">' + errorMessage + '<button type="button" class="close" data-dismiss="alert">×</button></div>';
-                        jQuery('#yoomoney-payment-form').prepend(content);
-                        jQuery('#yoomoney-payment-form .alert').fadeIn(300);
+                const checkoutCreditButton = yoomoneyCheckoutCreditUI({
+                    type: 'button',
+                    tag: 'button',
+                    domSelector: '.yoomoney_kassa_installments_button_container'
+                });
+                jQuery('.yoomoney_kassa_installments_button_container button').off('click').on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    jQuery.ajax({
+                        url: "{{ validate_url }}",
+                        dataType: "json",
+                        method: "GET",
+                        data: {
+                            paymentType: "installments",
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                document.location = data.redirect;
+                            } else {
+                                onValidateError(data.error);
+                            }
+                        },
+                        failure: function () {
+                            onValidateError("Failed to create payment");
+                        }
                     });
-                } else {
+                });
+            }
+
+            setTimeout(createCheckoutCreditUI, 200);
+
+            jQuery.get("https://yoomoney.ru/credit/order/ajax/credit-pre-schedule?shopId="
+                + {{ kassa.getShopId() }} +"&sum=" + {{ amount }}, function (data) {
+                const yoomoney_installments_amount_text = "{{ language.get('text_method_installments_amount') }}";
+                if (yoomoney_installments_amount_text && data && data.amount) {
+                    jQuery('label.kassa_payment_method_installments').append(yoomoney_installments_amount_text.replace('%s', data.amount));
+                }
+            });
+        {% endif %}
+
+        function onValidateError(errorMessage) {
+            var warning = jQuery('#yoomoney-payment-form .alert');
+            if (warning.length > 0) {
+                warning.fadeOut(300, function () {
+                    warning.remove();
                     var content = '<div class="alert alert-danger">' + errorMessage + '<button type="button" class="close" data-dismiss="alert">×</button></div>';
                     jQuery('#yoomoney-payment-form').prepend(content);
                     jQuery('#yoomoney-payment-form .alert').fadeIn(300);
-                }
+                });
+            } else {
+                var content = '<div class="alert alert-danger">' + errorMessage + '<button type="button" class="close" data-dismiss="alert">×</button></div>';
+                jQuery('#yoomoney-payment-form').prepend(content);
+                jQuery('#yoomoney-payment-form .alert').fadeIn(300);
             }
-        });
-        //--></script>
+        }
+    //--></script>
 
     {% if fullView is defined and fullView %}
     {{ content_bottom }}

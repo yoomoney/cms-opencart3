@@ -2,7 +2,7 @@
 <modification>
     <name>YooMoney for Opencart 3.x</name>
     <code>YooMoney</code>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <author>YooMoney</author>
     <!-- Вставка кнопки в историю заказов-->
     <file path="catalog/controller/account/order.php">
