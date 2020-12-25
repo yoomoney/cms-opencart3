@@ -20,7 +20,7 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATOR.'autoloa
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.0.2';
+    const MODULE_VERSION = '2.0.3';
 
     private $kassaModel;
     private $walletModel;
