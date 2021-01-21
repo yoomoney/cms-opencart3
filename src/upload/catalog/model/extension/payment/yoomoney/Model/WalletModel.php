@@ -42,7 +42,7 @@ class WalletModel extends AbstractPaymentModel
         $templateData['image_base_path'] = HTTPS_SERVER . 'image/catalog/payment/yoomoney';
         $templateData['validate_url'] = $controller->url->link('extension/payment/yoomoney/validate', '', true);
 
-        $templateData['cmsname'] = 'opencart2';
+        $templateData['cmsname'] = 'opencart3';
 
         $templateData['successUrl'] = $controller->url->link('checkout/success', '', true);
 
