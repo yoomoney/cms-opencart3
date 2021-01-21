@@ -19,7 +19,7 @@ use YooMoneyModule\Model\KassaModel;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.4';
+    const MODULE_VERSION = '2.0.5';
 
     /**
      * @var ModelExtensionPaymentYoomoney
@@ -195,7 +195,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
      */
     public function jsonError($message)
     {
-        $this->getModel()->log('info', $message);
+        $this->getModel()->log('error', $message);
         echo json_encode(array(
             'success' => false,
             'error'   => $message,
@@ -336,31 +336,43 @@ class ControllerExtensionPaymentYoomoney extends Controller
     public function validate()
     {
         $this->load->language('extension/payment/'.self::MODULE_NAME);
-        if (empty($_GET['payment_type'])) {
+        if (empty($_POST['paymentType'])) {
             $this->jsonError('Unknown payment type');
         }
 
-        $type = $_GET['payment_type'];
+        $type = $_POST['paymentType'];
         $paymentModel = $this->getModel()->getPaymentModel();
+        $this->getModel()->log('info', 'type: ' . $type);
 
         if ($paymentModel instanceof \YooMoneyModule\Model\WalletModel) {
             if ($type !== 'AC' && $type !== 'PC') {
                 $this->jsonError('Invalid payment type');
             }
 
+            $this->load->model('checkout/order');
+            $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+            if ((float)$_POST['sum'] != (float)$order_info['total']) {
+                $this->jsonError('Invalid total amount');
+            }
+
             if ($paymentModel->getCreateOrderBeforeRedirect()) {
-                $this->load->model('checkout/order');
                 $url     = $this->url->link('extension/payment/yoomoney/repay',
                     'order_id='.$this->session->data['order_id'], true);
                 $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
+                if (!empty($this->model_checkout_order)) {
+                    $this->getModel()->log('info', 'create order - ' . $this->session->data['order_id']);
+                    $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
+                }
             }
+
             if ($paymentModel->getClearCartBeforeRedirect()) {
                 $this->cart->clear();
             }
+            echo json_encode(array('success' => true));
         } else {
             $this->jsonError('Invalid payment type');
         }
+        exit();
     }
 
     public function resetToken()
@@ -492,20 +504,37 @@ class ControllerExtensionPaymentYoomoney extends Controller
     {
         $data   = $_POST;
         $wallet = $this->getModel()->getWalletModel();
-        $this->getModel()->log('info', 'callback:  request '.serialize($_REQUEST));
-        $orderId = isset($data['label']) ? (int)$data['label'] : 0;
+        $this->getModel()->log('info', "callback:  request \n" . print_r($_REQUEST, true));
+        $orderId = !empty($data['label']) ? (int)$data['label'] : 0;
         if ($wallet->isEnabled()) {
-            $this->getModel()->log('info', 'callback:  orderid='.$orderId);
+            $this->getModel()->log('info', 'callback: orderid='.$orderId);
             if ($this->getModel()->checkSign($data, $wallet->getPassword())) {
                 $this->load->model('checkout/order');
-                $this->model_checkout_order->addOrderHistory(
-                    $orderId,
-                    $wallet->getSuccessOrderStatusId(),
-                    'Платёж номер подтверждён'
-                );
+                $orderInfo = $this->model_checkout_order->getOrder($orderId);
+                $orderAmount = sprintf('%.2f', $this->currency->format($orderInfo['total'], 'RUB', '', false));
+                $this->getModel()->log('info', 'Total order = ' . $orderAmount . ',  Total paid = ' . $data['amount'] . ';');
+                if ($data['amount'] == $orderAmount) {
+                    $this->model_checkout_order->addOrderHistory(
+                        $orderId,
+                        $wallet->getSuccessOrderStatusId(),
+                        'Платёж номер "' . $data['operation_id'] . '" подтверждён'
+                    );
+                    $this->getModel()->log('info', 'callback: Payment amount is valid.');
+                } else {
+                    $message = 'Получен платёж номер "' . $data['operation_id'] . '" на сумму ' . $data['amount'] . ' RUB';
+                    $this->getModel()->addOrderHistory(
+                        $orderId,
+                        $orderInfo['order_status_id'] ?: 1,
+                        $message
+                    );
+                    $this->getModel()->log('error', 'callback: Payment amount is not valid.');
+                }
+            } else {
+                $this->getModel()->log('error', 'callback: Payment is not signed.');
             }
         } else {
-            exit("You aren't YooMoney.");
+            $this->getModel()->log('info', 'callback: You aren\'t YooMoney.');
+            exit('You aren\'t YooMoney.');
         }
     }
 
