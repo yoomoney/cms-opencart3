@@ -19,7 +19,7 @@ use YooMoneyModule\Model\KassaModel;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.5';
+    const MODULE_VERSION = '2.0.6';
 
     /**
      * @var ModelExtensionPaymentYoomoney
@@ -351,7 +351,13 @@ class ControllerExtensionPaymentYoomoney extends Controller
 
             $this->load->model('checkout/order');
             $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-            if ((float)$_POST['sum'] != (float)$order_info['total']) {
+            $this->getModel()->log('info', 'post: ' . print_r(array($order_info, $_POST), true));
+            if ($this->currency->has('RUB')) {
+                $orderAmount = sprintf('%.2f', $this->currency->format($order_info['total'], 'RUB', '', false));
+            } else {
+                $orderAmount = sprintf('%.2f', $this->getModel()->convertFromCbrf($order_info, 'RUB'));
+            }
+            if ((float)$_POST['sum'] != (float)$orderAmount) {
                 $this->jsonError('Invalid total amount');
             }
 
@@ -359,10 +365,8 @@ class ControllerExtensionPaymentYoomoney extends Controller
                 $url     = $this->url->link('extension/payment/yoomoney/repay',
                     'order_id='.$this->session->data['order_id'], true);
                 $comment = '<a href="'.$url.'" class="button">'.$this->language->get('text_repay').'</a>';
-                if (!empty($this->model_checkout_order)) {
-                    $this->getModel()->log('info', 'create order - ' . $this->session->data['order_id']);
-                    $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
-                }
+                $this->getModel()->log('info', 'Create order - ' . $this->session->data['order_id']);
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], 1, $comment);
             }
 
             if ($paymentModel->getClearCartBeforeRedirect()) {

@@ -46,7 +46,11 @@ class WalletModel extends AbstractPaymentModel
 
         $templateData['successUrl'] = $controller->url->link('checkout/success', '', true);
 
-        $templateData['amount'] = $orderInfo['total'];
+        if ($controller->currency->has('RUB')) {
+            $templateData['amount'] = sprintf('%.2f', $controller->currency->format($orderInfo['total'], 'RUB', '', false));
+        } else {
+            $templateData['amount'] = sprintf('%.2f', $controller->getModel()->convertFromCbrf($orderInfo, 'RUB'));
+        }
         $templateData['comment'] = $orderInfo['comment'];
         $templateData['orderId'] = $orderInfo['order_id'];
         $templateData['customerNumber'] = trim($orderInfo['order_id'] . ' ' . $orderInfo['email']);

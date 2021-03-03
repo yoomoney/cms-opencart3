@@ -2,7 +2,7 @@
 <modification>
     <name>YooMoney for Opencart 3.x</name>
     <code>YooMoney</code>
-    <version>2.0.5</version>
+    <version>2.0.6</version>
     <author>YooMoney</author>
     <link>https://github.com/yoomoney/cms-opencart3</link>
     <!-- Вставка кнопки в историю заказов-->
@@ -275,6 +275,7 @@
                     $this->load->model('extension/payment/yoomoney');
                     $data['cost'] = $this->model_extension_payment_yoomoney->convertFromCbrf(array('total' => $cost), 'RUB');
                 }
+                $data['yoomoney_showInstallmentsBlock'] = $data['yoomoney_showInstallmentsBlock'] && ($data['cost'] >= 3000);
             ]]></add>
         </operation>
     </file>
