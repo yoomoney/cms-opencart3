@@ -19,7 +19,7 @@ use YooMoneyModule\Model\KassaModel;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.0.7';
+    const MODULE_VERSION = '2.0.8';
 
     /**
      * @var ModelExtensionPaymentYoomoney
@@ -516,8 +516,8 @@ class ControllerExtensionPaymentYoomoney extends Controller
                 $this->load->model('checkout/order');
                 $orderInfo = $this->model_checkout_order->getOrder($orderId);
                 $orderAmount = sprintf('%.2f', $this->currency->format($orderInfo['total'], 'RUB', '', false));
-                $this->getModel()->log('info', 'Total order = ' . $orderAmount . ',  Total paid = ' . $data['amount'] . ';');
-                if ($data['amount'] == $orderAmount) {
+                $this->getModel()->log('info', 'Total order = ' . $orderAmount . ',  Total paid = ' . $data['amount'] . ',  Total withdraw = ' . $data['withdraw_amount'] . ';');
+                if ($data['withdraw_amount'] == $orderAmount) {
                     $this->model_checkout_order->addOrderHistory(
                         $orderId,
                         $wallet->getSuccessOrderStatusId(),
