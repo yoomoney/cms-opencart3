@@ -39,6 +39,7 @@ class KassaModel extends AbstractPaymentModel
     protected $isSecondReceipt;
     protected $secondReceiptStatusId;
     protected $defaultTaxRate;
+    protected $defaultTaxSystemCode;
     protected $taxRates;
     protected $log;
     protected $testMode;
@@ -54,6 +55,8 @@ class KassaModel extends AbstractPaymentModel
     protected $b2bTaxRates;
     protected $defaultPaymentMode;
     protected $defaultPaymentSubject;
+    protected $defaultDeliveryPaymentMode;
+    protected $defaultDeliveryPaymentSubject;
     protected $currency;
     protected $currency_convert;
 
@@ -96,6 +99,7 @@ class KassaModel extends AbstractPaymentModel
         $this->isSecondReceipt       = (bool)$this->getConfigValue('second_receipt_enable');
         $this->secondReceiptStatusId = (int)$this->getConfigValue('second_receipt_status');
         $this->defaultTaxRate        = (int)$this->getConfigValue('tax_rate_default');
+        $this->defaultTaxSystemCode  = (int)$this->getConfigValue('tax_system_default');
         $this->log                   = (bool)$this->getConfigValue('debug_log');
 
         $this->taxRates = array();
@@ -113,15 +117,17 @@ class KassaModel extends AbstractPaymentModel
 
         $this->showInFooter = $this->getConfigValue('show_in_footer');
 
-        $this->b2bSberbankEnabled        = $this->getConfigValue('b2b_sberbank_enabled');
-        $this->b2bSberbankPaymentPurpose = $this->getConfigValue('b2b_sberbank_payment_purpose');
-        $this->b2bSberbankDefaultTaxRate = $this->getConfigValue('b2b_tax_rate_default');
-        $this->b2bTaxRates               = $this->getConfigValue('b2b_tax_rates');
-        $this->defaultPaymentMode        = $this->getConfigValue('payment_mode_default');
-        $this->defaultPaymentSubject     = $this->getConfigValue('payment_subject_default');
+        $this->b2bSberbankEnabled            = $this->getConfigValue('b2b_sberbank_enabled');
+        $this->b2bSberbankPaymentPurpose     = $this->getConfigValue('b2b_sberbank_payment_purpose');
+        $this->b2bSberbankDefaultTaxRate     = $this->getConfigValue('b2b_tax_rate_default');
+        $this->b2bTaxRates                   = $this->getConfigValue('b2b_tax_rates');
+        $this->defaultPaymentMode            = $this->getConfigValue('payment_mode_default');
+        $this->defaultPaymentSubject         = $this->getConfigValue('payment_subject_default');
+        $this->defaultDeliveryPaymentMode    = $this->getConfigValue('delivery_payment_mode_default');
+        $this->defaultDeliveryPaymentSubject = $this->getConfigValue('delivery_payment_subject_default');
 
-        $this->currency                  = $this->getConfigValue('currency');
-        $this->currency_convert          = $this->getConfigValue('currency_convert');
+        $this->currency                      = $this->getConfigValue('currency');
+        $this->currency_convert              = $this->getConfigValue('currency_convert');
     }
 
     public function isTestMode()
@@ -211,6 +217,11 @@ class KassaModel extends AbstractPaymentModel
         return array(1, 2, 3, 4, 5, 6);
     }
 
+    public function getTaxSystemCodeList()
+    {
+        return array(1, 2, 3, 4, 5, 6);
+    }
+
     public function getB2bTaxRateList()
     {
         return array(VatDataType::UNTAXED, VatDataRate::RATE_7, VatDataRate::RATE_10, VatDataRate::RATE_18, VatDataRate::RATE_20);
@@ -242,6 +253,11 @@ class KassaModel extends AbstractPaymentModel
     public function getTaxRates()
     {
         return $this->taxRates;
+    }
+
+    public function getDefaultTaxSystemCode()
+    {
+        return $this->defaultTaxSystemCode;
     }
 
     public function getDebugLog()
@@ -367,6 +383,22 @@ class KassaModel extends AbstractPaymentModel
     public function getDefaultPaymentSubject()
     {
         return $this->defaultPaymentSubject;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultDeliveryPaymentMode()
+    {
+        return $this->defaultDeliveryPaymentMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultDeliveryPaymentSubject()
+    {
+        return $this->defaultDeliveryPaymentSubject;
     }
 
     /**

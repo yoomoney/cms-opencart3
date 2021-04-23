@@ -20,7 +20,7 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATOR.'autoloa
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.0.9';
+    const MODULE_VERSION = '2.1.0';
 
     private $kassaModel;
     private $walletModel;
@@ -560,10 +560,14 @@ class ModelExtensionPaymentYoomoney extends Model
         } elseif (!empty($orderInfo['telephone'])) {
             $builder->setReceiptPhone($orderInfo['telephone']);
         }
-        $taxRates = $this->config->get('yoomoney_kassa_tax_rates');
-        $defaultVatCode = $this->config->get('yoomoney_kassa_tax_rate_default');
-        $defaultPaymentSubject = $this->config->get('yoomoney_kassa_payment_subject_default');
-        $defaultPaymentMode    = $this->config->get('yoomoney_kassa_payment_mode_default');
+        $taxRates                       = $this->config->get('yoomoney_kassa_tax_rates');
+        $defaultVatCode                 = $this->config->get('yoomoney_kassa_tax_rate_default');
+        $defaultTaxSystemCode           = $this->config->get('yoomoney_kassa_tax_system_default');
+        $defaultPaymentSubject          = $this->config->get('yoomoney_kassa_payment_subject_default');
+        $defaultPaymentMode             = $this->config->get('yoomoney_kassa_payment_mode_default');
+        $defaultDeliveryPaymentSubject  = $this->config->get('yoomoney_kassa_payment_subject_default');
+        $defaultDeliveryPaymentMode     = $this->config->get('yoomoney_kassa_payment_mode_default');
+
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
             $properties  = $this->getPaymentProperties($prod['product_id']);
@@ -586,8 +590,16 @@ class ModelExtensionPaymentYoomoney extends Model
         foreach ($order_totals as $total) {
             if (isset($total['code']) && $total['code'] === 'shipping') {
                 $price = $this->currency->format($total['value'], 'RUB', '', false);
-                $builder->addReceiptShipping($total['title'], $price, $defaultVatCode, $defaultPaymentMode, $defaultPaymentSubject);
+                $builder->addReceiptShipping(
+                    $total['title'], $price, $defaultVatCode,
+                    $defaultDeliveryPaymentMode ?: $defaultPaymentMode,
+                    $defaultDeliveryPaymentSubject ?: $defaultPaymentSubject
+                );
             }
+        }
+
+        if (!empty($defaultTaxSystemCode)) {
+            $builder->setTaxSystemCode($defaultTaxSystemCode);
         }
     }
 

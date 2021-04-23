@@ -76,6 +76,14 @@ class YooMoneyKassaModel extends \YooMoneyModule\Model\KassaModel
         $this->defaultTaxRate = (int)$value;
     }
 
+    public function setDefaultTaxSystemCode($value)
+    {
+        if (!in_array($value, $this->getTaxSystemCodeList())) {
+            $value = 0;
+        }
+        $this->defaultTaxSystemCode = (int)$value;
+    }
+
     public function setTaxRates($taxRates)
     {
         $all            = $this->getTaxRateList();
