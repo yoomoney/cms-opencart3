@@ -20,7 +20,7 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATOR.'autoloa
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.1.0';
+    const MODULE_VERSION = '2.1.1';
 
     private $kassaModel;
     private $walletModel;
@@ -471,14 +471,14 @@ class ModelExtensionPaymentYoomoney extends Model
     }
 
     /**
-     * @param PaymentInterface $payment
+     * @param string $paymentId
      *
      * @return int
      */
-    public function findOrderIdByPayment($payment)
+    public function findOrderIdByPayment($paymentId)
     {
         $sql       = 'SELECT `order_id` FROM `'.DB_PREFIX.'yoomoney_payment` WHERE `payment_id` = \''.
-                     $this->db->escape($payment->getId()).'\'';
+                     $this->db->escape($paymentId).'\'';
         $resultSet = $this->db->query($sql);
         if (empty($resultSet) || empty($resultSet->num_rows)) {
             return -1;
