@@ -1,8 +1,11 @@
 <?php
 
 use YooKassa\Model\ConfirmationType;
+use YooKassa\Model\Notification\NotificationFactory;
+use YooKassa\Model\Notification\NotificationRefundSucceeded;
 use YooKassa\Model\Notification\NotificationSucceeded;
 use YooKassa\Model\Notification\NotificationWaitingForCapture;
+use YooKassa\Model\NotificationEventType;
 use YooKassa\Model\PaymentMethodType;
 use YooKassa\Model\PaymentStatus;
 use YooMoneyModule\Model\KassaModel;
@@ -19,7 +22,7 @@ use YooMoneyModule\Model\KassaModel;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.1.0';
+    const MODULE_VERSION = '2.1.1';
 
     /**
      * @var ModelExtensionPaymentYoomoney
@@ -399,14 +402,12 @@ class ControllerExtensionPaymentYoomoney extends Controller
     {
         if (!$this->getModel()->getKassaModel()->isEnabled()) {
             header('HTTP/1.1 403 Module disabled');
-
-            return;
+            exit();
         }
         $source = file_get_contents('php://input');
         if (empty($source)) {
             header('HTTP/1.1 400 Empty request body');
-
-            return;
+            exit();
         }
         $json = json_decode($source, true);
         if (empty($json)) {
@@ -417,49 +418,56 @@ class ControllerExtensionPaymentYoomoney extends Controller
             }
             $this->getModel()->log('warning', 'Invalid parameters in capture notification controller - '.$message);
             header('HTTP/1.1 400 Invalid json object in body');
-
-            return;
+            exit();
         }
 
         $this->getModel()->log('info', 'Notification: '.$source);
 
         try {
-            $notification = ($json['event'] === YooKassa\Model\NotificationEventType::PAYMENT_SUCCEEDED)
-                ? new NotificationSucceeded($json)
-                : new NotificationWaitingForCapture($json);
-
+            $factory = new NotificationFactory();
+            $notification = $factory->factory($json);
         } catch (\Exception $e) {
             $this->getModel()->log('error', 'Invalid notification object - '.$e->getMessage());
             header('HTTP/1.1 400 Invalid object in body');
-
-            return;
+            exit();
         }
-        $orderId = $this->getModel()->findOrderIdByPayment($notification->getObject());
 
+        $paymentId = $notification instanceof NotificationRefundSucceeded
+                   ? $notification->getObject()->getPaymentId()
+                   : $notification->getObject()->getId();
+
+        $orderId = $this->getModel()->findOrderIdByPayment($paymentId);
         if ($orderId <= 0) {
-            $this->getModel()->log('error', 'Order not exists for payment '.$notification->getObject()->getId());
-            header('HTTP/1.1 404 Order not exists');
-
-            return;
+            $this->getModel()->log('error', 'Order not exists for payment ' . $paymentId);
+            exit();
         }
+
+        if ($notification->getEvent() === NotificationEventType::REFUND_SUCCEEDED) {
+            $this->getModel()->log('info', 'Refund success for order #'.$orderId);
+            exit();
+        }
+
+        if ($notification->getEvent() === NotificationEventType::PAYMENT_CANCELED) {
+            $this->getModel()->log('info', 'Payment for order #'.$orderId.' cancelled');
+            exit();
+        }
+
         $this->load->model('checkout/order');
         $orderInfo = $this->model_checkout_order->getOrder($orderId);
         if (empty($orderInfo)) {
-            $this->getModel()->log('warning', 'Empty order#'.$orderId.' in notification');
-            header('HTTP/1.1 405 Invalid order payment method');
+            $this->getModel()->log('warning', 'Empty order #'.$orderId.' in notification');
             exit();
         } elseif ($orderInfo['order_status_id'] <= 0) {
             $this->getModel()->confirmOrder($orderId, $notification->getObject());
         }
         $this->getModel()->updatePaymentInfo($notification->getObject()->getId());
+
         $result = null;
         if ($notification instanceof NotificationWaitingForCapture) {
             $payment = $this->getModel()->fetchPaymentInfo($notification->getObject()->getId());
             if ($payment === null) {
-                header('HTTP/1.1 400 Payment capture error');
                 $this->getModel()->log('error', 'Payment not captured: capture result is null');
             } elseif ($payment->getStatus() !== PaymentStatus::WAITING_FOR_CAPTURE) {
-                header('HTTP/1.1 400 Invalid payment status');
                 $this->getModel()->log('error',
                     'Payment not captured: invalid payment status "'.$payment->getStatus().'"');
             } else {
@@ -489,10 +497,8 @@ class ControllerExtensionPaymentYoomoney extends Controller
         } elseif ($notification instanceof NotificationSucceeded) {
             $result = $this->getModel()->fetchPaymentInfo($notification->getObject()->getId());
             if ($result === null) {
-                header('HTTP/1.1 400 Payment capture error');
                 $this->getModel()->log('error', 'Payment not captured: capture result is null');
             } elseif ($result->getStatus() !== PaymentStatus::SUCCEEDED) {
-                header('HTTP/1.1 400 Invalid payment status');
                 $this->getModel()->log('error',
                     'Payment not captured: invalid payment status "'.$result->getStatus().'"');
             } else {
@@ -501,7 +507,9 @@ class ControllerExtensionPaymentYoomoney extends Controller
                 );
             }
         }
+
         echo json_encode(array('success' => $result));
+        exit();
     }
 
     public function callback()
