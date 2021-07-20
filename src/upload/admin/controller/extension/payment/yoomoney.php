@@ -12,7 +12,7 @@ use YooKassa\Model\PaymentStatus;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.1.1';
+    const MODULE_VERSION = '2.1.2';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;
