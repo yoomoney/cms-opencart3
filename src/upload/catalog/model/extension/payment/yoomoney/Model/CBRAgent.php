@@ -41,7 +41,8 @@ class CBRAgent
             {
                 $code = $item->getElementsByTagName('CharCode')->item(0)->nodeValue;
                 $curs = $item->getElementsByTagName('Value')->item(0)->nodeValue;
-                $this->list[$code] = floatval(str_replace(',', '.', $curs));
+                $nominal = $item->getElementsByTagName('Nominal')->item(0)->nodeValue;
+                $this->list[$code] = floatval(str_replace(',', '.', $curs) / $nominal);
             }
 
             return true;
