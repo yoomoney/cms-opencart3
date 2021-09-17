@@ -12,7 +12,7 @@ use YooKassa\Model\PaymentStatus;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.1.4';
+    const MODULE_VERSION = '2.1.5';
 
     const WIDGET_INSTALL_STATUS_SUCCESS = true;
     const WIDGET_INSTALL_STATUS_FAIL    = false;
@@ -1167,6 +1167,7 @@ class ControllerExtensionPaymentYoomoney extends Controller
             $paymentMethod = $this->language->get('kassa_payment_method_'.$paymentData->getType());
         }
 
+        $data['cancel']            = $this->url->link('sale/order', 'user_token='.$this->session->data['user_token'], true);
         $data['kassa']             = $this->getModel()->getKassaModel();
         $data['payment']           = $payment;
         $data['order']             = $orderInfo;
