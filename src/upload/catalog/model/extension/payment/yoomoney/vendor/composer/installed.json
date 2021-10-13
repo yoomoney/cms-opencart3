@@ -1,106 +1,116 @@
-[
-    {
-        "name": "psr/log",
-        "version": "1.1.4",
-        "version_normalized": "1.1.4.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/php-fig/log.git",
-            "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
+{
+    "packages": [
+        {
+            "name": "psr/log",
+            "version": "1.1.4",
+            "version_normalized": "1.1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11",
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "time": "2021-05-03T11:20:27+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "Psr/Log/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "install-path": "../psr/log"
         },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11",
-            "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.3.0"
-        },
-        "time": "2021-05-03T11:20:27+00:00",
-        "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-master": "1.1.x-dev"
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "Psr\\Log\\": "Psr/Log/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "PHP-FIG",
-                "homepage": "https://www.php-fig.org/"
-            }
-        ],
-        "description": "Common interface for logging libraries",
-        "homepage": "https://github.com/php-fig/log",
-        "keywords": [
-            "log",
-            "psr",
-            "psr-3"
-        ]
-    },
-    {
-        "name": "yoomoney/yookassa-sdk-php",
-        "version": "2.1.3",
-        "version_normalized": "2.1.3.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/yoomoney/yookassa-sdk-php.git",
-            "reference": "3d1420c74ce405df0eeb09e5ea8bc70e7970df22"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/yoomoney/yookassa-sdk-php/zipball/3d1420c74ce405df0eeb09e5ea8bc70e7970df22",
-            "reference": "3d1420c74ce405df0eeb09e5ea8bc70e7970df22",
-            "shasum": ""
-        },
-        "require": {
-            "ext-curl": "*",
-            "ext-json": "*",
-            "ext-mbstring": "*",
-            "php": ">=5.3.0",
-            "psr/log": "^1.0"
-        },
-        "require-dev": {
-            "ext-xml": "*",
-            "mockery/mockery": "^0.9.9",
-            "phpunit/phpunit": "^4.8.35 || ^5.7"
-        },
-        "time": "2021-07-26T08:21:36+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "YooKassa\\": "lib/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "YooMoney",
-                "email": "cms@yoomoney.ru"
-            }
-        ],
-        "description": "This is a developer tool for integration with YooMoney.",
-        "homepage": "https://yookassa.ru/developers/api",
-        "keywords": [
-            "api",
-            "payments",
-            "sdk",
-            "yookassa",
-            "yoomoney"
-        ]
-    }
-]
+        {
+            "name": "yoomoney/yookassa-sdk-php",
+            "version": "2.1.7",
+            "version_normalized": "2.1.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yoomoney/yookassa-sdk-php.git",
+                "reference": "4ea726f9bdd6bb57f1b1e371c33baa852fdaf0aa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yoomoney/yookassa-sdk-php/zipball/4ea726f9bdd6bb57f1b1e371c33baa852fdaf0aa",
+                "reference": "4ea726f9bdd6bb57f1b1e371c33baa852fdaf0aa",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.3.0",
+                "psr/log": "^1.0 || ^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "ext-xml": "*",
+                "mockery/mockery": "^0.9.9",
+                "phpunit/phpunit": "^4.8.35 || ^5.7"
+            },
+            "time": "2021-09-28T09:17:32+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "YooKassa\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "YooMoney",
+                    "email": "cms@yoomoney.ru"
+                }
+            ],
+            "description": "This is a developer tool for integration with YooMoney.",
+            "homepage": "https://yookassa.ru/developers/api",
+            "keywords": [
+                "api",
+                "payments",
+                "sdk",
+                "yookassa",
+                "yoomoney"
+            ],
+            "support": {
+                "issues": "https://github.com/yoomoney/yookassa-sdk-php/issues",
+                "source": "https://github.com/yoomoney/yookassa-sdk-php/tree/2.1.7"
+            },
+            "install-path": "../yoomoney/yookassa-sdk-php"
+        }
+    ],
+    "dev": false,
+    "dev-package-names": []
+}
