@@ -32,7 +32,7 @@ $_['kassa_add_installments_block_label'] = 'Add the information block about Inst
 $_['kassa_payment_mode_shop_label'] = 'На стороне магазина';
 
 $_['kassa_payment_method_bank_card'] = 'Банковские карты';
-$_['kassa_payment_method_sberbank'] = 'Сбербанк Онлайн';
+$_['kassa_payment_method_sberbank'] = 'SberPay';
 $_['kassa_payment_method_cash'] = 'Наличные через терминалы';
 $_['kassa_payment_method_qiwi'] = 'QIWI Wallet';
 $_['kassa_payment_method_alfabank'] = 'Альфа-Клик';
