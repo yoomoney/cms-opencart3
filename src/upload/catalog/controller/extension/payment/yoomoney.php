@@ -22,7 +22,7 @@ use YooMoneyModule\Model\KassaModel;
 class ControllerExtensionPaymentYoomoney extends Controller
 {
     const MODULE_NAME = 'yoomoney';
-    const MODULE_VERSION = '2.2.0';
+    const MODULE_VERSION = '2.2.1';
 
     /**
      * @var ModelExtensionPaymentYoomoney
