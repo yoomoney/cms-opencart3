@@ -5,7 +5,7 @@ class ModelExtensionPaymentYoomoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '2.2.1';
+    const MODULE_VERSION = '2.2.2';
     const YOOMONEY_EVENT_SECOND_RECEIPT_CODE = 'yoomoney_second_receipt_trigger';
 
     private $kassaModel;
@@ -19,6 +19,14 @@ class ModelExtensionPaymentYoomoney extends Model
     public function install()
     {
         $this->log('info', 'install yoomoney module');
+        if ($this->checkExistTable(DB_PREFIX.'yoomoney_payment', 'captured_at')) {
+            $this->db->query('
+                ALTER TABLE `' . DB_PREFIX . 'yoomoney_payment` MODIFY `captured_at` DATETIME NULL DEFAULT NULL;');
+        }
+        if ($this->checkExistTable(DB_PREFIX.'yoomoney_refunds', 'authorized_at')) {
+            $this->db->query('
+                ALTER TABLE `' . DB_PREFIX . 'yoomoney_refunds` MODIFY `authorized_at` DATETIME NULL DEFAULT NULL;');
+        }
         $this->db->query('
             CREATE TABLE IF NOT EXISTS `'.DB_PREFIX.'yoomoney_payment` (
                 `order_id`          INTEGER  NOT NULL,
@@ -29,7 +37,7 @@ class ModelExtensionPaymentYoomoney extends Model
                 `payment_method_id` CHAR(36) NOT NULL,
                 `paid`              ENUM(\'Y\', \'N\') NOT NULL,
                 `created_at`        DATETIME NOT NULL,
-                `captured_at`       DATETIME NOT NULL DEFAULT \'0000-00-00 00:00:00\',
+                `captured_at`       DATETIME NULL DEFAULT NULL,
                 `receipt`           TEXT DEFAULT NULL,
 
                 CONSTRAINT `'.DB_PREFIX.'yoomoney_payment_pk` PRIMARY KEY (`order_id`),
@@ -45,7 +53,7 @@ class ModelExtensionPaymentYoomoney extends Model
                 `amount`            DECIMAL(11, 2) NOT NULL,
                 `currency`          CHAR(3) NOT NULL,
                 `created_at`        DATETIME NOT NULL,
-                `authorized_at`     DATETIME NOT NULL DEFAULT \'0000-00-00 00:00:00\',
+                `authorized_at`     DATETIME NULL DEFAULT NULL,
                 INDEX `'.DB_PREFIX.'yoomoney_refunds_idx_order_id` (`order_id`),
                 INDEX `'.DB_PREFIX.'yoomoney_refunds_idx_payment_id` (`payment_id`),
                 CONSTRAINT `'.DB_PREFIX.'yoomoney_refunds_pk` PRIMARY KEY (`refund_id`)
@@ -744,5 +752,14 @@ class ModelExtensionPaymentYoomoney extends Model
     private function getMapFileName()
     {
         return 'opencart-3.map';
+    }
+
+    private function checkExistTable($tableName, $columnName)
+    {
+        try {
+            return $this->db->query("SELECT $columnName FROM $tableName LIMIT 1;");
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }
