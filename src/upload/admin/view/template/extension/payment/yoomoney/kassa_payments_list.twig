@@ -42,7 +42,7 @@
                         <td class="text-center">{{ payment.status }}</td>
                         <td class="text-center">{{ payment.created_at }}</td>
                         <td class="text-center">
-                            {% if payment.captured_at == '0000-00-00 00:00:00' %}
+                            {% if payment.captured_at == null %}
                             не подтверждён
                             {% else %}
                             {{ payment.captured_at }}
