@@ -20,7 +20,7 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'yoomoney'.DIRECTORY_SEPARATOR.'autoloa
  */
 class ModelExtensionPaymentYoomoney extends Model
 {
-    const MODULE_VERSION = '2.2.2';
+    const MODULE_VERSION = '2.2.3';
 
     private $kassaModel;
     private $walletModel;
@@ -565,8 +565,10 @@ class ModelExtensionPaymentYoomoney extends Model
         $defaultTaxSystemCode           = $this->config->get('yoomoney_kassa_tax_system_default');
         $defaultPaymentSubject          = $this->config->get('yoomoney_kassa_payment_subject_default');
         $defaultPaymentMode             = $this->config->get('yoomoney_kassa_payment_mode_default');
-        $defaultDeliveryPaymentSubject  = $this->config->get('yoomoney_kassa_payment_subject_default');
-        $defaultDeliveryPaymentMode     = $this->config->get('yoomoney_kassa_payment_mode_default');
+        $defaultDeliveryPaymentSubject  = $this->config->get('yoomoney_kassa_delivery_payment_subject_default');
+        $defaultDeliveryPaymentMode     = $this->config->get('yoomoney_kassa_delivery_payment_mode_default');
+        $defaultVoucherPaymentMode     = $this->config->get('yoomoney_kassa_voucher_payment_mode_default');
+        $defaultVoucherPaymentSubject     = $this->config->get('yoomoney_kassa_voucher_payment_subject_default');
 
         $orderProducts = $this->model_account_order->getOrderProducts($orderInfo['order_id']);
         foreach ($orderProducts as $prod) {
@@ -584,6 +586,23 @@ class ModelExtensionPaymentYoomoney extends Model
                 ? $taxRates[$productInfo['tax_class_id']]
                 : $defaultVatCode;
             $builder->addReceiptItem($prod['name'], $price, $prod['quantity'], $vatCode, $paymentMode, $paymentSubject);
+        }
+
+        $orderVouchers = $this->model_account_order->getOrderVouchers($orderInfo['order_id']);
+
+        foreach ($orderVouchers as $voucher) {
+            $paymentMode    = $defaultVoucherPaymentMode;
+            $paymentSubject = $defaultVoucherPaymentSubject;
+            $price          = $this->currency->format($voucher['amount'], 'RUB', '', false);
+
+            $builder->addReceiptItem(
+                $voucher['description'],
+                $price,
+                1,
+                $defaultVatCode,
+                $paymentMode,
+                $paymentSubject
+            );
         }
 
         $order_totals = $this->model_account_order->getOrderTotals($orderInfo['order_id']);

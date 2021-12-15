@@ -333,3 +333,7 @@ $_['kassa_payment_subject_default_description'] = 'Признаки предме
 
 $_['kassa_delivery_payment_mode_default_label']    = 'Признак способа расчета для доставки';
 $_['kassa_delivery_payment_subject_default_label'] = 'Признак предмета расчета для доставки';
+
+$_['kassa_voucher_payment_mode_default_label']    = 'Признак способа расчета для сертификата';
+$_['kassa_voucher_payment_subject_default_label'] = 'Признак предмета расчета для сертификата';
+$_['kassa_voucher_default_description'] = 'Признаки предмета расчёта и способа расчёта для сертификатов будут браться из следующих полей:';
