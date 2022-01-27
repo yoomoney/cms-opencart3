@@ -423,7 +423,7 @@
                         <select id="kassa-voucher-payment-mode-default" name="yoomoney_kassa_voucher_payment_mode_default"
                                 class="form-control">
                             {% for id, name in kassa.getPaymentModeEnum() %}
-                                <option value="{{ id }}"{{ kassa.getDefaultDeliveryPaymentMode() == id ? ' selected' : '' }}>{{ name }}</option>
+                                <option value="{{ id }}"{{ kassa.getDefaultVoucherPaymentMode() == id ? ' selected' : '' }}>{{ name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -436,7 +436,7 @@
                         <select id="kassa-voucher-payment-subject" name="yoomoney_kassa_voucher_payment_subject_default"
                                 class="form-control">
                             {% for id, name in kassa.getPaymentSubjectEnum() %}
-                                <option value="{{ id }}"{{ kassa.getDefaultDeliveryPaymentSubject() == id ? ' selected' : '' }}>{{ name }}</option>
+                                <option value="{{ id }}"{{ kassa.getDefaultVoucherPaymentSubject() == id ? ' selected' : '' }}>{{ name }}</option>
                             {% endfor %}
                         </select>
                     </div>
