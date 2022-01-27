@@ -57,6 +57,8 @@ class KassaModel extends AbstractPaymentModel
     protected $defaultPaymentSubject;
     protected $defaultDeliveryPaymentMode;
     protected $defaultDeliveryPaymentSubject;
+    protected $defaultVoucherPaymentMode;
+    protected $defaultVoucherPaymentSubject;
     protected $currency;
     protected $currency_convert;
 
@@ -125,6 +127,8 @@ class KassaModel extends AbstractPaymentModel
         $this->defaultPaymentSubject         = $this->getConfigValue('payment_subject_default');
         $this->defaultDeliveryPaymentMode    = $this->getConfigValue('delivery_payment_mode_default');
         $this->defaultDeliveryPaymentSubject = $this->getConfigValue('delivery_payment_subject_default');
+        $this->defaultVoucherPaymentMode     = $this->getConfigValue('voucher_payment_mode_default');
+        $this->defaultVoucherPaymentSubject  = $this->getConfigValue('voucher_payment_subject_default');
 
         $this->currency                      = $this->getConfigValue('currency');
         $this->currency_convert              = $this->getConfigValue('currency_convert');
@@ -399,6 +403,22 @@ class KassaModel extends AbstractPaymentModel
     public function getDefaultDeliveryPaymentSubject()
     {
         return $this->defaultDeliveryPaymentSubject;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultVoucherPaymentMode()
+    {
+        return $this->defaultVoucherPaymentMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultVoucherPaymentSubject()
+    {
+        return $this->defaultVoucherPaymentSubject;
     }
 
     /**
