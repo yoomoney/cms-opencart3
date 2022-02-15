@@ -28,6 +28,7 @@ class KassaModel extends AbstractPaymentModel
     private static $_disabledPaymentMethods = array(
         PaymentMethodType::B2B_SBERBANK,
         PaymentMethodType::WECHAT,
+        PaymentMethodType::WEBMONEY,
     );
 
     protected $shopId;
