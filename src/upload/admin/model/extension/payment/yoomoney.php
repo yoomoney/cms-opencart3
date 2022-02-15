@@ -5,7 +5,7 @@ class ModelExtensionPaymentYoomoney extends Model
     /**
      * string
      */
-    const MODULE_VERSION = '2.2.4';
+    const MODULE_VERSION = '2.2.5';
     const YOOMONEY_EVENT_SECOND_RECEIPT_CODE = 'yoomoney_second_receipt_trigger';
 
     private $kassaModel;
@@ -65,7 +65,7 @@ class ModelExtensionPaymentYoomoney extends Model
                 `product_id`        INTEGER  NOT NULL,
                 `payment_subject`   VARCHAR(256),
                 `payment_mode`      VARCHAR(256),
-                                
+
                 CONSTRAINT `'.DB_PREFIX.'yoomoney_payment_pk` PRIMARY KEY (`product_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=UTF8 COLLATE=utf8_general_ci;
         ');
